@@ -5,6 +5,7 @@ abstract class AuthEvent extends Equatable {
 }
 
 class SignInWithGoogleEvent extends AuthEvent {}
+class SignInWithAppleEvent extends AuthEvent {}
 class SignOutEvent extends AuthEvent {}
 class CheckAuthStatusEvent extends AuthEvent {}
 

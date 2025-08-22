@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'google_maps_current_location_picker.dart';
 
@@ -232,12 +233,7 @@ class _LocationPickerDemoState extends State<LocationPickerDemo> {
         _selectedAddress = 'Location selected at ${result.latitude.toStringAsFixed(4)}, ${result.longitude.toStringAsFixed(4)}';
       });
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Location selected: ${result.latitude.toStringAsFixed(6)}, ${result.longitude.toStringAsFixed(6)}'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      AppSnackBar.success(context, 'Location selected: ${result.latitude.toStringAsFixed(6)}, ${result.longitude.toStringAsFixed(6)}');
     }
   }
 

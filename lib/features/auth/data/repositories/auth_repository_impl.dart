@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/firebase_auth_datasource.dart';
@@ -13,7 +15,15 @@ class AuthRepositoryImpl implements AuthRepository {
     if (user == null) return null;
     return UserModel.fromFirebaseUser(user);
   }
-
+ 
+  @override
+    Future<UserEntity?> signInWithApple() async {
+    log(' ✅ signInWithApple Impl called ');
+    final user = await dataSource.signInWithApple();
+    if (user == null) return null;
+    return UserModel.fromFirebaseUser(user);
+  }
+  
   @override
   Future<void> signOut() async {
     await dataSource.signOut();

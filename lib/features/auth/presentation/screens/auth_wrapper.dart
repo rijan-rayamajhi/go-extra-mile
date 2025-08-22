@@ -26,7 +26,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         // Debug: Print current state
-        print('AuthWrapper - Current state: $state');
         
         // Show loading while checking authentication or during logout
         if (state is AuthInitial || state is AuthLoading) {
@@ -48,18 +47,15 @@ class _AuthWrapperState extends State<AuthWrapper> {
         
         // If authenticated, go directly to main screen
         if (state is AuthAuthenticated) {
-          print('AuthWrapper - User authenticated, showing MainScreen');
           return const MainScreen();
         }
         
         // If not authenticated or account deleted, show auth screen
         if (state is AuthUnauthenticated) {
-          print('AuthWrapper - User not authenticated, showing AuthScreen');
           return const AuthScreen();
         }
         
         // For any other state (like AuthFailure), show auth screen as fallback
-        print('AuthWrapper - Fallback state, showing AuthScreen');
         return const AuthScreen();
       },
     );

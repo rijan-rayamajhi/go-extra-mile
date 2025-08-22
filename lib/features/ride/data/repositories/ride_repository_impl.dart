@@ -47,6 +47,8 @@ class RideRepositoryImpl implements RideRepository {
   @override
   Future<void> uploadRide(RideEntity rideEntity) async {
     try {
+
+      print('Ride Entity before conversion: $rideEntity');
       // Convert entity to model for Firestore upload
       final rideModel = RideModel(
         id: rideEntity.id,
@@ -61,13 +63,19 @@ class RideRepositoryImpl implements RideRepository {
         totalTime: rideEntity.totalTime,
         totalGEMCoins: rideEntity.totalGEMCoins,
         rideMemories: rideEntity.rideMemories,
+        rideTitle: rideEntity.rideTitle,
+        rideDescription: rideEntity.rideDescription,
+        topSpeed: rideEntity.topSpeed,
+        averageSpeed: rideEntity.averageSpeed,
+        routePoints: rideEntity.routePoints,
       );
 
+      print('Ride Entity Model  conversion: $rideModel');
       // Upload to Firestore using the injected datasource
       await _firestoreDatasource.uploadRide(rideModel);
       
-      // Clear local storage ride data after successful upload
-      await _localDatasource.clearRide(rideEntity.userId);
+      // // Clear local storage ride data after successful upload
+      // await _localDatasource.clearRide(rideEntity.userId);
     } catch (e) {
       throw Exception('Failed to upload ride: $e');
     }

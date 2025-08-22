@@ -16,6 +16,13 @@ class RideEntity extends Equatable {
   final double? totalTime;
   final double? totalGEMCoins;
   final List<RideMemoryEntity>? rideMemories;
+  
+  // 🔹 Ride Details
+  final String? rideTitle;
+  final String? rideDescription;
+  final double? topSpeed;
+  final double? averageSpeed;
+  final List<GeoPoint>? routePoints;
 
   const RideEntity({
     required this.id,
@@ -30,6 +37,11 @@ class RideEntity extends Equatable {
     this.totalTime,
     this.totalGEMCoins,
     this.rideMemories,
+    this.rideTitle,
+    this.rideDescription,
+    this.topSpeed,
+    this.averageSpeed,
+    this.routePoints,
   });
 
   @override
@@ -46,5 +58,10 @@ class RideEntity extends Equatable {
         totalTime,
         totalGEMCoins,
         rideMemories,
+        rideTitle,
+        rideDescription,
+        topSpeed,
+        averageSpeed,
+        routePoints,
       ];
 }

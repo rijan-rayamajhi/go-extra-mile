@@ -91,8 +91,8 @@ class _HomeRideProgressState extends State<HomeRideProgress> {
             color: Colors.grey.shade200,
             padding: const EdgeInsets.all(16),
             child: Shimmer.fromColors(
-              baseColor: Colors.white.withOpacity(0.3),
-              highlightColor: Colors.white.withOpacity(0.7),
+              baseColor: Colors.white.withValues(alpha: 0.3),
+              highlightColor: Colors.white.withValues(alpha: 0.7),
               child: Row(
                 children: [
                   Container(

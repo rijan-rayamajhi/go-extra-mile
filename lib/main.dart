@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:go_extra_mile_new/firebase_options.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/screens/auth_wrapper.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_bloc.dart';
+import 'package:go_extra_mile_new/features/gem_coin/presentation/bloc/gem_coin_bloc.dart';
+import 'package:go_extra_mile_new/features/license/presentation/bloc/driving_license_bloc.dart';
 import 'package:go_extra_mile_new/core/theme/app_theme.dart';
 import 'package:go_extra_mile_new/core/di/injection_container.dart' as di;
-import 'firebase_options_env.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Load environment variables
-  await dotenv.load(fileName: '.env.prod');
+  
+  // Initialize Firebase
   await Firebase.initializeApp(
-    options: FirebaseOptionsEnv.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   
   await di.init();
@@ -39,8 +40,15 @@ class MyApp extends StatelessWidget {
         BlocProvider<RideBloc>(
           create: (context) => di.sl<RideBloc>(),
         ),
+        BlocProvider<GemCoinBloc>(
+          create: (context) => di.sl<GemCoinBloc>(),
+        ),
+        BlocProvider<DrivingLicenseBloc>(
+          create: (context) => di.sl<DrivingLicenseBloc>(),
+        ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Go Extra Mile',
         theme: AppTheme.lightTheme, // Follows system theme preference
         home: const AuthWrapper(),

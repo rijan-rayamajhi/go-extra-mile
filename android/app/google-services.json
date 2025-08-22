@@ -7,12 +7,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:780810782870:android:572768c074374ee3471ab7",
+        "mobilesdk_app_id": "1:780810782870:android:b0c2c994e38f8d56471ab7",
         "android_client_info": {
-          "package_name": "com.example.go_extra_mile_new"
+          "package_name": "com.rijan.goExtraMile"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "780810782870-6gvqhdmofrffjtu9lbia8g8dta0aoafu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rijan.goExtraMile",
+            "certificate_hash": "c5e3a26b289ff3d7167ad9c40b25aa5c15a07356"
+          }
+        },
         {
           "client_id": "780810782870-06q24ca9q0vukqm4fe1bo7igbal9pmh0.apps.googleusercontent.com",
           "client_type": 3
@@ -31,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "780810782870-l89tccblrdadtm97tqtd2v06mbuq52b6.apps.googleusercontent.com",
+              "client_id": "780810782870-2foaeqg6fb5j2s16p7ffhqas6iov9rf3.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.goExtraMileNew"
+                "bundle_id": "com.rijan.goExtraMile"
               }
             }
           ]

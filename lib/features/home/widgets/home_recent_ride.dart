@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/custome_divider.dart';
-import 'package:intl/intl.dart';
+import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_details_screen.dart';
 import '../../ride/presentation/bloc/ride_bloc.dart';
 import '../../ride/presentation/bloc/ride_event.dart';
 import '../../ride/presentation/bloc/ride_state.dart';
@@ -9,6 +9,7 @@ import '../../auth/presentation/bloc/auth_bloc.dart';
 import '../../auth/presentation/bloc/auth_state.dart';
 import '../../ride/domain/entities/ride_entity.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../common/widgets/ride_card_widget.dart';
 
 class HomeRecentRide extends StatefulWidget {
   const HomeRecentRide({super.key});
@@ -166,85 +167,27 @@ class _HomeRecentRideState extends State<HomeRecentRide> {
     );
   }
 
+  Widget _divider() {
+    return Container(
+      height: 28,
+      width: 1,
+      color: Colors.grey.shade300,
+    );
+  }
+
   Widget _buildRecentRidesList(ThemeData theme, List<RideEntity> rides) {
     return Column(
       children: rides.map((ride) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: _buildRideCard(theme, ride),
+        child: RideCardWidget(ride: ride , onTap: () {
+          //navigate to RideDetailsScreen
+          Navigator.push(context, MaterialPageRoute(builder: (context) => RideDetailsScreen(ride: ride)));
+        },),
       )).toList(),
     );
   }
 
-  Widget _buildRideCard(ThemeData theme, RideEntity ride) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: Colors.grey.shade300,
-          width: 1.2,
-        ),
-      ),
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    shape: BoxShape.circle,
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  child: Icon(Icons.directions_bike,
-                      color: Colors.blue.shade700, size: 22),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  "Recent Rides",
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
 
-            // Ride stats
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _rideStat("Distance", "${ride.totalDistance?.toStringAsFixed(1) ?? '0'} km"),
-                _divider(),
-                _rideStat("Time", "${ride.totalTime?.toStringAsFixed(0) ?? '0'} min"),
-                _divider(),
-                _rideStat("Coins", "${ride.totalGEMCoins?.toStringAsFixed(0) ?? '0'}"),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Ride date
-            Text(
-              "Started • ${DateFormat('dd MMM, hh:mm a').format(ride.startedAt)}",
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade600,
-              ),
-            ),
-            if (ride.endedAt != null)
-              Text(
-                "Ended • ${DateFormat('dd MMM, hh:mm a').format(ride.endedAt!)}",
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade600,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildErrorCard(ThemeData theme, String errorMessage) {
     return Card(
@@ -303,76 +246,5 @@ class _HomeRecentRideState extends State<HomeRecentRide> {
     );
   }
 
-  Widget _buildNoRidesCard(ThemeData theme) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: Colors.grey.shade300,
-          width: 1.2,
-        ),
-      ),
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    shape: BoxShape.circle,
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  child: Icon(Icons.directions_bike,
-                      color: Colors.grey.shade600, size: 22),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  "No Rides Yet",
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Start your first ride to see your stats here!",
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _rideStat(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-      ],
-    );
-  }
-
-  Widget _divider() {
-    return Container(
-      height: 28,
-      width: 1,
-      color: Colors.grey.shade300,
-    );
-  }
 }

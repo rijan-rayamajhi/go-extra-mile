@@ -14,12 +14,14 @@ class RideGoogleMap extends StatefulWidget {
   final String currentLocationMarkerImageUrl;
   final List<RideMemoryEntity>? customMarkers; // Add custom markers parameter
   final Function(RideMemoryEntity)? onMemoryMarkerTapped; // Add callback for memory marker taps
+  final List<LatLng>? routePoints; // Add route points parameter
   
   const RideGoogleMap({
     super.key, 
     required this.currentLocationMarkerImageUrl,
     this.customMarkers, // Make it optional
     this.onMemoryMarkerTapped, // Make it optional
+    this.routePoints, // Make it optional
   });
 
   @override
@@ -32,11 +34,46 @@ class RideGoogleMapState extends State<RideGoogleMap> {
   LatLng? _currentLocation;
   bool _isLocationLoaded = false;
   Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {}; // Add polylines for route
+  List<LatLng> _currentRoutePoints = []; // Store current route points
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _initializeRoute(); // Initialize route if provided
+  }
+
+  void _initializeRoute() {
+    if (widget.routePoints != null && widget.routePoints!.isNotEmpty) {
+      _currentRoutePoints = List.from(widget.routePoints!);
+      _updateRoutePolyline();
+    }
+  }
+
+  // Method to update route points and redraw polyline
+  void updateRoute(List<LatLng> newRoutePoints) {
+    setState(() {
+      _currentRoutePoints = List.from(newRoutePoints);
+      _updateRoutePolyline();
+    });
+  }
+
+  void _updateRoutePolyline() {
+    if (_currentRoutePoints.length < 2) return;
+    
+    setState(() {
+      _polylines.clear();
+      _polylines.add(
+        Polyline(
+          polylineId: const PolylineId('ride_route'),
+          points: _currentRoutePoints,
+          color: Colors.blue,
+          width: 4,
+          geodesic: true,
+        ),
+      );
+    });
   }
 
   Future<void> _getCurrentLocation() async {
@@ -420,6 +457,7 @@ class RideGoogleMapState extends State<RideGoogleMap> {
       mapType: MapType.normal,
       padding: const EdgeInsets.only(bottom: 100),
       markers: _markers, // Add custom markers
+      polylines: _polylines, // Add route polylines
     );
   }
 }

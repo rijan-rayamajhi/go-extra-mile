@@ -5,13 +5,13 @@ import 'dart:io';
 
 class CircularImage extends StatelessWidget {
   final VoidCallback? onTap;
-  final String imageUrl;
+  final String? imageUrl; // Changed to nullable
   final String? heroTag;
   final double? width;
   final double? height;
   const CircularImage({
     super.key,
-    required this.imageUrl,
+    this.imageUrl, // Made optional
     this.heroTag,
     this.width = 120,
     this.height = 120,
@@ -19,11 +19,16 @@ class CircularImage extends StatelessWidget {
   });
 
   Widget _buildImage() {
+    // Check if imageUrl is null
+    if (imageUrl == null || imageUrl!.isEmpty) {
+      return const Icon(Icons.image_not_supported);
+    }
+    
     // Check if the imageUrl is a file path
-    if (imageUrl.startsWith('/') || imageUrl.contains('\\') || imageUrl.startsWith('file://')) {
+    if (imageUrl!.startsWith('/') || imageUrl!.contains('\\') || imageUrl!.startsWith('file://')) {
       try {
         return Image.file(
-          File(imageUrl),
+          File(imageUrl!),
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => const Icon(Icons.person),
         );
@@ -34,7 +39,7 @@ class CircularImage extends StatelessWidget {
     
     // Handle network images
     return CachedNetworkImage(
-      imageUrl: imageUrl,
+      imageUrl: imageUrl!,
       fit: BoxFit.cover,
       errorWidget: (context, url, error) => const Icon(Icons.person),
     );

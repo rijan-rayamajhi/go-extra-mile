@@ -1,10 +1,13 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../widgets/auth_terms_condition.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -21,34 +24,56 @@ class _AuthScreenState extends State<AuthScreen> {
         child: Padding(
           padding: const EdgeInsets.all(screenPadding),
           child: BlocConsumer<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is AuthFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Authentication failed: ${state.message}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                } 
-                // Note: Navigation is now handled by AuthWrapper
-              },
-              builder: (context, state) {
-                return Column(
-                  children: [
-                    const Spacer(),
-                    PrimaryButton(
-                      text: 'Continue with Google',
+            listener: (context, state) {
+              if (state is AuthFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 4),
+                    action: SnackBarAction(
+                      label: 'Dismiss',
+                      textColor: Colors.white,
                       onPressed: () {
-                        context.read<AuthBloc>().add(SignInWithGoogleEvent());
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       },
                     ),
-                    const SizedBox(height: spacing),
-                  ],
+                  ),
                 );
-              },
-            ),
+              }
+              // Note: Navigation is now handled by AuthWrapper
+            },
+            builder: (context, state) {
+              return Column(
+                children: [
+                  const Spacer(),
+                  PrimaryButton(
+                    text: 'Continue with Google',
+                    icon: FontAwesomeIcons.google,
+                    onPressed: () {
+                      context.read<AuthBloc>().add(SignInWithGoogleEvent());
+                    },
+                    isLoading: state is AuthLoading,
+                  ),
+                  const SizedBox(height: spacing),
+                          PrimaryButton(
+                    text: 'Continue with Apple',
+                    icon: FontAwesomeIcons.apple,
+                    onPressed: () {
+                      context.read<AuthBloc>().add(SignInWithAppleEvent());
+                    },
+                    isLoading: state is AuthLoading,
+                  ),
+                  const SizedBox(height: spacing),
+
+                  //terms and conditions
+                  AuthTermsCondition(),
+                ],
+              );
+            },
           ),
         ),
-      );
+      ),
+    );
   }
 }

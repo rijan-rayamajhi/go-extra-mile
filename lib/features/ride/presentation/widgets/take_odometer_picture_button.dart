@@ -28,11 +28,11 @@ class TakeOdometerPictureButton extends StatelessWidget {
               shape: BoxShape.circle,
               color: isLoading 
                   ? Colors.grey[300]
-                  : Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
               border: Border.all(
                 color: isLoading 
                     ? Colors.grey[400]!
-                    : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -78,7 +78,7 @@ class TakeOdometerPictureButton extends StatelessWidget {
                 fontSize: 10,
                 color: isLoading 
                     ? Colors.grey[500]
-                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),

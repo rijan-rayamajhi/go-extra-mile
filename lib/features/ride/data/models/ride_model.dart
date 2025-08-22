@@ -17,6 +17,11 @@ class RideModel extends RideEntity {
     super.totalTime,
     super.totalGEMCoins,
     super.rideMemories,
+    super.rideTitle,
+    super.rideDescription,
+    super.topSpeed,
+    super.averageSpeed,
+    super.routePoints,
   });
 
   /// 🔹 copyWith
@@ -33,6 +38,11 @@ class RideModel extends RideEntity {
     double? totalTime,
     double? totalGEMCoins,
     List<RideMemoryEntity>? rideMemories,
+    String? rideTitle,
+    String? rideDescription,
+    double? topSpeed,
+    double? averageSpeed,
+    List<GeoPoint>? routePoints,
   }) {
     return RideModel(
       id: id ?? this.id,
@@ -47,6 +57,11 @@ class RideModel extends RideEntity {
       totalTime: totalTime ?? this.totalTime,
       totalGEMCoins: totalGEMCoins ?? this.totalGEMCoins,
       rideMemories: rideMemories ?? this.rideMemories,
+      rideTitle: rideTitle ?? this.rideTitle,
+      rideDescription: rideDescription ?? this.rideDescription,
+      topSpeed: topSpeed ?? this.topSpeed,
+      averageSpeed: averageSpeed ?? this.averageSpeed,
+      routePoints: routePoints ?? this.routePoints,
     );
   }
 
@@ -68,6 +83,15 @@ class RideModel extends RideEntity {
       rideMemories: data['rideMemories'] != null 
           ? (data['rideMemories'] as List<dynamic>)
               .map((memory) => RideMemoryModel.fromFirestore(memory as Map<String, dynamic>))
+              .toList()
+          : null,
+      rideTitle: data['rideTitle'] as String?,
+      rideDescription: data['rideDescription'] as String?,
+      topSpeed: data['topSpeed'] as double?,
+      averageSpeed: data['averageSpeed'] as double?,
+      routePoints: data['routePoints'] != null 
+          ? (data['routePoints'] as List<dynamic>)
+              .map((point) => point as GeoPoint)
               .toList()
           : null,
     );
@@ -92,6 +116,11 @@ class RideModel extends RideEntity {
         }
         return RideMemoryModel.fromEntity(memory).toJson();
       }).toList(),
+      'rideTitle': rideTitle,
+      'rideDescription': rideDescription,
+      'topSpeed': topSpeed,
+      'averageSpeed': averageSpeed,
+      'routePoints': routePoints,
     };
   }
 
@@ -122,6 +151,18 @@ class RideModel extends RideEntity {
               .map((memory) => RideMemoryModel.fromJson(memory as Map<String, dynamic>))
               .toList()
           : null,
+      rideTitle: json['rideTitle'] as String?,
+      rideDescription: json['rideDescription'] as String?,
+      topSpeed: json['topSpeed'] as double?,
+      averageSpeed: json['averageSpeed'] as double?,
+      routePoints: json['routePoints'] != null
+          ? (json['routePoints'] as List<dynamic>)
+              .map((point) => GeoPoint(
+                (point['latitude'] as num).toDouble(),
+                (point['longitude'] as num).toDouble(),
+              ))
+              .toList()
+          : null,
     );
   }
 
@@ -146,6 +187,14 @@ class RideModel extends RideEntity {
           return memory.toJson();
         }
         return RideMemoryModel.fromEntity(memory).toJson();
+      }).toList(),
+      'rideTitle': rideTitle,
+      'rideDescription': rideDescription,
+      'topSpeed': topSpeed,
+      'averageSpeed': averageSpeed,
+      'routePoints': routePoints?.map((point) => {
+        'latitude': point.latitude,
+        'longitude': point.longitude,
       }).toList(),
     };
   }

@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/ride_model.dart';
 import '../models/ride_memory_model.dart';
 import '../../domain/entities/ride_memory_entity.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RideLocalDatasource {
   /// 🔹 Get cache key for a specific user
@@ -96,6 +96,23 @@ class RideLocalDatasource {
         }
       }
 
+      // Handle routePoints conversion if present
+      List<GeoPoint>? updatedRoutePoints;
+      if (fields['routePoints'] != null) {
+        if (fields['routePoints'] is List<Map<String, dynamic>>) {
+          // Convert from JSON format to GeoPoint
+          updatedRoutePoints = (fields['routePoints'] as List<Map<String, dynamic>>)
+              .map((pointMap) => GeoPoint(
+                (pointMap['latitude'] as num).toDouble(),
+                (pointMap['longitude'] as num).toDouble(),
+              ))
+              .toList();
+        } else if (fields['routePoints'] is List<GeoPoint>) {
+          // Already in correct format
+          updatedRoutePoints = fields['routePoints'] as List<GeoPoint>;
+        }
+      }
+
       // Create a new ride model with updated fields
       final updatedRide = RideModel(
         id: currentRide.id,
@@ -110,6 +127,11 @@ class RideLocalDatasource {
         totalTime: fields['totalTime'] ?? currentRide.totalTime,
         totalGEMCoins: fields['totalGEMCoins'] ?? currentRide.totalGEMCoins,
         rideMemories: updatedRideMemories ?? currentRide.rideMemories,
+        rideTitle: fields['rideTitle'] ?? currentRide.rideTitle,
+        rideDescription: fields['rideDescription'] ?? currentRide.rideDescription,
+        topSpeed: fields['topSpeed'] ?? currentRide.topSpeed,
+        averageSpeed: fields['averageSpeed'] ?? currentRide.averageSpeed,
+        routePoints: updatedRoutePoints ?? currentRide.routePoints,
       );
       await saveRide(updatedRide);
     }

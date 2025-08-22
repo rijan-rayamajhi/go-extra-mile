@@ -28,7 +28,6 @@ class AdminDataBloc extends Bloc<AdminDataEvent, AdminDataState> {
         final appSettings = await getAppSettings();
         emit(AdminDataLoaded(appSettings));
       } catch (e) {
-        print(e);
         emit(AdminDataError(e.toString()));
       }
     });
@@ -70,7 +69,6 @@ class AdminDataBloc extends Bloc<AdminDataEvent, AdminDataState> {
           ));
         }
       } catch (e) {
-        print(e);
         emit(AdminDataError(e.toString()));
       }
     });
@@ -116,7 +114,6 @@ class AdminDataBloc extends Bloc<AdminDataEvent, AdminDataState> {
           ));
         }
       } catch (e) {
-        print(e);
         emit(AdminDataError(e.toString()));
       }
     });
@@ -163,7 +160,6 @@ class AdminDataBloc extends Bloc<AdminDataEvent, AdminDataState> {
           ));
         }
       } catch (e) {
-        print(e);
         emit(AdminDataError(e.toString()));
       }
     });
@@ -211,7 +207,6 @@ class AdminDataBloc extends Bloc<AdminDataEvent, AdminDataState> {
           ));
         }
       } catch (e) {
-        print(e);
         emit(AdminDataError(e.toString()));
       }
     });

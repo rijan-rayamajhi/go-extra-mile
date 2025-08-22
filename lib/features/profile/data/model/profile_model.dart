@@ -35,7 +35,7 @@ class ProfileModel extends ProfileEntity {
       gender: map['gender'],
       totalGemCoins: (map['totalGemCoins'] as num?)?.toDouble(),
       dateOfBirth: (map['dateOfBirth'] as Timestamp?)?.toDate(),
-      privateProfile: map['privateProfile'],
+      privateProfile: map['privateProfile'] is bool ? map['privateProfile'] : (map['privateProfile'] == true),
       totalDistance: (map['totalDistance'] as num?)?.toDouble(),
       totalRide: map['totalRide'],
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),

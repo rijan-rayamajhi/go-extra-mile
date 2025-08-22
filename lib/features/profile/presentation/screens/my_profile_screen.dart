@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_extra_mile_new/common/widgets/custome_divider.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/common/widgets/image_viewer.dart';
@@ -151,55 +150,45 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         centerTitle: false,
         actions: [
           //toggle switch with loading indicator
-          Row(
+          Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (currentState is ProfileUpdating)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (currentState is ProfileUpdating)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
                       ),
                     ),
+                  IconButton(
+                    icon: Icon(
+                      (profile.privateProfile ?? false) == true
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: (profile.privateProfile ?? false) == true
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.primary,
+                    ),
+                    onPressed: currentState is ProfileUpdating
+                        ? null
+                        : () {
+                            _showPrivacyConfirmation(context, profile);
+                          },
+                    tooltip: (profile.privateProfile ?? false) == true
+                        ? 'Profile is private - tap to make public'
+                        : 'Profile is public - tap to make private',
                   ),
-                ),
-              IconButton(
-                icon: Icon(
-                  profile.privateProfile == true
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  color: profile.privateProfile == true
-                      ? Theme.of(context).colorScheme.error
-                      : Theme.of(context).colorScheme.primary,
-                ),
-                onPressed: currentState is ProfileUpdating
-                    ? null
-                    : () {
-                        try {
-                          // Toggle the profile privacy
-                          final newPrivacyValue =
-                              !(profile.privateProfile ?? false);
-                          final updatedProfile = (profile as ProfileModel)
-                              .copyWith(privateProfile: newPrivacyValue);
-                          context.read<ProfileBloc>().add(
-                            UpdateProfileEvent(updatedProfile),
-                          );
-                        } catch (e) {
-                          // Show error message if update fails
-                          AppSnackBar.error(
-                            context,
-                            'Failed to update privacy setting',
-                          );
-                        }
-                      },
-                tooltip: profile.privateProfile == true
-                    ? 'Profile is private - tap to make public'
-                    : 'Profile is public - tap to make private',
+                ],
               ),
             ],
           ),
@@ -212,9 +201,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             onPressed: () {
               CustomerCareBottomSheet.show(
                 context,
-                whatsappNumber: '+1234567890',
+                whatsappNumber: '+916360896102',
                 emailAddress: 'support@goextramile.com',
-                phoneNumber: '+1234567890',
+                phoneNumber: '+916360896102',
                 companyName: 'Go Extra Mile',
               );
             },
@@ -479,8 +468,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
               const SizedBox(height: 16),
 
-            
-
               //profile memory
               ProfileRideMemoryGridview(),
             ],
@@ -741,17 +728,73 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   //   );
   // }
 
+  void _showPrivacyConfirmation(BuildContext context, ProfileEntity profile) {
+    final currentPrivacy = profile.privateProfile ?? false;
+    final newPrivacyValue = !currentPrivacy;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          currentPrivacy ? 'Make Profile Public?' : 'Make Profile Private?',
+        ),
+        content: Text(
+          currentPrivacy
+              ? 'Your profile will become visible to other users. Are you sure you want to make it public?'
+              : 'Your profile will become private and only visible to you. Are you sure you want to make it private?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _updateProfilePrivacy(profile, newPrivacyValue);
+            },
+            child: Text(
+              currentPrivacy ? 'Make Public' : 'Make Private',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _updateProfilePrivacy(ProfileEntity profile, bool newPrivacyValue) {
+    try {
+      // Create updated profile with new privacy setting
+      final updatedProfile = (profile as ProfileModel)
+          .copyWith(privateProfile: newPrivacyValue);
+
+      // Log the change for debugging
+      print(
+        'Profile privacy changing from ${profile.privateProfile} to $newPrivacyValue',
+      );
+
+      context.read<ProfileBloc>().add(
+        UpdateProfileEvent(updatedProfile),
+      );
+    } catch (e) {
+      // Show error message if update fails
+      print('Error updating profile privacy: $e');
+      AppSnackBar.error(
+        context,
+        'Failed to update privacy setting',
+      );
+    }
+  }
+
   void _performLogout() async {
     try {
       // Use the auth bloc to handle logout
       context.read<AuthBloc>().add(SignOutEvent());
-      
+
       // Navigate to auth screen and remove all routes
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const AuthWrapper(),
-          ),
+          MaterialPageRoute(builder: (context) => const AuthWrapper()),
           (route) => false,
         );
       }
@@ -761,8 +804,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       }
     }
   }
-
-
 
   // void _performDeleteAccount() async {
   //   try {
@@ -781,7 +822,4 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   //     }
   //   }
   // }
-
-
-
 }

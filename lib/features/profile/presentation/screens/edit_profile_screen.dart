@@ -8,6 +8,7 @@ import 'package:go_extra_mile_new/core/utils/image_picker_utils.dart';
 import 'package:go_extra_mile_new/core/utils/text_validators.dart';
 import 'package:go_extra_mile_new/core/utils/date_picker_utils.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
+import 'package:go_extra_mile_new/features/license/presentation/screens/my_driving_license_screen.dart';
 import 'package:go_extra_mile_new/features/profile/domain/entities/profile_entity.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_event.dart';
@@ -691,27 +692,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildDobSection() {
     return EditProfileDob(
-      selectedDate: _selectedDob,
       onTap: () async {
-        final DateTime now = DateTime.now();
-        final DateTime eighteenYearsAgo = DateTime(
-          now.year - 18,
-          now.month,
-          now.day,
-        );
-        final DateTime? picked = await DatePickerUtils.pickDate(
-          context,
-          initialDate: _selectedDob ?? eighteenYearsAgo,
-          firstDate: DatePickerUtils.kDefaultFirstDate,
-          lastDate: eighteenYearsAgo,
-          helpText: 'Select your date of birth',
-          confirmText: 'Select',
-        );
-        if (picked != null) {
-          setState(() {
-            _selectedDob = DateTime(picked.year, picked.month, picked.day);
-          });
-        }
+         //Nabigate to Add New DL Screen
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => MyDrivingLicenseScreen()));
+
       },
     );
   }

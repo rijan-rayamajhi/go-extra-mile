@@ -135,7 +135,6 @@ class AdminDataRepositoryImpl implements AdminDataRepository {
     try {
       // Fetch from Firestore
       final doc = await _firestore.collection('admin_data').doc('vehicle_brands').get();
-      print('Vehicle brands data: ${doc.data()}');
       if (!doc.exists) {
         throw Exception('Vehicle brands document not found');
       }
@@ -153,7 +152,6 @@ class AdminDataRepositoryImpl implements AdminDataRepository {
           final brand = VehicleBrandModel.fromJson(brandData as Map<String, dynamic>);
           brandsMap[brand.id] = brand;  // Use ID as key instead of name
         } catch (e) {
-          print('Error parsing brand: $e');
           // Continue with other brands if one fails
         }
       }

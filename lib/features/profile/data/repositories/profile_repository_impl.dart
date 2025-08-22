@@ -61,6 +61,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
     if (profile.youtubeLink != null) updateData['youtubeLink'] = profile.youtubeLink;
     if (profile.whatsappLink != null) updateData['whatsappLink'] = profile.whatsappLink;
     
+    // Handle boolean fields - they can be false, so we need to check if they're not null
+    if (profile.privateProfile != null) updateData['privateProfile'] = profile.privateProfile;
+    
     // Always update the updatedAt timestamp
     updateData['updatedAt'] = Timestamp.now();
     

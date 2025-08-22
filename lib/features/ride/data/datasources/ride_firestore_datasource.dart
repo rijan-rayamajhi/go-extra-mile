@@ -13,9 +13,11 @@ class RideFirestoreDataSource {
   /// 🔹 Upload ride to user's rides subcollection
   Future<void> uploadRide(RideModel ride) async {
     try {
+
       // Convert ride model to Firestore document
       final rideData = ride.toFirestore();
-      
+
+
       // Add document ID if provided, otherwise let Firestore generate one
       if (ride.id.isNotEmpty) {
         await _getUserRidesCollection(ride.userId).doc(ride.id).set(rideData);

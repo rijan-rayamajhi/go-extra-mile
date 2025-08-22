@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>780810782870-l89tccblrdadtm97tqtd2v06mbuq52b6.apps.googleusercontent.com</string>
+	<string>780810782870-2foaeqg6fb5j2s16p7ffhqas6iov9rf3.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.780810782870-l89tccblrdadtm97tqtd2v06mbuq52b6</string>
+	<string>com.googleusercontent.apps.780810782870-2foaeqg6fb5j2s16p7ffhqas6iov9rf3</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>780810782870-6gvqhdmofrffjtu9lbia8g8dta0aoafu.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCw6bi7dmX2XWaOWocDqZoFDISZnQEhKJA</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.goExtraMileNew</string>
+	<string>com.rijan.goExtraMile</string>
 	<key>PROJECT_ID</key>
 	<string>gem-prod-91ada</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:780810782870:ios:fb81f623e7f36803471ab7</string>
+	<string>1:780810782870:ios:6596c7b226bf6151471ab7</string>
 </dict>
 </plist>

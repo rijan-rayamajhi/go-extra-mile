@@ -21,7 +21,19 @@ import 'package:go_extra_mile_new/features/ride/domain/entities/ride_entity.dart
 
 class SaveRideScreen extends StatefulWidget {
   final RideEntity rideEntity;
-  const SaveRideScreen({super.key, required this.rideEntity});
+  final double? distance;
+  final Duration? duration;
+  final double? topSpeed;
+  final double? averageSpeed;
+  
+  const SaveRideScreen({
+    super.key, 
+    required this.rideEntity,
+    this.distance,
+    this.duration,
+    this.topSpeed,
+    this.averageSpeed,
+  });
 
   @override
   State<SaveRideScreen> createState() => _SaveRideScreenState();
@@ -43,23 +55,47 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
     super.initState();
     _loadStartAddress();
     _setDefaultTitle();
+    _setDefaultDescription();
   }
 
   void _setDefaultTitle() {
-    final now = DateTime.now();
-    final customLabels = {
-      'morning': 'Morning Ride',
-      'afternoon': 'Afternoon Adventure', 
-      'evening': 'Evening Journey',
-      'night': 'Night Ride',
-    };
-    
-    final timeOfDayTitle = DatePickerUtils.getTimeOfDayLocalized(
-      now, 
-      customLabels: customLabels
-    );
-    
-    _titleController.text = timeOfDayTitle;
+    // Use existing ride title if available, otherwise generate default
+    if (widget.rideEntity.rideTitle != null && widget.rideEntity.rideTitle!.isNotEmpty) {
+      _titleController.text = widget.rideEntity.rideTitle!;
+    } else {
+      final now = DateTime.now();
+      final customLabels = {
+        'morning': 'Morning Ride',
+        'afternoon': 'Afternoon Adventure', 
+        'evening': 'Evening Journey',
+        'night': 'Night Ride',
+      };
+      
+      final timeOfDayTitle = DatePickerUtils.getTimeOfDayLocalized(
+        now, 
+        customLabels: customLabels
+      );
+      
+      _titleController.text = timeOfDayTitle;
+    }
+  }
+
+  void _setDefaultDescription() {
+    // Use existing ride description if available, otherwise generate default
+    if (widget.rideEntity.rideDescription != null && widget.rideEntity.rideDescription!.isNotEmpty) {
+      _descriptionController.text = widget.rideEntity.rideDescription!;
+    } else {
+      final distance = widget.distance ?? widget.rideEntity.totalDistance ?? 0.0;
+      final duration = widget.duration ?? Duration(minutes: (widget.rideEntity.totalTime ?? 0.0).toInt());
+      final topSpeed = widget.topSpeed ?? widget.rideEntity.topSpeed ?? 0.0;
+      
+      _descriptionController.text = 'Completed a ${distance.toStringAsFixed(2)} km ride in ${duration.inMinutes} minutes with a top speed of ${topSpeed.toStringAsFixed(1)} km/h';
+    }
+  }
+
+  String _formatDuration(Duration d) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    return "${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
   }
 
   @override
@@ -71,10 +107,49 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
 
   void _handleRedeemGemCoins() {
     if (_formKey.currentState!.validate()) {
-      // Dispatch UploadRideEvent
-      context.read<RideBloc>().add(
-        UploadRideEvent(rideEntity: widget.rideEntity),
+      // Create updated ride entity with form data
+      final updatedRideEntity = RideEntity(
+        id: widget.rideEntity.id,
+        userId: widget.rideEntity.userId,
+        vehicleId: widget.rideEntity.vehicleId,
+        status: widget.rideEntity.status,
+        startedAt: widget.rideEntity.startedAt,
+        startCoordinates: widget.rideEntity.startCoordinates,
+        endCoordinates: widget.rideEntity.endCoordinates,
+        endedAt: widget.rideEntity.endedAt,
+        totalDistance: widget.rideEntity.totalDistance,
+        totalTime: widget.rideEntity.totalTime,
+        totalGEMCoins: widget.rideEntity.totalGEMCoins,
+        rideMemories: widget.rideEntity.rideMemories,
+        rideTitle: _titleController.text.trim(),
+        rideDescription: _descriptionController.text.trim(),
+        topSpeed: widget.rideEntity.topSpeed,
+        averageSpeed: widget.rideEntity.averageSpeed,
+        routePoints: widget.rideEntity.routePoints,
       );
+
+    //  print(updatedRideEntity.id);
+    //  print(updatedRideEntity.userId);
+    //  print(updatedRideEntity.vehicleId);
+    //  print(updatedRideEntity.status);
+    //  print(updatedRideEntity.startedAt);
+    //  print(updatedRideEntity.startCoordinates);
+    //  print(updatedRideEntity.endCoordinates);
+    //  print(updatedRideEntity.endedAt);
+    //  print(updatedRideEntity.totalDistance);
+    //  print(updatedRideEntity.totalTime);
+    //  print(updatedRideEntity.totalGEMCoins);
+    //  print(updatedRideEntity.rideMemories);
+    //  print(updatedRideEntity.rideTitle);
+    //  print(updatedRideEntity.rideDescription);
+    //  print(updatedRideEntity.topSpeed);
+    //  print(updatedRideEntity.averageSpeed);
+    //  print(updatedRideEntity.routePoints);  
+
+
+     context.read<RideBloc>().add(
+      UploadRideEvent(rideEntity: updatedRideEntity),
+     );
 
       // Note: Success message will be shown by BlocListener when RideUploaded state is emitted
     } else {
@@ -218,6 +293,13 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                       value: _endAddress,
                       theme: theme,
                     ),
+                    if (widget.rideEntity.routePoints != null && widget.rideEntity.routePoints!.isNotEmpty)
+                      SaveRideInfoRow(
+                        icon: Icons.route,
+                        label: "Route Points",
+                        value: "${widget.rideEntity.routePoints!.length} tracking points",
+                        theme: theme,
+                      ),
                   ],
                 ),
                 SaveRideSection(
@@ -227,25 +309,25 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                     SaveRideInfoRow(
                       icon: Icons.route_outlined,
                       label: "Distance",
-                      value: widget.rideEntity.totalDistance.toString(),
+                      value: "${(widget.distance ?? widget.rideEntity.totalDistance ?? 0.0).toStringAsFixed(2)} km",
                       theme: theme,
                     ),
                     SaveRideInfoRow(
                       icon: Icons.access_time,
                       label: "Duration",
-                      value: widget.rideEntity.totalTime.toString(),
+                      value: _formatDuration(widget.duration ?? Duration(minutes: (widget.rideEntity.totalTime ?? 0.0).toInt())),
                       theme: theme,
                     ),
                     SaveRideInfoRow(
                       icon: Icons.speed,
                       label: "Top Speed",
-                      value: 'Comming Soon',
+                      value: widget.topSpeed != null ? "${widget.topSpeed!.toStringAsFixed(1)} km/h" : "N/A",
                       theme: theme,
                     ),
                     SaveRideInfoRow(
                       icon: Icons.directions_bike_outlined,
                       label: "Average Speed",
-                      value:  'Comming Soon',
+                      value: widget.averageSpeed != null ? "${widget.averageSpeed!.toStringAsFixed(1)} km/h" : "N/A",
                       theme: theme,
                     ),
                   ],
@@ -303,7 +385,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                             ),
                           ),
                           Text(
-                            '${widget.rideEntity.totalDistance} km = ${widget.rideEntity.totalDistance} GEM coins',
+                            '${(widget.distance ?? widget.rideEntity.totalDistance ?? 0.0).toStringAsFixed(2)} km = ${(widget.distance ?? widget.rideEntity.totalDistance ?? 0.0).floor()} GEM coins',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
