@@ -23,7 +23,7 @@ class EditProfileDob extends StatelessWidget {
               ? state.license 
               : (state as DrivingLicenseSubmitted).license;
           
-          if (license.dob != DateTime(1900, 1, 1)) {
+          if (license != null) {
             displayText = DatePickerUtils.formatDate(license.dob, pattern: 'dd MMM, yyyy');
             hasExistingDob = true;
           } else {

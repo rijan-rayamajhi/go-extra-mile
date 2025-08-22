@@ -13,7 +13,7 @@ class DrivingLicenseInitial extends DrivingLicenseState {}
 class DrivingLicenseLoading extends DrivingLicenseState {}
 
 class DrivingLicenseLoaded extends DrivingLicenseState {
-  final DrivingLicenseEntity license;
+  final DrivingLicenseEntity? license;
 
   const DrivingLicenseLoaded(this.license);
 

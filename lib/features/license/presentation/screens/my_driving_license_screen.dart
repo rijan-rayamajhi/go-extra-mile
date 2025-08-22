@@ -58,14 +58,24 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
     }
   }
 
-  void _populateFieldsFromLicense(DrivingLicenseEntity license) {
+  void _populateFieldsFromLicense(DrivingLicenseEntity? license) {
+    if (license == null) return;
+    
     // Only populate if fields are empty and license has data
     if (_selectedVehicleType == null && license.licenseType.isNotEmpty) {
       _selectedVehicleType = license.licenseType;
     }
     
-    if (_dob == null && license.dob != null) {
+    if (_dob == null && license.dob != null && !_isDefaultDob(license.dob)) {
       _dob = license.dob;
+    }
+    
+    // Reset cleared flags if we have network images
+    if (license.frontImagePath.isNotEmpty && license.frontImagePath.startsWith('http')) {
+      _frontImageCleared = false;
+    }
+    if (license.backImagePath.isNotEmpty && license.backImagePath.startsWith('http')) {
+      _backImageCleared = false;
     }
   }
 
@@ -78,12 +88,14 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
     final currentState = context.read<DrivingLicenseBloc>().state;
     bool hasValidFrontImage = _frontImage != null || 
                              (currentState is DrivingLicenseLoaded && 
-                              currentState.license.frontImagePath.isNotEmpty && 
+                              currentState.license?.frontImagePath.isNotEmpty == true && 
+                              currentState.license!.frontImagePath.startsWith('http') &&
                               !_frontImageCleared);
     
     bool hasValidBackImage = _backImage != null || 
                             (currentState is DrivingLicenseLoaded && 
-                             currentState.license.backImagePath.isNotEmpty && 
+                             currentState.license?.backImagePath.isNotEmpty == true && 
+                             currentState.license!.backImagePath.startsWith('http') &&
                              !_backImageCleared);
 
     // Validate required fields
@@ -99,9 +111,19 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
     final license = DrivingLicenseEntity(
       licenseType: _selectedVehicleType!,
       frontImagePath: _frontImage?.path ?? 
-                     (currentState as DrivingLicenseLoaded).license.frontImagePath,
+                     (currentState is DrivingLicenseLoaded && 
+                      currentState.license?.frontImagePath.isNotEmpty == true &&
+                      currentState.license!.frontImagePath.startsWith('http') &&
+                      !_frontImageCleared
+                          ? currentState.license!.frontImagePath
+                          : ''),
       backImagePath: _backImage?.path ?? 
-                    (currentState as DrivingLicenseLoaded).license.backImagePath,
+                    (currentState is DrivingLicenseLoaded && 
+                     currentState.license?.backImagePath.isNotEmpty == true &&
+                     currentState.license!.backImagePath.startsWith('http') &&
+                     !_backImageCleared
+                         ? currentState.license!.backImagePath
+                         : ''),
       dob: _dob!,
     );
 
@@ -188,6 +210,13 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
     }
   }
 
+  // Helper method to check if DOB is the default placeholder
+  bool _isDefaultDob(DateTime? dob) {
+    if (dob == null) return true;
+    final now = DateTime.now();
+    return dob.year == now.year - 18 && dob.month == now.month && dob.day == now.day;
+  }
+
   Future<void> _pickDob() async {
     final now = DateTime.now();
     final picked = await DatePickerUtils.pickDate(
@@ -254,7 +283,7 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
       onTap: (file == null && 
               ((isFront && _frontImageCleared) || 
                (!isFront && _backImageCleared) || 
-               imageUrl == null)) ? onTap : null,
+               (imageUrl == null || imageUrl.isEmpty || !imageUrl.startsWith('http')))) ? onTap : null,
       child: AspectRatio(
         aspectRatio: 16 / 9,
         child: Container(
@@ -267,7 +296,7 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
           child: (file == null && 
                   ((isFront && _frontImageCleared) || 
                    (!isFront && _backImageCleared) || 
-                   imageUrl == null))
+                   (imageUrl == null || imageUrl.isEmpty || !imageUrl.startsWith('http'))))
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -298,8 +327,8 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
                               width: double.infinity,
                               height: double.infinity,
                             )
-                          : (!_frontImageCleared && isFront && imageUrl != null) || 
-                             (!_backImageCleared && !isFront && imageUrl != null)
+                          : (!_frontImageCleared && isFront && imageUrl != null && imageUrl.startsWith('http')) || 
+                             (!_backImageCleared && !isFront && imageUrl != null && imageUrl.startsWith('http'))
                               ? CachedNetworkImage(
                                   imageUrl: imageUrl!,
                                   fit: BoxFit.cover,
@@ -455,6 +484,218 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
               ? state.license 
               : (state as DrivingLicenseSubmitted).license;
           
+          // If no license exists, show empty form
+          if (license == null) {
+            return Scaffold(
+              appBar: AppBar(),
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(screenPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Driving License',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Please upload your driving license photos.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+
+                      // Show message for new users
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.blue.shade600),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Please upload photos of your driving license.',
+                                style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Front side DL image
+                      _buildUploadCard(
+                        "Front Side",
+                        _frontImage,
+                        null,
+                        () => _pickImage(true),
+                        () => _clearImage(true),
+                        true, // isFront = true
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Back side DL image
+                      _buildUploadCard(
+                        "Back Side",
+                        _backImage,
+                        null,
+                        () => _pickImage(false),
+                        () => _clearImage(false),
+                        false, // isFront = false
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Vehicle Type Dropdown
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.directions_car,
+                              color: Colors.grey.shade600,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedVehicleType,
+                                  hint: Text(
+                                    "Select Vehicle Type",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  isExpanded: true,
+                                  items: _vehicleTypes.map((String type) {
+                                    return DropdownMenuItem<String>(
+                                      value: type,
+                                      child: Text(
+                                        type,
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _selectedVehicleType = newValue;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // DOB Picker
+                      GestureDetector(
+                        onTap: _pickDob,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 18,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                color: Colors.grey.shade600,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                                                          Text(
+                              _dob != null
+                                  ? DatePickerUtils.formatDate(_dob!, pattern: 'dd MMM, yyyy')
+                                  : "Select Date of Birth",
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Authorization Checkbox
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _isAuthorized,
+                            onChanged: (bool? value) {
+                              if (value == true) {
+                                _showAuthorizationDialog();
+                              } else {
+                                setState(() {
+                                  _isAuthorized = false;
+                                });
+                              }
+                            },
+                            activeColor: theme.primaryColor,
+                          ),
+                          Expanded(
+                            child: Text(
+                              'I am authorized to add this Driving Licence',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      PrimaryButton(
+                        onPressed: _isAuthorized
+                            ? () {
+                                _saveDrivingLicense();
+                              }
+                            : () {
+                                AppSnackBar.info(
+                                  context,
+                                  'Please check the authorization checkbox to Save',
+                                );
+                              },
+                        text: "Save",
+                      ),
+
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+          
           return Scaffold(
             appBar: AppBar(),
             body: SingleChildScrollView(
@@ -505,8 +746,9 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
                       ),
                     ),
                     
-                    // Show verification status if license exists
-                    if (license.frontImagePath.isNotEmpty || license.backImagePath.isNotEmpty)
+                    // Show verification status if license exists and has images
+                    if ((license.frontImagePath.isNotEmpty && license.frontImagePath.startsWith('http')) || 
+                        (license.backImagePath.isNotEmpty && license.backImagePath.startsWith('http')))
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -555,6 +797,34 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
                       ),
                     
                     const SizedBox(height: 32),
+
+                    // Show message for new users
+                    if (license.frontImagePath.isEmpty && license.backImagePath.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.blue.shade600),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Please upload photos of your driving license.',
+                                style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
                     // Front side DL image
                     _buildUploadCard(
@@ -654,11 +924,9 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              _dob != null
-                                  ? "${_dob!.day}-${_dob!.month}-${_dob!.year}"
-                                  : license.dob != null
-                                      ? "${license.dob.day}-${license.dob.month}-${license.dob.year}"
-                                      : "Select Date of Birth",
+                              _dob != null && !_isDefaultDob(_dob)
+                                  ? DatePickerUtils.formatDate(_dob!, pattern: 'dd MMM, yyyy')
+                                  : "Select Date of Birth",
                               style: const TextStyle(fontSize: 16),
                             ),
                           ],

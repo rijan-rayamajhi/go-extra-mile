@@ -8,7 +8,7 @@ class GetDrivingLicense {
 
   GetDrivingLicense(this.repository);
 
-  Future<Either<Failure, DrivingLicenseEntity>> call() async {
+  Future<Either<Failure, DrivingLicenseEntity?>> call() async {
     return await repository.getDrivingLicense();
   }
 }

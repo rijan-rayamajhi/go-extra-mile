@@ -4,5 +4,5 @@ import 'package:go_extra_mile_new/features/license/domain/entities/driving_licen
 
 abstract class DrivingLicenseRepository {
   Future<Either<Failure, DrivingLicenseEntity>> submitDrivingLicense(DrivingLicenseEntity license);
-  Future<Either<Failure, DrivingLicenseEntity>> getDrivingLicense();
+  Future<Either<Failure, DrivingLicenseEntity?>> getDrivingLicense();
 } 

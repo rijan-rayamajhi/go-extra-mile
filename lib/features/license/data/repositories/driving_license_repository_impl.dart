@@ -31,7 +31,7 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
   }
 
   @override
-  Future<Either<Failure, DrivingLicenseEntity>> getDrivingLicense() async {
+  Future<Either<Failure, DrivingLicenseEntity?>> getDrivingLicense() async {
     try {
       final doc = await firestore.collection('users').doc(_uid).get();
 
@@ -41,7 +41,8 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
 
       final data = doc.data();
       if (data == null || !data.containsKey(fieldName)) {
-        return Left(ServerFailure("No Driving License found for user"));
+        // Return null when no driving license data exists
+        return const Right(null);
       }
 
       final license = DrivingLicenseModel.fromMap(data[fieldName]);

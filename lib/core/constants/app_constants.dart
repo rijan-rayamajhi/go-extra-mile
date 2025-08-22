@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 // String Constants
 const String appName = 'Go Extra Mile';
+const String appDescription = 'Ride & Earn';
 
 //paddings
 const double screenPadding = 16.0;

@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -47,22 +46,71 @@ class _AuthScreenState extends State<AuthScreen> {
               return Column(
                 children: [
                   const Spacer(),
-                  PrimaryButton(
-                    text: 'Continue with Google',
-                    icon: FontAwesomeIcons.google,
-                    onPressed: () {
-                      context.read<AuthBloc>().add(SignInWithGoogleEvent());
-                    },
-                    isLoading: state is AuthLoading,
+                  // App branding section
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          appName,
+                          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: spacing / 2),
+                        Text(
+                          appDescription,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: spacing * 2),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: spacing),
-                          PrimaryButton(
-                    text: 'Continue with Apple',
-                    icon: FontAwesomeIcons.apple,
-                    onPressed: () {
-                      context.read<AuthBloc>().add(SignInWithAppleEvent());
+                  Spacer(),
+                  // Show both buttons only on iOS, otherwise show only Google
+                  Builder(
+                    builder: (context) {
+                      final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+                      if (isIOS) {
+                        return Column(
+                          children: [
+                            PrimaryButton(
+                              text: 'Continue with Google',
+                              icon: FontAwesomeIcons.google,
+                              onPressed: () {
+                                context.read<AuthBloc>().add(SignInWithGoogleEvent());
+                              },
+                              isLoading: state is AuthLoading,
+                            ),
+                            const SizedBox(height: spacing),
+                            PrimaryButton(
+                              text: 'Continue with Apple',
+                              icon: FontAwesomeIcons.apple,
+                              onPressed: () {
+                                context.read<AuthBloc>().add(SignInWithAppleEvent());
+                              },
+                              isLoading: state is AuthLoading,
+                            ),
+                          ],
+                        );
+                      } else {
+                        return PrimaryButton(
+                          text: 'Continue with Google',
+                          icon: FontAwesomeIcons.google,
+                          onPressed: () {
+                            context.read<AuthBloc>().add(SignInWithGoogleEvent());
+                          },
+                          isLoading: state is AuthLoading,
+                        );
+                      }
                     },
-                    isLoading: state is AuthLoading,
                   ),
                   const SizedBox(height: spacing),
 

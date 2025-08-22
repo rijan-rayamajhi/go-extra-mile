@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/rect_image.dart';
 import 'package:go_extra_mile_new/features/home/widgets/home_grid_view.dart';
 import 'package:go_extra_mile_new/features/home/widgets/home_profile_image.dart';
-import 'package:go_extra_mile_new/features/home/widgets/home_recent_ride.dart';
 import 'package:go_extra_mile_new/features/home/widgets/home_ride_progress.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_event.dart';
