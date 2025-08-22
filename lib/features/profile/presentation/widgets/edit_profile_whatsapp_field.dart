@@ -20,7 +20,7 @@ class EditProfileWhatsappField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Whatsapp',
+          'WhatsApp Number',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
@@ -28,14 +28,14 @@ class EditProfileWhatsappField extends StatelessWidget {
           controller: controller,
           enabled: true,
           prefixIcon: FontAwesomeIcons.whatsapp,
-          hintText: 'Enter your WhatsApp contact link',
-          keyboardType: TextInputType.url,
+          hintText: 'Enter your WhatsApp number',
+          keyboardType: TextInputType.phone,
           onChanged: onChanged,
         ),
         Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
-            'e.g., https://wa.me/1234567890',
+            'e.g., 1234567890',
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: 12,

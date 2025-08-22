@@ -26,11 +26,17 @@ class TextValidators {
       return 'Username must be less than 20 characters';
     }
     
-    // Allow letters, numbers, underscores, and hyphens
+    // Allow letters, numbers, dots, and underscores (similar to Gmail)
     // Must start with a letter or number
-    const pattern = r'^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$';
+    // Cannot start or end with dots or underscores
+    const pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._]*[a-zA-Z0-9]$';
     if (!RegExp(pattern).hasMatch(trimmedValue)) {
-      return 'Username can only contain letters, numbers, underscores, and hyphens. Must start and end with a letter or number.';
+      return 'Username can only contain letters, numbers, dots, and underscores. Must start and end with a letter or number.';
+    }
+    
+    // Check for consecutive dots or underscores
+    if (trimmedValue.contains('..') || trimmedValue.contains('__') || trimmedValue.contains('._') || trimmedValue.contains('._')) {
+      return 'Username cannot contain consecutive dots or underscores';
     }
     
     return null;
@@ -188,19 +194,10 @@ class TextValidators {
 
     final trimmedValue = value.trim();
     
-    // WhatsApp URL format: https://wa.me/phone_number or just phone number
-    if (trimmedValue.startsWith('http')) {
-      // Full URL validation
-      final urlPattern = r'^https?://wa\.me/[0-9]{7,15}$';
-      if (!RegExp(urlPattern).hasMatch(trimmedValue)) {
-        return 'Please enter a valid WhatsApp contact URL (e.g., https://wa.me/1234567890)';
-      }
-    } else {
-      // Phone number validation (for backward compatibility)
-      const pattern = r'^\+?[0-9]{7,15}$';
-      if (!RegExp(pattern).hasMatch(trimmedValue)) {
-        return 'WhatsApp number must be 7-15 digits, optionally starting with +';
-      }
+    // Phone number validation - exactly 10 digits without country code
+    const pattern = r'^[0-9]{10}$';
+    if (!RegExp(pattern).hasMatch(trimmedValue)) {
+      return 'WhatsApp number must be exactly 10 digits without country code';
     }
     
     return null;

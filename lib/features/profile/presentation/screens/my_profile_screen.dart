@@ -133,15 +133,19 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               icon: Icon(Icons.arrow_back_ios),
             ),
 
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Text(
-                profile.userName != null
-                    ? '@${profile.userName}'.replaceAll('  ', ' ')
-                    : 'User',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: Theme.of(context).colorScheme.onSurface,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  profile.userName != null
+                      ? '@${profile.userName}'.replaceAll('  ', ' ')
+                      : 'User',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ),
@@ -341,7 +345,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             if (profile.whatsappLink != null) ...[
                               IconButton(
                                 onPressed: () {
-                                  launchUrl(Uri.parse(profile.whatsappLink!));
+                                  // Create WhatsApp URL from phone number
+                                  final phoneNumber = profile.whatsappLink!;
+                                  final whatsappUrl = 'https://wa.me/$phoneNumber';
+                                  launchUrl(Uri.parse(whatsappUrl));
                                 },
                                 icon: Icon(
                                   FontAwesomeIcons.whatsapp,
