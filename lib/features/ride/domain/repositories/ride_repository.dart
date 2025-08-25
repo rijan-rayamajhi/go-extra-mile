@@ -14,7 +14,7 @@ abstract class RideRepository {
   Future<List<RideEntity>> getAllRidesByUserId(String userId);
   
   /// 🔹 Get recent rides for a specific user with optional limit
-  Future<List<RideEntity>> getRecentRidesByUserId(String userId, {int limit = 10});
+  Future<List<RideEntity>> getRecentRidesByUserId(String userId, {int limit = 1});
   
   /// 🔹 Discard/delete a ride
   Future<void> discardRide(String userId);

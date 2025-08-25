@@ -8,9 +8,12 @@ import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_blo
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_bloc.dart';
 import 'package:go_extra_mile_new/features/gem_coin/presentation/bloc/gem_coin_bloc.dart';
 import 'package:go_extra_mile_new/features/license/presentation/bloc/driving_license_bloc.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_bloc.dart';
+import 'package:go_extra_mile_new/features/notification/presentation/bloc/notification_bloc.dart';
+import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_bloc.dart';
 import 'package:go_extra_mile_new/core/theme/app_theme.dart';
 import 'package:go_extra_mile_new/core/di/injection_container.dart' as di;
-
+ 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -18,11 +21,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  await di.init();
+    await di.init();
   runApp(const MyApp());
 }
-
+  
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -46,10 +48,19 @@ class MyApp extends StatelessWidget {
         BlocProvider<DrivingLicenseBloc>(
           create: (context) => di.sl<DrivingLicenseBloc>(),
         ),
+        BlocProvider<VehicleBloc>(
+          create: (context) => di.sl<VehicleBloc>(),
+        ),
+        BlocProvider<NotificationBloc>(
+          create: (context) => di.sl<NotificationBloc>(),
+        ),
+        BlocProvider<ReferralBloc>(
+          create: (context) => di.sl<ReferralBloc>(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Go Extra Mile',
+        title: 'GEM NEW',
         theme: AppTheme.lightTheme, // Follows system theme preference
         home: const AuthWrapper(),
       ),

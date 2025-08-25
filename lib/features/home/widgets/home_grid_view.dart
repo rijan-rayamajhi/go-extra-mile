@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_extra_mile_new/features/gem_coin/presentation/screens/gem_coins_history_screen.dart';
 import 'package:go_extra_mile_new/features/license/presentation/screens/my_driving_license_screen.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/screens/my_ride_screen.dart';
-import 'package:go_extra_mile_new/features/vehicle/my_vechile_screen.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/screens/my_vechile_screen.dart';
 
 
 class HomeGridView extends StatelessWidget {
@@ -36,7 +36,7 @@ class HomeGridView extends StatelessWidget {
         label: 'My Vehicles',
         color: Theme.of(context).colorScheme.onSurface,
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => MyVechileScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MyVehicleScreen()));
         }
       ),
       GridItemData(
@@ -68,7 +68,7 @@ class HomeGridView extends StatelessWidget {
       //   label: 'Daily\nReward',
       //   color: Theme.of(context).colorScheme.onSurface,
       //   onTap: () {
-      //     AppSnackBar.show(context, message: 'Coming Soon', type: AppSnackBarType.info);
+      //     // Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationScreen()));
       //   }
       // ),
       // GridItemData(
@@ -84,7 +84,7 @@ class HomeGridView extends StatelessWidget {
       //   label: 'Earn Gem\nCoins',
       //   color: Theme.of(context).colorScheme.onSurface,
       //   onTap: () {
-      //     AppSnackBar.show(context, message: 'Coming Soon', type: AppSnackBarType.info);
+         
       //   }
       // ),
       // GridItemData(

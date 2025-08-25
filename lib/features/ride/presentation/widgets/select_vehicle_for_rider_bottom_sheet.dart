@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:uuid/uuid.dart';
 
@@ -12,14 +13,16 @@ import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_bloc.dart
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_event.dart';
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_entity.dart';
 import 'package:go_extra_mile_new/core/di/injection_container.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_bloc.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_event.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_state.dart';
+import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entiry.dart';
 
 class SelectVehicleForRiderBottomSheet extends StatefulWidget {
-  final List<Map<String, String>> vehicles;
   final Function(int)? onVehicleSelected;
 
   const SelectVehicleForRiderBottomSheet({
     super.key,
-    required this.vehicles,
     this.onVehicleSelected,
   });
 
@@ -35,12 +38,9 @@ class _SelectVehicleForRiderBottomSheetState
   final LocationService _locationService = LocationService();
   bool _isLoading = false;
 
-  final List<Map<String, String>> _vehicles = [];
-
   @override
   void initState() {
     super.initState();
-    _vehicles.addAll(widget.vehicles);
     _pageController = PageController(
       initialPage: _currentIndex,
       viewportFraction: 0.5,
@@ -50,12 +50,11 @@ class _SelectVehicleForRiderBottomSheetState
   @override
   void dispose() {
     _pageController.dispose();
-    // Return the current selected index when bottom sheet is disposed
     super.dispose();
   }
 
-  void _animateToPage(int index) {
-    if (index >= 0 && index < _vehicles.length) {
+  void _animateToPage(int index, List<VehicleEntity> vehicles) {
+    if (index >= 0 && index < vehicles.length) {
       _pageController.animateToPage(
         index,
         duration: const Duration(milliseconds: 140),
@@ -66,7 +65,9 @@ class _SelectVehicleForRiderBottomSheetState
     }
   }
 
-  Future<void> _startRide() async {
+
+
+  Future<void> _startRide(List<VehicleEntity> vehicles) async {
     try {
       setState(() {
         _isLoading = true;
@@ -90,14 +91,14 @@ class _SelectVehicleForRiderBottomSheetState
         return;
       }
 
-      // Get selected vehicle ID using brand name and model name
-      final selectedVehicle = _vehicles[_currentIndex];
+      // Get selected vehicle
+      final selectedVehicle = vehicles[_currentIndex];
 
       // Create RideEntity
       final rideEntity = RideEntity(
         id: const Uuid().v4(), // Generate a unique id for the ride
         userId: currentUser.uid,
-        vehicleId: selectedVehicle['id']!,
+        vehicleId: selectedVehicle.id,
         status: 'active',
         startedAt: DateTime.now(),
         startCoordinates: GeoPoint(position.latitude, position.longitude),
@@ -114,7 +115,7 @@ class _SelectVehicleForRiderBottomSheetState
           MaterialPageRoute(
             builder: (context) => RideScreen(
               rideEntity: rideEntity,
-              selectedVechile: _vehicles[_currentIndex],
+              selectedVechile: selectedVehicle,
             ),
           ),
         );
@@ -136,6 +137,132 @@ class _SelectVehicleForRiderBottomSheetState
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<VehicleBloc>()..add(LoadUserVehicles(FirebaseAuth.instance.currentUser?.uid ?? '')),
+      child: BlocBuilder<VehicleBloc, VehicleState>(
+        builder: (context, state) {
+          if (state is VehicleLoading) {
+            return _buildLoadingState();
+          } else if (state is VehicleError) {
+            return _buildErrorState();
+          } else if (state is VehicleLoaded) {
+            if (state.vehicles.isEmpty) {
+              return _buildNoVehiclesState();
+            }
+            
+            // Use VehicleEntity list directly
+            final vehicles = state.vehicles;
+            
+            return _buildVehicleSelectionContent(vehicles);
+          } else {
+            // VehicleInitial state
+            return _buildLoadingState();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      height: 420,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading vehicles...'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Container(
+      height: 420,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading vehicles',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please try again later',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoVehiclesState() {
+    return Container(
+      height: 420,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.directions_car_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              'No Vehicles Found',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please add a vehicle to start riding',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVehicleSelectionContent(List<VehicleEntity> vehicles) {
     return Container(
       height: 420,
       decoration: const BoxDecoration(
@@ -202,7 +329,7 @@ class _SelectVehicleForRiderBottomSheetState
                   child: PageView.builder(
                     controller: _pageController,
                     padEnds: true,
-                    itemCount: _vehicles.length,
+                    itemCount: vehicles.length,
                     onPageChanged: (index) {
                       setState(() {
                         _currentIndex = index;
@@ -243,7 +370,7 @@ class _SelectVehicleForRiderBottomSheetState
 
                           return GestureDetector(
                             onTap: () {
-                              _animateToPage(index);
+                              _animateToPage(index, vehicles);
                               // Also call the callback directly on tap for immediate response
                               widget.onVehicleSelected?.call(index);
                             },
@@ -254,13 +381,13 @@ class _SelectVehicleForRiderBottomSheetState
                                   curve: Curves.easeOutCubic,
                                   width: size,
                                   height: size,
-                                  child: CircularImage(
-                                    imageUrl: _vehicles[index]['image']!,
-                                  ),
+                                                                  child: CircularImage(
+                                  imageUrl: vehicles[index].vehicleBrandImage,
+                                ),
                                 ),
                                 const SizedBox(height: 8),
                                     Text(
-                                      '${_vehicles[index]['brandName']} ${_vehicles[index]['modelName']}',
+                                      '${vehicles[index].vehicleBrandName} ${vehicles[index].vehicleModelName}',
                                       textAlign: TextAlign.center,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -288,7 +415,7 @@ class _SelectVehicleForRiderBottomSheetState
                   width: 200,
                   child: PrimaryButton(
                     text: _isLoading ? 'Starting...' : 'Start Ride',
-                    onPressed: _isLoading ? () {} : () => _startRide(),
+                    onPressed: _isLoading ? () {} : () => _startRide(vehicles),
                     icon: Icons.motorcycle,
                   ),
                 ),

@@ -18,21 +18,16 @@ import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_bloc.dart
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_event.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_state.dart';
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_entity.dart';
+import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entiry.dart';
 
 class SaveRideScreen extends StatefulWidget {
   final RideEntity rideEntity;
-  final double? distance;
-  final Duration? duration;
-  final double? topSpeed;
-  final double? averageSpeed;
+  final VehicleEntity selectedVehicle;
   
   const SaveRideScreen({
     super.key, 
     required this.rideEntity,
-    this.distance,
-    this.duration,
-    this.topSpeed,
-    this.averageSpeed,
+    required this.selectedVehicle,
   });
 
   @override
@@ -85,9 +80,9 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
     if (widget.rideEntity.rideDescription != null && widget.rideEntity.rideDescription!.isNotEmpty) {
       _descriptionController.text = widget.rideEntity.rideDescription!;
     } else {
-      final distance = widget.distance ?? widget.rideEntity.totalDistance ?? 0.0;
-      final duration = widget.duration ?? Duration(minutes: (widget.rideEntity.totalTime ?? 0.0).toInt());
-      final topSpeed = widget.topSpeed ?? widget.rideEntity.topSpeed ?? 0.0;
+      final distance = (widget.rideEntity.totalDistance ?? 0.0) / 1000; // Convert meters to km
+      final duration = Duration(seconds: (widget.rideEntity.totalTime ?? 0.0).toInt()); // totalTime is in seconds
+      final topSpeed = widget.rideEntity.topSpeed ?? 0.0;
       
       _descriptionController.text = 'Completed a ${distance.toStringAsFixed(2)} km ride in ${duration.inMinutes} minutes with a top speed of ${topSpeed.toStringAsFixed(1)} km/h';
     }
@@ -96,6 +91,13 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     return "${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
+  }
+
+  String _formatSpeed(double? speed) {
+    if (speed == null || speed.isNaN || speed.isInfinite || speed <= 0) {
+      return "0.0 Km/h";
+    }
+    return "${speed.toStringAsFixed(1)} Km/h";
   }
 
   @override
@@ -108,6 +110,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
   void _handleRedeemGemCoins() {
     if (_formKey.currentState!.validate()) {
       // Create updated ride entity with form data
+
       final updatedRideEntity = RideEntity(
         id: widget.rideEntity.id,
         userId: widget.rideEntity.userId,
@@ -137,7 +140,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
     //  print(updatedRideEntity.endCoordinates);
     //  print(updatedRideEntity.endedAt);
     //  print(updatedRideEntity.totalDistance);
-    //  print(updatedRideEntity.totalTime);
+     print(updatedRideEntity.totalTime);
     //  print(updatedRideEntity.totalGEMCoins);
     //  print(updatedRideEntity.rideMemories);
     //  print(updatedRideEntity.rideTitle);
@@ -223,14 +226,21 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
           AppSnackBar.error(context, state.message);
         }
       },
-      child: Scaffold(
-        appBar: AppBarWidget(
-          title: 'Save Ride',
-          leading: IconButton(
-            onPressed: () => _showUnsavedRideDialog(),
-            icon: const Icon(Icons.close),
+      child: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) {
+          if (!didPop) {
+            _showUnsavedRideDialog();
+          }
+        },
+        child: Scaffold(
+          appBar: AppBarWidget(
+            title: 'Save Ride',
+            leading: IconButton(
+              onPressed: () => _showUnsavedRideDialog(),
+              icon: const Icon(Icons.close),
+            ),
           ),
-        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(screenPadding),
@@ -244,7 +254,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                     SaveRideInfoRow(
                       icon: Icons.motorcycle_outlined,
                       label: "Vehicle",
-                      value: widget.rideEntity.vehicleId,
+                      value: '${widget.selectedVehicle.vehicleBrandName} ${widget.selectedVehicle.vehicleModelName}',
                       theme: theme,
                     ),
                   ],
@@ -309,25 +319,25 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                     SaveRideInfoRow(
                       icon: Icons.route_outlined,
                       label: "Distance",
-                      value: "${(widget.distance ?? widget.rideEntity.totalDistance ?? 0.0).toStringAsFixed(2)} km",
+                      value: "${((widget.rideEntity.totalDistance ?? 0.0) / 1000).toStringAsFixed(2)} km",
                       theme: theme,
                     ),
                     SaveRideInfoRow(
                       icon: Icons.access_time,
                       label: "Duration",
-                      value: _formatDuration(widget.duration ?? Duration(minutes: (widget.rideEntity.totalTime ?? 0.0).toInt())),
+                      value: _formatDuration(Duration(seconds: (widget.rideEntity.totalTime ?? 0.0).toInt())),
                       theme: theme,
                     ),
                     SaveRideInfoRow(
                       icon: Icons.speed,
                       label: "Top Speed",
-                      value: widget.topSpeed != null ? "${widget.topSpeed!.toStringAsFixed(1)} km/h" : "N/A",
+                      value: "${widget.rideEntity.topSpeed?.toStringAsFixed(1) ?? '0.0'} Km/h",
                       theme: theme,
                     ),
                     SaveRideInfoRow(
                       icon: Icons.directions_bike_outlined,
                       label: "Average Speed",
-                      value: widget.averageSpeed != null ? "${widget.averageSpeed!.toStringAsFixed(1)} km/h" : "N/A",
+                      value: _formatSpeed(widget.rideEntity.averageSpeed),
                       theme: theme,
                     ),
                   ],
@@ -385,7 +395,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                             ),
                           ),
                           Text(
-                            '${(widget.distance ?? widget.rideEntity.totalDistance ?? 0.0).toStringAsFixed(2)} km = ${(widget.distance ?? widget.rideEntity.totalDistance ?? 0.0).floor()} GEM coins',
+                            '${((widget.rideEntity.totalDistance ?? 0.0) / 1000).toStringAsFixed(2)} km = ${((widget.rideEntity.totalDistance ?? 0.0) / 1000).floor()} GEM coins',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -418,6 +428,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

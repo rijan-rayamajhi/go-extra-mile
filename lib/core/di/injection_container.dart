@@ -50,6 +50,26 @@ import '../../common/admin_data/domain/usecases/get_user_interests.dart';
 import '../../common/admin_data/domain/usecases/get_vehicle_brand.dart';
 import '../../common/admin_data/domain/usecases/get_vehicle_brand_by_id.dart';
 import '../../common/admin_data/bloc/admin_data_bloc.dart';
+import '../../features/vehicle/data/datasource/vehicle_firestore_datasource.dart';
+import '../../features/vehicle/data/repositories/vehicle_repository_impl.dart';
+import '../../features/vehicle/domain/repositories/vehicle_repository.dart';
+import '../../features/vehicle/domain/usecases/add_vehicle.dart';
+import '../../features/vehicle/domain/usecases/get_user_vehicles.dart';
+import '../../features/vehicle/presentation/bloc/vehicle_bloc.dart';
+import '../../features/notification/data/datasources/notification_remote_datasource.dart';
+import '../../features/notification/data/repositories/notification_repository_impl.dart';
+import '../../features/notification/domain/notification_repository.dart';
+import '../../features/notification/domain/usecases/get_notifications.dart';
+import '../../features/notification/domain/usecases/get_notification_by_id.dart';
+import '../../features/notification/domain/usecases/mark_as_read.dart';
+import '../../features/notification/domain/usecases/mark_all_as_read.dart';
+import '../../features/notification/presentation/bloc/notification_bloc.dart';
+import '../../features/referral/data/repositories/referral_repository_impl.dart';
+import '../../features/referral/domain/repositories/referral_repository.dart';
+import '../../features/referral/domain/usecases/check_referral_usage.dart';
+import '../../features/referral/domain/usecases/process_referral.dart';
+import '../../features/referral/domain/usecases/validate_referral_code.dart';
+import '../../features/referral/presentation/bloc/referral_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -87,6 +107,17 @@ Future<void> init() async {
   // Usecases
   sl.registerLazySingleton(() => SignInWithGoogle(sl()));
   sl.registerLazySingleton(() => SignInWithApple(sl()));
+
+  // Referral dependencies
+  sl.registerLazySingleton<ReferralRepository>(() => ReferralRepositoryImpl());
+  sl.registerLazySingleton(() => ProcessReferral(sl()));
+  sl.registerLazySingleton(() => ValidateReferralCode(sl()));
+  
+  sl.registerFactory(() => ReferralBloc(
+    validateReferralCode: sl(),
+    checkReferralUsage: sl(),
+    processReferral: sl(),
+  ));
 
   // Bloc
   sl.registerFactory(() => AuthBloc(
@@ -152,6 +183,38 @@ Future<void> init() async {
   
   sl.registerFactory(() => GemCoinBloc(
     getTransactionHistory: sl(),
+  ));
+
+  // Vehicle dependencies
+  sl.registerLazySingleton<VehicleFirestoreDataSource>(() => VehicleFirestoreDataSource());
+  sl.registerLazySingleton<VehicleRepository>(() => VehicleRepositoryImpl(
+    sl(),
+  ));
+  sl.registerLazySingleton(() => AddVehicle(sl()));
+  sl.registerLazySingleton(() => GetUserVehicles(sl()));
+  
+  sl.registerFactory(() => VehicleBloc(
+    getUserVehicles: sl(),
+    addVehicle: sl(),
+  ));
+
+  // Notification dependencies
+  sl.registerLazySingleton<NotificationRemoteDataSource>(() => NotificationRemoteDataSourceImpl(
+    firestore: sl(),
+  ));
+  sl.registerLazySingleton<NotificationRepository>(() => NotificationRepositoryImpl(
+    remoteDataSource: sl(),
+  ));
+  sl.registerLazySingleton(() => GetNotifications(sl()));
+  sl.registerLazySingleton(() => GetNotificationById(sl()));
+  sl.registerLazySingleton(() => MarkAsRead(sl()));
+  sl.registerLazySingleton(() => MarkAllAsRead(sl()));
+  
+  sl.registerFactory(() => NotificationBloc(
+    getNotifications: sl(),
+    getNotificationById: sl(),
+    markAsRead: sl(),
+    markAllAsRead: sl(),
   ));
 
   // Admin Data dependencies

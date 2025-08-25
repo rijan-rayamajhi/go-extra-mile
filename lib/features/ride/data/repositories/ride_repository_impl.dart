@@ -92,7 +92,7 @@ class RideRepositoryImpl implements RideRepository {
   }
   
   @override
-  Future<List<RideEntity>> getRecentRidesByUserId(String userId, {int limit = 10}) async {
+  Future<List<RideEntity>> getRecentRidesByUserId(String userId, {int limit = 1}) async {
     try {
       final rides = await _firestoreDatasource.getRecentRidesByUserId(userId, limit: limit);
       return rides;

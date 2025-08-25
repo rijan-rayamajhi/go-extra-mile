@@ -29,9 +29,9 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     
     <application
-        android:label="go_extra_mile_new"
+        android:label="GEM NEW"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -74,6 +74,27 @@
         <meta-data
             android:name="com.google.android.gms.auth.api.signin.GoogleSignInOptions.SERVER_CLIENT_ID"
             android:value="780810782870-06q24ca9q0vukqm4fe1bo7igbal9pmh0.apps.googleusercontent.com" />
+        
+        <!-- Image Cropper Activity -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Ucrop.CropTheme"/>
+        
+        <!-- Firebase Messaging Service for Background Messages -->
+        <service
+            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingBackgroundService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        
+        <!-- Firebase Messaging Service for Foreground Messages -->
+        <service
+            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

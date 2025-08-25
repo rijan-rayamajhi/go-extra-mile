@@ -424,204 +424,199 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
 
     @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => di.sl<GemCoinBloc>(),
-      child: BlocListener<GemCoinBloc, GemCoinState>(
-        listener: (context, state) {
-          // Handle any side effects here if needed
-        },
-        child: Scaffold(
-          backgroundColor: Colors.grey[50],
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).primaryColor,),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.refresh, color: Theme.of(context).primaryColor,),
-                onPressed: _loadTransactionHistory,
-              ),
-              IconButton(
-                icon: Icon(Icons.filter_alt_outlined, color: Theme.of(context).primaryColor,),
-                onPressed: _showFilterModal,
-              ),
-            ],
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).primaryColor,),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.filter_alt_outlined, color: Theme.of(context).primaryColor,),
+            onPressed: _showFilterModal,
           ),
-          body: BlocBuilder<GemCoinBloc, GemCoinState>(
-          builder: (context, state) {
-            if (state is GemCoinLoading) {
-              return Center(
-                child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
-              );
-            } else if (state is GemCoinError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.grey[400],
+        ],
+      ),
+      body: BlocBuilder<GemCoinBloc, GemCoinState>(
+        builder: (context, state) {
+          if (state is GemCoinLoading) {
+            return Center(
+              child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
+            );
+          } else if (state is GemCoinError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading transactions',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error loading transactions',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
-                      ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[500],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.message,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[500],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadTransactionHistory,
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            } else if (state is GemCoinLoaded) {
-              final transactionHistory = state.history;
-              
-              if (transactionHistory.isEmpty) {
-                return _buildEmptyState();
-              }
-              
-              final filteredTransactions = getFilteredTransactions(transactionHistory);
-              final currentBalance = calculateCurrentBalance(transactionHistory);
-              final creditTotal = calculateCreditTotal(transactionHistory);
-              final debitTotal = calculateDebitTotal(transactionHistory);
-
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Header Section with Coin Display
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          // Coin Icon
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Image.asset(
-                              'assets/icons/gem_coin.png',
-                              width: 60,
-                            height: 60,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          // Balance
-                          Text(
-                            currentBalance.toString(),
-                            style: TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Gem Coins',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    // Credit/Debit Summary Cards
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _buildSummaryCard(
-                              title: 'Credit',
-                              amount: '+${creditTotal}',
-                              icon: Icons.trending_up,
-                              color: Colors.green,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildSummaryCard(
-                              title: 'Debit',
-                              amount: '-${debitTotal}',
-                              icon: Icons.trending_down,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Transaction History
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Recent Transactions',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[800],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          
-                          // Transaction List
-                          if (filteredTransactions.isEmpty)
-                            _buildEmptyFilterState()
-                          else
-                            ...filteredTransactions.map((transaction) {
-                              final iconData = getTransactionIcon(transaction.rewardType);
-                              return _buildTransactionItem(
-                                icon: iconData['icon'],
-                                title: transaction.reason,
-                                subtitle: _getTransactionSubtitle(transaction),
-                                amount: '${transaction.type == GEMCoinTransactionType.credit ? '+' : '-'}${transaction.amount}',
-                                isCredit: transaction.type == GEMCoinTransactionType.credit,
-                                date: formatDate(transaction.date),
-                                iconColor: iconData['color'],
-                              );
-                            }).toList(),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              );
-            } else {
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadTransactionHistory,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          } else if (state is GemCoinLoaded) {
+            final transactionHistory = state.history;
+            
+            if (transactionHistory.isEmpty) {
               return _buildEmptyState();
             }
-          },
-        ),
-      ), ));
+            
+            final filteredTransactions = getFilteredTransactions(transactionHistory);
+            final currentBalance = calculateCurrentBalance(transactionHistory);
+            final creditTotal = calculateCreditTotal(transactionHistory);
+            final debitTotal = calculateDebitTotal(transactionHistory);
+
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Filter Indicator Badge
+                  if (selectedFilter != 'All' || selectedTimeRange != 'All Time')
+                    _buildFilterBadge(),
+                  
+                  
+                  // Header Section with Coin Display 
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        // Coin Icon
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset(
+                            'assets/icons/gem_coin.png',
+                            width: 60,
+                          height: 60,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Balance
+                        Text(
+                          currentBalance.toString(),
+                          style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Gem Coins',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Credit/Debit Summary Cards
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildSummaryCard(
+                            title: 'Credit',
+                            amount: '+${creditTotal}',
+                            icon: Icons.trending_up,
+                            color: Colors.green,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildSummaryCard(
+                            title: 'Debit',
+                            amount: '-${debitTotal}',
+                            icon: Icons.trending_down,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Transaction History
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Recent Transactions',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Transaction List
+                        if (filteredTransactions.isEmpty)
+                          _buildEmptyFilterState()
+                        else
+                          ...filteredTransactions.map((transaction) {
+                            final iconData = getTransactionIcon(transaction.rewardType);
+                            return _buildTransactionItem(
+                              icon: iconData['icon'],
+                              title: transaction.reason,
+                              subtitle: _getTransactionSubtitle(transaction),
+                              amount: '${transaction.type == GEMCoinTransactionType.credit ? '+' : '-'}${transaction.amount}',
+                              isCredit: transaction.type == GEMCoinTransactionType.credit,
+                              date: formatDate(transaction.date),
+                              iconColor: iconData['color'],
+                            );
+                          }).toList(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          } else {
+            return _buildEmptyState();
+          }
+        },
+      ),
+    );
   }
 
   Widget _buildEmptyState() {
@@ -849,5 +844,81 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
         ],
       ),
     );
+  }
+
+  Widget _buildFilterBadge() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.filter_alt,
+            size: 16,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            _getFilterDescription(),
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedFilter = 'All';
+                selectedTimeRange = 'All Time';
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.close,
+                size: 14,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getFilterDescription() {
+    List<String> activeFilters = [];
+    
+    if (selectedFilter != 'All') {
+      activeFilters.add(selectedFilter);
+    }
+    
+    if (selectedTimeRange != 'All Time') {
+      activeFilters.add(selectedTimeRange);
+    }
+    
+    if (activeFilters.isEmpty) {
+      return 'No filters applied';
+    }
+    
+    return '${activeFilters.join(' • ')}';
   }
 }

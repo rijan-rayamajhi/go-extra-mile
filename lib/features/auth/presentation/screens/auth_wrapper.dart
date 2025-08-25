@@ -5,6 +5,7 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'auth_screen.dart';
 import '../../../main_screen.dart';
+import '../../../referral/presentation/screens/referral_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -45,9 +46,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
           );
         }
         
-        // If authenticated, go directly to main screen
+        // If authenticated and referral step completed, go to main screen
         if (state is AuthAuthenticated) {
           return const MainScreen();
+        }
+        
+        // If authenticated but needs to complete referral step, show referral screen
+        if (state is AuthNeedsReferral) {
+          return ReferralScreen();
         }
         
         // If not authenticated or account deleted, show auth screen

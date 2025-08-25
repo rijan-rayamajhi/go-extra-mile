@@ -34,7 +34,7 @@ class _HomeRecentRideState extends State<HomeRecentRide> {
       context.read<RideBloc>().add(
         GetRecentRidesByUserIdEvent(
           userId: authState.user.uid,
-          limit: 3, // Get the 3 most recent rides
+          limit: 1, // Get the 3 most recent rides
         ),
       );
     }

@@ -19,9 +19,9 @@ class DrivingLicenseModel extends DrivingLicenseEntity {
       frontImagePath: data['frontImagePath'] ?? '',
       backImagePath: data['backImagePath'] ?? '',
       dob: (data['dob'] as Timestamp).toDate(),
-      verificationStatus: VerificationStatus.values.firstWhere(
+      verificationStatus: DrivingLicenseVerificationStatus.values.firstWhere(
         (e) => e.name == (data['verificationStatus'] ?? 'pending'),
-        orElse: () => VerificationStatus.pending,
+        orElse: () => DrivingLicenseVerificationStatus.pending,
       ),
     );
   }
@@ -33,9 +33,9 @@ class DrivingLicenseModel extends DrivingLicenseEntity {
       frontImagePath: data['frontImagePath'] ?? '',
       backImagePath: data['backImagePath'] ?? '',
       dob: (data['dob'] as Timestamp).toDate(),
-      verificationStatus: VerificationStatus.values.firstWhere(
+        verificationStatus: DrivingLicenseVerificationStatus.values.firstWhere(
         (e) => e.name == (data['verificationStatus'] ?? 'pending'),
-        orElse: () => VerificationStatus.pending,
+        orElse: () => DrivingLicenseVerificationStatus.pending,
       ),
     );
   }

@@ -20,16 +20,15 @@ class _ProfileRideMemoryGridviewState extends State<ProfileRideMemoryGridview> {
   @override
   void initState() {
     super.initState();
-    _loadRecentRides();
+    _loadAllRides();
   }
 
-  void _loadRecentRides() {
+  void _loadAllRides() {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       context.read<RideBloc>().add(
-        GetRecentRidesByUserIdEvent(
+        GetAllRidesByUserIdEvent(
           userId: currentUser.uid,
-          limit: 6, // Limit to 6 rides for the grid
         ),
       );
     }
@@ -41,7 +40,7 @@ class _ProfileRideMemoryGridviewState extends State<ProfileRideMemoryGridview> {
       builder: (context, state) {
         if (state is RideLoading) {
           return _buildLoadingGrid();
-        } else if (state is RecentRidesLoaded) {
+        } else if (state is AllRidesLoaded) {
           return _buildRidesGrid(state.rides);
         } else if (state is RideFailure) {
           return _buildErrorWidget(state.message);
@@ -205,7 +204,7 @@ class _ProfileRideMemoryGridviewState extends State<ProfileRideMemoryGridview> {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: _loadRecentRides,
+            onPressed: _loadAllRides,
             child: const Text('Retry'),
           ),
         ],

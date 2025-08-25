@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/user_entity.dart';
 import '../models/user_model.dart';
 import '../../../../core/service/firebase_firestore_service.dart';
@@ -18,6 +19,10 @@ class UserFirestoreDataSource {
     // Extract username from email (part before @ symbol)
     final userName = user.email?.split('@').first ?? 'user';
     
+    // Get FCM token from shared preferences
+    final prefs = await SharedPreferences.getInstance();
+    final fcmToken = prefs.getString('fcm_token') ?? '';
+    
     final userData = {
       'uid': user.uid,
       'userName': userName,
@@ -32,6 +37,7 @@ class UserFirestoreDataSource {
       'totalRide': 0,
       'totalDistance': 0,
       'referralCode': user.uid.substring(0, 7).toUpperCase(), // Simple referral code using first 6 chars of UID, all capital
+      'fcmToken': fcmToken.isEmpty ? '' : fcmToken,
       ...?additionalData,
     };
     await _firestoreService.setDocument(

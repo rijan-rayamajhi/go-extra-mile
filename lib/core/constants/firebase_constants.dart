@@ -4,3 +4,4 @@
 const String usersCollection = 'users';
 const String deletedUsersCollection = 'deleted_users';
 const String ridesCollection = 'rides';
+const String vehiclesCollection = 'vehicles';

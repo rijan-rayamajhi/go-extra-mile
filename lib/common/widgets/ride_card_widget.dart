@@ -44,10 +44,11 @@ class _RideCardWidgetState extends State<RideCardWidget> {
 
     try {
       // Load start address
-      final startAddress = await _locationService.getFormattedAddressFromCoordinates(
-        widget.ride.startCoordinates.latitude,
-        widget.ride.startCoordinates.longitude,
-      );
+      final startAddress = await _locationService
+          .getFormattedAddressFromCoordinates(
+            widget.ride.startCoordinates.latitude,
+            widget.ride.startCoordinates.longitude,
+          );
 
       // Load end address if available
       String? endAddress;
@@ -77,16 +78,13 @@ class _RideCardWidgetState extends State<RideCardWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return GestureDetector(
       onTap: widget.onTap,
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: Colors.grey.shade300,
-            width: 1.2,
-          ),
+          side: BorderSide(color: Colors.grey.shade300, width: 1.2),
         ),
         elevation: 0,
         child: Padding(
@@ -110,37 +108,27 @@ class _RideCardWidgetState extends State<RideCardWidget> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    widget.title ?? "Recent Rides",
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.ride.rideTitle!,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      Text(
+                         widget.ride.rideDescription ?? 'Click you see ride details', 
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              // Start and End Points
-              if (_isLoadingAddresses)
-                _buildAddressLoading()
-              else
-                _buildAddresses(),
-
-              const SizedBox(height: 16),
-
-              // Ride stats
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _rideStat("Distance", "${widget.ride.totalDistance?.toStringAsFixed(1) ?? '0'} km"),
-                  _divider(),
-                  _rideStat("Time", "${widget.ride.totalTime?.toStringAsFixed(0) ?? '0'} min"),
-                  _divider(),
-                  _rideStat("Coins", widget.ride.totalGEMCoins?.toStringAsFixed(0) ?? '0'),
-                ],
-              ),
-              const SizedBox(height: 16),
-
+              SizedBox(height: 16,),
               // Ride date
               Text(
                 "Started • ${DateFormat('dd MMM, hh:mm a').format(widget.ride.startedAt)}",
@@ -148,6 +136,7 @@ class _RideCardWidgetState extends State<RideCardWidget> {
                   color: Colors.grey.shade600,
                 ),
               ),
+
               if (widget.ride.endedAt != null)
                 Text(
                   "Ended • ${DateFormat('dd MMM, hh:mm a').format(widget.ride.endedAt!)}",
@@ -170,20 +159,13 @@ class _RideCardWidgetState extends State<RideCardWidget> {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }
 
   Widget _divider() {
-    return Container(
-      height: 28,
-      width: 1,
-      color: Colors.grey.shade300,
-    );
+    return Container(height: 28, width: 1, color: Colors.grey.shade300);
   }
 
   Widget _buildAddresses() {
@@ -216,7 +198,7 @@ class _RideCardWidgetState extends State<RideCardWidget> {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         // End Point (if available)
         if (widget.ride.endCoordinates != null) ...[
           Row(

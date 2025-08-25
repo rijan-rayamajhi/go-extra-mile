@@ -262,4 +262,28 @@ class TextValidators {
     
     return null;
   }
+
+  static String? vehicleRegistrationNumber(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Vehicle registration number is required';
+    }
+    
+    final trimmedValue = value.trim();
+    
+    if (trimmedValue.length < 4) {
+      return 'Vehicle registration number must be at least 4 characters long';
+    }
+    
+    if (trimmedValue.length > 15) {
+      return 'Vehicle registration number must be less than 15 characters';
+    }
+    
+    // Allow only numbers
+    const pattern = r'^[0-9]+$';
+    if (!RegExp(pattern).hasMatch(trimmedValue)) {
+      return 'Vehicle registration number can only contain numbers';
+    }
+    
+    return null;
+  }
 } 

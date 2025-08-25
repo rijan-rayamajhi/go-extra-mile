@@ -177,35 +177,35 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
   }
 
   // Helper methods for verification status
-  Color _getVerificationStatusColor(VerificationStatus status) {
+  Color _getVerificationStatusColor(DrivingLicenseVerificationStatus status) {
     switch (status) {
-      case VerificationStatus.pending:
+      case DrivingLicenseVerificationStatus.pending:
         return Colors.orange;
-      case VerificationStatus.rejected:
+      case DrivingLicenseVerificationStatus.rejected:
         return Colors.red;
-      case VerificationStatus.verified:
+      case DrivingLicenseVerificationStatus.verified:
         return Colors.green;
     }
   }
 
-  IconData _getVerificationStatusIcon(VerificationStatus status) {
+  IconData _getVerificationStatusIcon(DrivingLicenseVerificationStatus status) {
     switch (status) {
-      case VerificationStatus.pending:
+      case DrivingLicenseVerificationStatus.pending:
         return Icons.schedule;
-      case VerificationStatus.rejected:
+      case DrivingLicenseVerificationStatus.rejected:
         return Icons.cancel;
-      case VerificationStatus.verified:
+      case DrivingLicenseVerificationStatus.verified:
         return Icons.verified;
     }
   }
 
-  String _getVerificationStatusText(VerificationStatus status) {
+  String _getVerificationStatusText(DrivingLicenseVerificationStatus status) {
     switch (status) {
-      case VerificationStatus.pending:
+      case DrivingLicenseVerificationStatus.pending:
         return 'Pending Review';
-      case VerificationStatus.rejected:
+      case DrivingLicenseVerificationStatus.rejected:
         return 'Rejected';
-      case VerificationStatus.verified:
+      case DrivingLicenseVerificationStatus.verified:
         return 'Verified';
     }
   }

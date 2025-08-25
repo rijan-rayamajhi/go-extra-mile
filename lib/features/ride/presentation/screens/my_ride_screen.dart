@@ -130,29 +130,68 @@ class _MyRideScreenState extends State<MyRideScreen> {
     final sortedRides = List<RideEntity>.from(rides)
       ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
 
+    // Group rides by month
+    final Map<String, List<RideEntity>> ridesByMonth = {};
+    
+    for (final ride in sortedRides) {
+      final monthKey = _getMonthKey(ride.startedAt);
+      ridesByMonth.putIfAbsent(monthKey, () => []).add(ride);
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: sortedRides.length,
+      itemCount: ridesByMonth.length,
       itemBuilder: (context, index) {
-        final ride = sortedRides[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: RideCardWidget(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => RideDetailsScreen(ride: ride)),
-              );
-            },
-            ride: ride,
-            title: _getRideTitle(ride),
-            icon: Icons.directions_bike_outlined,
-            iconColor: Colors.blue,
-            iconBackgroundColor: Colors.blue.withValues(alpha: 0.1),
-          ),
+        final monthKey = ridesByMonth.keys.elementAt(index);
+        final monthRides = ridesByMonth[monthKey]!;
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Month header
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12, top: 8),
+              child: Text(
+                monthKey,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ),
+            // Rides for this month
+            ...monthRides.map((ride) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: RideCardWidget(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RideDetailsScreen(ride: ride)),
+                  );
+                },
+                ride: ride,
+                title: _getRideTitle(ride),
+                icon: Icons.directions_bike_outlined,
+                iconColor: Colors.blue,
+                iconBackgroundColor: Colors.blue.withValues(alpha: 0.1),
+              ),
+            )),
+          ],
         );
       },
     );
+  }
+
+  String _getMonthKey(DateTime date) {
+    final months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    final month = months[date.month - 1];
+    final year = date.year;
+    
+    return '$month $year';
   }
 
   String _getRideTitle(RideEntity ride) {

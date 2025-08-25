@@ -1,11 +1,8 @@
-// removed unused imports
 import 'package:flutter/material.dart';
-import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 // PrimaryButton is imported in the bottom sheet where it's used
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/select_vehicle_for_rider_bottom_sheet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/service/location_service.dart' hide LatLng;
-import '../../../../core/utils/marker_utils.dart';
 
 class RideVehicleScreen extends StatefulWidget {
   const RideVehicleScreen({super.key});
@@ -24,9 +21,6 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
 
   // Add missing variables
   final PageController _pageController = PageController();
-
-  // Vehicle data from app constants
-  final List<Map<String, String>> _vehicles = vehicles;
 
   // Add markers list
   Set<Marker> _markers = {};
@@ -90,47 +84,21 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
       return;
     }
 
-    final vehicle = _vehicles[_selectedVehicleIndex!];
-    
-    try {
-      final BitmapDescriptor markerIcon = await MarkerUtils.circularMarker(
-        vehicle['image']!,
-        size: 80,
-      );
+    // Since vehicles are now loaded through the bloc in the bottom sheet,
+    // we'll create a simple default marker for now
+    // The actual vehicle-specific marker will be created when a vehicle is selected
+    final defaultMarker = Marker(
+      markerId: const MarkerId('selected_vehicle'),
+      position: _currentLocation!,
+      infoWindow: const InfoWindow(
+        title: 'Selected Vehicle',
+        snippet: 'Your selected vehicle',
+      ),
+    );
 
-      final marker = Marker(
-        markerId: const MarkerId('selected_vehicle'),
-        position: _currentLocation!,
-        icon: markerIcon,
-        infoWindow: InfoWindow(
-          title: '${vehicle['brandName']} ${vehicle['modelName']}',
-          snippet: 'Your selected vehicle',
-        ),
-      );
-
-      setState(() {
-        _markers = {marker};
-      });
-    } catch (e) {
-      // Log the error for debugging
-      print('Failed to create custom marker for vehicle: ${vehicle['brandName']} ${vehicle['modelName']}');
-      print('Error: $e');
-      print('Image URL: ${vehicle['image']}');
-      
-      // Fallback to default marker if custom marker creation fails
-      final fallbackMarker = Marker(
-        markerId: const MarkerId('selected_vehicle'),
-        position: _currentLocation!,
-        infoWindow: InfoWindow(
-          title: '${vehicle['brandName']} ${vehicle['modelName']}',
-          snippet: 'Your selected vehicle',
-        ),
-      );
-
-      setState(() {
-        _markers = {fallbackMarker};
-      });
-    }
+    setState(() {
+      _markers = {defaultMarker};
+    });
   }
 
   void _onVehicleSelected(int vehicleIndex) {
@@ -209,9 +177,8 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
             zoom: 20.0,
           ),
           padding: EdgeInsets.only(bottom: _mapPaddingBottom),
-          myLocationEnabled: false, // Disable default blue marker
+          myLocationEnabled: true, // Disable default blue marker
           myLocationButtonEnabled: false, // We have our own FABxF
-          markers: _markers,
         ),
         Positioned( 
           left: 16,
@@ -254,7 +221,6 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
           left: 0,
           right: 0,
           child: SelectVehicleForRiderBottomSheet(
-            vehicles: _vehicles,
             onVehicleSelected: _onVehicleSelected,
           ),
         ),

@@ -7,7 +7,9 @@ import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_section.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_info_row.dart';
-import 'package:go_extra_mile_new/core/service/location_service.dart' as location_service;
+import 'package:go_extra_mile_new/core/service/location_service.dart'
+    as location_service;
+import 'package:share_plus/share_plus.dart';
 
 class RideDetailsScreen extends StatefulWidget {
   final RideEntity ride;
@@ -19,7 +21,8 @@ class RideDetailsScreen extends StatefulWidget {
 
 class _RideDetailsScreenState extends State<RideDetailsScreen> {
   final Completer<GoogleMapController> _mapController = Completer();
-  final location_service.LocationService _locationService = location_service.LocationService();
+  final location_service.LocationService _locationService =
+      location_service.LocationService();
   List<LatLng> _routePoints = [];
   String? _startAddress;
   String? _endAddress;
@@ -44,20 +47,20 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
   }
 
   Set<Polyline> get _polylines => {
-        Polyline(
-          polylineId: const PolylineId('route'),
-          points: _routePoints,
-          width: 5,
-          geodesic: true,
-        ),
-      };
+    Polyline(
+      polylineId: const PolylineId('route'),
+      points: _routePoints,
+      width: 5,
+      geodesic: true,
+    ),
+  };
 
   CameraPosition get _initialCameraPosition => CameraPosition(
-        target: _routePoints.isNotEmpty
-            ? _routePoints.first
-            : const LatLng(12.9716, 77.5946), // fallback: Bangalore
-        zoom: 12,
-      );
+    target: _routePoints.isNotEmpty
+        ? _routePoints.first
+        : const LatLng(12.9716, 77.5946), // fallback: Bangalore
+    zoom: 12,
+  );
 
   Future<void> _fitToRoute() async {
     if (_routePoints.length < 2) return;
@@ -85,6 +88,13 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     );
   }
 
+  String _formatSpeed(double? speed) {
+    if (speed == null || speed.isNaN || speed.isInfinite || speed <= 0) {
+      return "0.0 km/h";
+    }
+    return "${speed.toStringAsFixed(1)} km/h";
+  }
+
   Future<void> _loadAddresses() async {
     setState(() {
       _isLoadingAddresses = true;
@@ -92,10 +102,11 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
 
     try {
       // Load start address
-      final startAddress = await _locationService.getFormattedAddressFromCoordinates(
-        widget.ride.startCoordinates.latitude,
-        widget.ride.startCoordinates.longitude,
-      );
+      final startAddress = await _locationService
+          .getFormattedAddressFromCoordinates(
+            widget.ride.startCoordinates.latitude,
+            widget.ride.startCoordinates.longitude,
+          );
 
       // Load end address if available
       String? endAddress;
@@ -122,6 +133,73 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     }
   }
 
+  Future<void> _shareRideDetails() async {
+    try {
+      final ride = widget.ride;
+
+      // Create a comprehensive ride summary
+      String rideSummary = '🚴‍♂️ Ride Details\n\n';
+
+      // Basic ride info
+      if (ride.rideTitle != null && ride.rideTitle!.isNotEmpty) {
+        rideSummary += '📝 ${ride.rideTitle}\n';
+      }
+      if (ride.rideDescription != null && ride.rideDescription!.isNotEmpty) {
+        rideSummary += '📖 ${ride.rideDescription}\n\n';
+      }
+
+      // Performance metrics
+      rideSummary += '📊 Performance\n';
+      if (ride.totalDistance != null) {
+        rideSummary +=
+            '📍 Distance: ${(ride.totalDistance! / 1000).toStringAsFixed(2)} km\n';
+      }
+      if (ride.totalTime != null) {
+        rideSummary +=
+            '⏱️ Duration: ${(ride.totalTime! / 60).toStringAsFixed(2)} min\n';
+      }
+      if (ride.topSpeed != null) {
+        rideSummary +=
+            '🏃 Top Speed: ${ride.topSpeed!.toStringAsFixed(1)} km/h\n';
+      }
+      if (ride.averageSpeed != null) {
+        rideSummary +=
+            '📈 Avg Speed: ${ride.averageSpeed!.toStringAsFixed(1)} km/h\n';
+      }
+
+      // GEM Coins
+      final gemCoins =
+          ride.totalGEMCoins?.toStringAsFixed(0) ??
+          (ride.totalDistance?.floor().toString() ?? '0');
+      rideSummary += '💎 GEM Coins: $gemCoins\n\n';
+
+      // Route info
+      rideSummary += '🗺️ Route\n';
+      if (_startAddress != null) {
+        rideSummary += '🚀 Start: $_startAddress\n';
+      }
+      if (_endAddress != null) {
+        rideSummary += '🏁 End: $_endAddress\n';
+      }
+
+      // Add app branding
+      rideSummary += '\n---\nShared from Go Extra Mile App';
+
+      // Share the ride details
+      await Share.share(rideSummary, subject: 'Check out my ride!');
+    } catch (e) {
+      // Show error message if sharing fails
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to share ride details'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -144,31 +222,41 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
         titleSpacing: 0,
         title: Row(
           children: [
-            const SizedBox(width: 8),
-            CircularImage(imageUrl: vechileBrandImage1, height: 45, width: 45),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.ride.vehicleId,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-                Text(
-                  widget.ride.vehicleId,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+            // const SizedBox(width: 8),
+            // CircularImage(imageUrl: vechileBrandImage1, height: 45, width: 45),
+            // const SizedBox(width: 12),
+            // Column(
+            //   crossAxisAlignment: CrossAxisAlignment.start,
+            //   children: [
+            //     Text(
+            //       widget.ride.vehicleId,
+            //       style: const TextStyle(
+            //         fontSize: 18,
+            //         fontWeight: FontWeight.w600,
+            //         color: Colors.black,
+            //       ),
+            //     ),
+            //     Text(
+            //       widget.ride.vehicleId,
+            //       style: const TextStyle(fontSize: 12, color: Colors.grey),
+            //     ),
+            //   ],
+            // ),
+            Text(
+              'Ride Details',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              _shareRideDetails();
+            },
             icon: const Icon(Icons.share, color: Colors.black),
           ),
         ],
@@ -192,18 +280,24 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.ride.rideTitle ?? "Untitled Ride",
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade800)),
+                  Text(
+                    widget.ride.rideTitle ?? "Untitled Ride",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
                   const SizedBox(height: 16),
-                  Text(widget.ride.rideDescription ?? "No description",
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey.shade700,
-                          height: 1.4)),
+                  Text(
+                    widget.ride.rideDescription ?? "No description",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey.shade700,
+                      height: 1.4,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -233,7 +327,8 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                     zoomGesturesEnabled: false,
                     scrollGesturesEnabled: false,
                     mapType: MapType.normal,
-                    myLocationButtonEnabled: false, // Remove current location button
+                    myLocationButtonEnabled:
+                        false, // Remove current location button
                   ),
                 ),
               ),
@@ -248,17 +343,20 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                 SaveRideInfoRow(
                   icon: Icons.location_on_outlined,
                   label: "Start",
-                  value: _isLoadingAddresses 
-                      ? "Loading..." 
-                      : (_startAddress ?? widget.ride.startCoordinates.toString()),
+                  value: _isLoadingAddresses
+                      ? "Loading..."
+                      : (_startAddress ??
+                            widget.ride.startCoordinates.toString()),
                   theme: theme,
                 ),
                 SaveRideInfoRow(
                   icon: Icons.flag_outlined,
                   label: "End",
-                  value: _isLoadingAddresses 
-                      ? "Loading..." 
-                      : (_endAddress ?? (widget.ride.endCoordinates?.toString() ?? "Ongoing")),
+                  value: _isLoadingAddresses
+                      ? "Loading..."
+                      : (_endAddress ??
+                            (widget.ride.endCoordinates?.toString() ??
+                                "Ongoing")),
                   theme: theme,
                 ),
                 SaveRideInfoRow(
@@ -281,14 +379,14 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                   icon: Icons.route_outlined,
                   label: "Distance",
                   value:
-                      "${widget.ride.totalDistance?.toStringAsFixed(2) ?? '0.00'} km",
+                      "${widget.ride.totalDistance != null ? (widget.ride.totalDistance! / 1000).toStringAsFixed(2) : '0.00'} km",
                   theme: theme,
                 ),
                 SaveRideInfoRow(
                   icon: Icons.access_time,
                   label: "Duration",
                   value:
-                      "${widget.ride.totalTime?.toStringAsFixed(2) ?? '0.00'} min",
+                      "${widget.ride.totalTime != null ? (widget.ride.totalTime! / 60).toStringAsFixed(2) : '0.00'} min",
                   theme: theme,
                 ),
                 SaveRideInfoRow(
@@ -302,7 +400,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                   icon: Icons.directions_bike_outlined,
                   label: "Average Speed",
                   value:
-                      "${widget.ride.averageSpeed?.toStringAsFixed(1) ?? '0.0'} km/h",
+                      _formatSpeed(widget.ride.averageSpeed),
                   theme: theme,
                 ),
               ],
@@ -316,20 +414,20 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
               SaveRideSection(
                 title: "Ride Memories",
                 gradient: [Colors.white, Colors.grey.shade50],
-                  children: [
+                children: [
                   RideMemoryRoad(
                     rideMemory: widget.ride.rideMemories!
-                        .map((m) => {
-                              'imageUrl': m.imageUrl,
-                              'title': m.title,
-                            })
+                        .map((m) => {'imageUrl': m.imageUrl, 'title': m.title})
                         .toList(),
-                    startAddress: _isLoadingAddresses 
-                        ? "Loading..." 
-                        : (_startAddress ?? widget.ride.startCoordinates.toString()),
-                    endAddress: _isLoadingAddresses 
-                        ? "Loading..." 
-                        : (_endAddress ?? (widget.ride.endCoordinates?.toString() ?? "Destination")),
+                    startAddress: _isLoadingAddresses
+                        ? "Loading..."
+                        : (_startAddress ??
+                              widget.ride.startCoordinates.toString()),
+                    endAddress: _isLoadingAddresses
+                        ? "Loading..."
+                        : (_endAddress ??
+                              (widget.ride.endCoordinates?.toString() ??
+                                  "Destination")),
                   ),
                 ],
               ),
@@ -351,23 +449,30 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/icons/gem_coin.png',
-                      width: 32, height: 32),
+                  Image.asset(
+                    'assets/icons/gem_coin.png',
+                    width: 32,
+                    height: 32,
+                  ),
                   const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('My GEM Coins Earning',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.amber.shade800)),
+                      Text(
+                        'My GEM Coins Earning',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.amber.shade800,
+                        ),
+                      ),
                       Text(
                         "${widget.ride.totalGEMCoins?.toStringAsFixed(0) ?? (widget.ride.totalDistance?.floor() ?? 0)} GEM Coins",
                         style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.amber.shade700),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.amber.shade700,
+                        ),
                       ),
                     ],
                   ),

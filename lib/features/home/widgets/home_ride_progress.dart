@@ -1,11 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_bloc.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_event.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_state.dart';
-import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
 class AnimatedEllipsis extends StatefulWidget {
@@ -122,10 +120,10 @@ class _HomeRideProgressState extends State<HomeRideProgress> {
           if (state.ride != null) {   
           return GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => RideScreen(
-                rideEntity: state.ride!,
-                selectedVechile: vehicles.firstWhere((v) => v['id'] == state.ride!.vehicleId, orElse: () => vehicles[0]),
-              )));
+              // Navigator.push(context, MaterialPageRoute(builder: (context) => RideScreen(
+              //   rideEntity: state.ride!,
+              //   selectedVechile: vehicles.firstWhere((v) => v['id'] == state.ride!.vehicleId, orElse: () => vehicles[0]),
+              // )));
             },
             child: Container(
               width: double.infinity,

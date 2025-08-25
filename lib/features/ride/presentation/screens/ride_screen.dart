@@ -16,13 +16,13 @@ import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_event.dar
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_state.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/ride_google_map.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/ride_capture_memory_button.dart';
-import 'package:go_extra_mile_new/features/ride/presentation/widgets/ride_sos_dilogue.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/screens/save_ride_screen.dart';
+import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entiry.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RideScreen extends StatefulWidget {
   final RideEntity rideEntity;
-  final Map<String, String> selectedVechile;
+  final VehicleEntity selectedVechile;
 
   const RideScreen({
     super.key,
@@ -56,7 +56,10 @@ class _RideScreenState extends State<RideScreen> {
   Timer? _tripTimer;
   
   // Route tracking
-  List<GeoPoint> _routePoints = [];
+  final List<GeoPoint> _routePoints = [];
+  
+  // Loading state
+  bool _isEndingRide = false;
   
   @override
   void initState() {
@@ -217,7 +220,38 @@ class _RideScreenState extends State<RideScreen> {
     AppSnackBar.show(context, message: rideMemory.title);
   }
 
+  void _showExitRideDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Exit Ride'),
+          content: const Text(
+            'Are you sure you want to exit? This will end your current ride and all progress will be lost. \n\nBackground Ride Tracking Comming Soon..',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // Close dialog
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).popUntil((route) => route.isFirst); // Exit ride
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Exit Ride'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _handleEndRide() async {
+    setState(() {
+      _isEndingRide = true;
+    });
     try {
       final locationService = LocationService();
       final position = await locationService.getCurrentPosition();
@@ -240,9 +274,18 @@ class _RideScreenState extends State<RideScreen> {
       });
 
       // Calculate average speed
-      double averageSpeed = _currentDistance > 0 && _currentDuration.inSeconds > 0 
-          ? (_currentDistance / 1000) / (_currentDuration.inMinutes / 60) 
-          : 0.0;
+      double averageSpeed = 0.0;
+      if (_currentDistance > 0 && _currentDuration.inSeconds > 0) {
+        // Convert distance from meters to kilometers
+        double distanceInKm = _currentDistance / 1000;
+        // Convert duration from seconds to hours
+        double durationInHours = _currentDuration.inSeconds / 3600;
+        
+        // Avoid division by zero
+        if (durationInHours > 0) {
+          averageSpeed = distanceInKm / durationInHours;
+        }
+      }
 
       final myRide = RideEntity(
         id: widget.rideEntity.id,
@@ -253,8 +296,8 @@ class _RideScreenState extends State<RideScreen> {
         startCoordinates: widget.rideEntity.startCoordinates,
         endCoordinates: GeoPoint(position.latitude, position.longitude),
         endedAt: DateTime.now(),
-        totalDistance: _currentDistance / 1000, // in km
-        totalTime: _currentDuration.inMinutes.toDouble(),
+        totalDistance: _currentDistance, // in km
+        totalTime: _currentDuration.inSeconds.toDouble(),
         totalGEMCoins: (_currentDistance / 1000).floor().toDouble(), // Calculate GEM coins based on distance
         rideMemories: _allMemories,
         rideTitle: widget.rideEntity.rideTitle ?? 'Ride on ${DateTime.now().toString().split(' ')[0]}',
@@ -277,15 +320,16 @@ class _RideScreenState extends State<RideScreen> {
         MaterialPageRoute(
           builder: (context) => SaveRideScreen(
             rideEntity: myRide,
-            distance: _currentDistance / 1000,
-            duration: _currentDuration,
-            topSpeed: _maxSpeed,
-            averageSpeed: averageSpeed,
+            selectedVehicle: widget.selectedVechile,
           ),
         ),
       );
     } catch (e) {
       AppSnackBar.show(context, message: 'Error getting location: $e');
+    } finally {
+      setState(() {
+        _isEndingRide = false;
+      });
     }
   }
 
@@ -298,7 +342,7 @@ class _RideScreenState extends State<RideScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<RideBloc, RideState>(
+    return BlocConsumer<RideBloc, RideState>(
       listener: (context, state) {
         if (state is RideFieldsUpdated) {
           AppSnackBar.show(context, message: 'Memory saved successfully!');
@@ -309,12 +353,30 @@ class _RideScreenState extends State<RideScreen> {
           );
         }
       },
-      child: Scaffold(
-        body: Stack(
-          children: [
+            builder: (context, state) {
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) {
+            if (!didPop) {
+              _showExitRideDialog();
+            }
+          },
+          child: Scaffold(
+                    body: Stack(
+            children: [
+              // Show loading overlay when ride bloc is processing
+              if (state is RideLoading)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.3),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                ),
             RideGoogleMap(
               key: _mapKey,
-              currentLocationMarkerImageUrl: widget.selectedVechile['image']!,
+              currentLocationMarkerImageUrl: widget.selectedVechile.vehicleBrandImage,
               customMarkers: _allMemories,
               onMemoryMarkerTapped: _handleMemoryMarkerTapped,
               routePoints: _routePoints.map((point) => 
@@ -328,7 +390,7 @@ class _RideScreenState extends State<RideScreen> {
               child: MapCircularButton(
                 icon: Icons.close,
                 onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  _showExitRideDialog();
                 },
               ),
             ),
@@ -391,21 +453,21 @@ class _RideScreenState extends State<RideScreen> {
               ),
             ),
 
-            // SOS button
-            Positioned(
-              bottom: 220 + 16,
-              left: 16,
-              child: MapCircularButton(
-                icon: Icons.sos,
-                backgroundColor: Colors.red,
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => const RideSOSDilogue(),
-                  );
-                },
-              ),
-            ),
+            // // SOS button
+            // Positioned(
+            //   bottom: 220 + 16,
+            //   left: 16,
+            //   child: MapCircularButton(
+            //     icon: Icons.sos,
+            //     backgroundColor: Colors.red,
+            //     onPressed: () {
+            //       showDialog(
+            //         context: context,
+            //         builder: (context) => const RideSOSDilogue(),
+            //       );
+            //     },
+            //   ),
+            // ),
 
             // Take picture button
             Positioned(
@@ -522,9 +584,10 @@ class _RideScreenState extends State<RideScreen> {
                     SizedBox(
                       width: 200,
                       child: PrimaryButton(
-                        text: 'End Ride',
-                        onPressed: _handleEndRide,
+                        text: _isEndingRide ? 'Ending...' : 'End Ride',
+                        onPressed: _isEndingRide ? () {} : () => _handleEndRide(),
                         icon: Icons.motorcycle,
+                        isLoading: _isEndingRide,
                       ),
                     ),
                   ],
@@ -540,13 +603,15 @@ class _RideScreenState extends State<RideScreen> {
               child: Container(
                 alignment: Alignment.center,
                 child: CircularImage(
-                  imageUrl: widget.selectedVechile['image']!,
+                  imageUrl: widget.selectedVechile.vehicleBrandImage,
                 ),
               ),
             ),
           ],
         ),
-      ),
+        ),
+      );
+      },
     );
   }
 }

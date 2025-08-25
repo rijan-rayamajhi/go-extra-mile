@@ -45,7 +45,7 @@ class RideFirestoreDataSource {
   }
   
   /// 🔹 Get recent rides for a specific user with optional limit
-  Future<List<RideModel>> getRecentRidesByUserId(String userId, {int limit = 10}) async {
+  Future<List<RideModel>> getRecentRidesByUserId(String userId, {int limit = 1}) async {
     try {
       final querySnapshot = await _getUserRidesCollection(userId)
           .orderBy('startedAt', descending: true) // Most recent rides first

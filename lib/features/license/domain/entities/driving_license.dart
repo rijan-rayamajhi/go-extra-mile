@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-enum VerificationStatus {
+enum DrivingLicenseVerificationStatus {
   pending,
   rejected,
-  verified,
+  verified
 }
 
 class DrivingLicenseEntity extends Equatable {
@@ -11,14 +11,14 @@ class DrivingLicenseEntity extends Equatable {
   final String frontImagePath;
   final String backImagePath;
   final DateTime dob;
-  final VerificationStatus verificationStatus;
+  final DrivingLicenseVerificationStatus verificationStatus;
 
   const DrivingLicenseEntity({
     required this.licenseType,
     required this.frontImagePath,
     required this.backImagePath,
     required this.dob,
-    this.verificationStatus = VerificationStatus.pending,
+    this.verificationStatus = DrivingLicenseVerificationStatus.pending,
 
   });
 

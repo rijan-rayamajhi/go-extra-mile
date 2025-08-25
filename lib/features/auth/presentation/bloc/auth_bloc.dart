@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/sign_in_with_google.dart';
 import '../../domain/usecases/sign_in_with_apple.dart';
@@ -18,63 +17,75 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.signInWithApple,
     required this.authRepository,
   }) : super(AuthInitial()) {
-    on<SignInWithGoogleEvent>(_onSignInWithGoogle);
-    on<SignInWithAppleEvent>(_onSignInWithApple);
+    on<SignInWithGoogleEvent>(
+      (e, emit) => _handleSignIn(emit, () => signInWithGoogle(), provider: 'Google'),
+    );
+    on<SignInWithAppleEvent>(
+      (e, emit) => _handleSignIn(emit, () => signInWithApple(), provider: 'Apple'),
+    );
     on<SignOutEvent>(_onSignOut);
     on<CheckAuthStatusEvent>(_onCheckAuth);
+    on<CheckReferralStatusEvent>(_onCheckReferralStatus);
   }
 
-  Future<void> _onSignInWithGoogle(SignInWithGoogleEvent e, Emitter emit) async {
+  /// Generic sign-in handler (Google/Apple)
+  Future<void> _handleSignIn(
+    Emitter<AuthState> emit,
+    Future<dynamic> Function() signInMethod, {
+    required String provider,
+  }) async {
+    log('✅ SignInWith$provider called');
     emit(AuthLoading());
     try {
-      final user = await signInWithGoogle();
+      final user = await signInMethod();
+      log('✅ $provider user: $user');
+
       if (user != null) {
         emit(AuthAuthenticated(user));
       } else {
         emit(AuthUnauthenticated());
       }
     } catch (err) {
-      if (err is AccountDeletedException) {
-        emit(AuthFailure(err.message));
-      } else {
-        emit(AuthFailure(err.toString()));
-      }
+      log('❌ $provider Sign-In failed: $err');
+      emit(AuthFailure(
+        err is AccountDeletedException ? err.message : err.toString(),
+      ));
     }
   }
 
-  Future<void> _onSignInWithApple(SignInWithAppleEvent e, Emitter emit) async {
-    log(' ✅ SignInWithAppleEvent called ');
+  /// Handle sign-out
+  Future<void> _onSignOut(SignOutEvent e, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    try {
-      final user = await signInWithApple();
-      log(' ✅ user: $user ');
-      if (user != null) {
-        emit(AuthAuthenticated(user));
-      } else {
-        emit(AuthUnauthenticated());
-      }
-    } catch (err) {
-      emit(AuthFailure(err.toString()));
-    }
-  }
-
-  Future<void> _onSignOut(SignOutEvent e, Emitter emit) async {
-    emit(AuthLoading()); // Add loading state for immediate UI feedback
     await authRepository.signOut();
     emit(AuthUnauthenticated());
   }
 
-  Future<void> _onCheckAuth(CheckAuthStatusEvent e, Emitter emit) async {
+  /// Check current auth status
+  Future<void> _onCheckAuth(CheckAuthStatusEvent e, Emitter<AuthState> emit) async {
     try {
       final user = await authRepository.getCurrentUser();
       if (user != null) {
-        // Check if this user account was deleted using email
         emit(AuthAuthenticated(user));
       } else {
         emit(AuthUnauthenticated());
       }
     } catch (err) {
-      emit(AuthFailure('Failed to check authentication status: ${err.toString()}'));
+      emit(AuthFailure('Failed to check authentication status: $err'));
+    }
+  }
+
+  /// Check referral status
+  Future<void> _onCheckReferralStatus(CheckReferralStatusEvent e, Emitter<AuthState> emit) async {
+    try {
+      final user = await authRepository.getCurrentUser();
+      if (user != null) {
+        // TODO: Add referral status check 
+        emit(AuthAuthenticated(user));
+      } else {
+        emit(AuthUnauthenticated());
+      }
+    } catch (err) {
+      emit(AuthFailure('Failed to check referral status: $err'));
     }
   }
 }

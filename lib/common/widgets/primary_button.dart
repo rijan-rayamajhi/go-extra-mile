@@ -37,7 +37,11 @@ class PrimaryButton extends StatelessWidget {
       ),
       onPressed: onPressed,
       child: isLoading 
-        ? const CircularProgressIndicator() 
+        ?  CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.onPrimary,
+            strokeWidth: 2, 
+            
+        ) 
         : iconImage != null 
           ? Row(
               mainAxisSize: MainAxisSize.min,

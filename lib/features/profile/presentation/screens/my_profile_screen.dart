@@ -61,6 +61,17 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             }
           },
         ),
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthUnauthenticated) {
+              // Navigate to auth screen when user becomes unauthenticated
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const AuthWrapper()),
+                (route) => false,
+              );
+            }
+          },
+        ),
       ],
       child: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
@@ -453,7 +464,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       ).dividerColor.withValues(alpha: 0.18),
                     ),
                     RideStatsWidget(
-                      value: (profile.totalDistance ?? 0).toString(),
+                      value: profile.totalDistance != null 
+                          ? '${(profile.totalDistance! / 1000).toStringAsFixed(2)} km'
+                          : '0.00 km',
                       label: 'Total Distance',
                       icon: FontAwesomeIcons.road,
                     ),
@@ -797,14 +810,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     try {
       // Use the auth bloc to handle logout
       context.read<AuthBloc>().add(SignOutEvent());
-
-      // Navigate to auth screen and remove all routes
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const AuthWrapper()),
-          (route) => false,
-        );
-      }
+      
+      // Don't navigate immediately - let the auth state change handle navigation
+      // The AuthWrapper will automatically show the auth screen when state becomes AuthUnauthenticated
     } catch (e) {
       if (mounted) {
         AppSnackBar.error(context, 'Failed to logout: $e');

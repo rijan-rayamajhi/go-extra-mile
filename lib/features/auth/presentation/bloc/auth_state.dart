@@ -13,6 +13,11 @@ class AuthAuthenticated extends AuthState {
   AuthAuthenticated(this.user);
   @override List<Object?> get props => [user];
 }
+class AuthNeedsReferral extends AuthState {
+  final UserEntity user;
+  AuthNeedsReferral(this.user);
+  @override List<Object?> get props => [user];
+}
 class AuthUnauthenticated extends AuthState {}
 class AuthFailure extends AuthState {
   final String message;

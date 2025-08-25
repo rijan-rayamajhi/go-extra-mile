@@ -203,15 +203,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _whatsappController.text,
     );
 
-    // DOB must be 18+
-    final DateTime now = DateTime.now();
-    final DateTime eighteenYearsAgo = DateTime(
-      now.year - 18,
-      now.month,
-      now.day,
-    );
-    final bool dobValid =
-        _selectedDob != null && !_selectedDob!.isAfter(eighteenYearsAgo);
+    // DOB validation is now optional - only validate if DOB is provided
+    bool dobValid = true;
+    if (_selectedDob != null) {
+      final DateTime now = DateTime.now();
+      final DateTime eighteenYearsAgo = DateTime(
+        now.year - 18,
+        now.month,
+        now.day,
+      );
+      dobValid = !_selectedDob!.isAfter(eighteenYearsAgo);
+    }
 
     setState(() {
       _usernameValidationError = usernameError;
@@ -247,14 +249,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       AppSnackBar.error(context, whatsappError);
       return false;
     }
-    if (!dobValid) {
+    if (_selectedDob != null && !dobValid) {
       AppSnackBar.error(context, 'Please select a valid date of birth (18+).');
       return false;
     }
 
-    // Add gender validation
-    if (_selectedGender == null || _selectedGender!.isEmpty) {
-      AppSnackBar.error(context, 'Please select your gender.');
+    // Gender validation is now optional - only validate if gender is provided
+    if (_selectedGender != null && _selectedGender!.isEmpty) {
+      AppSnackBar.error(context, 'Please select a valid gender.');
       return false;
     }
 
