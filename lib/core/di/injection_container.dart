@@ -55,6 +55,7 @@ import '../../features/vehicle/data/repositories/vehicle_repository_impl.dart';
 import '../../features/vehicle/domain/repositories/vehicle_repository.dart';
 import '../../features/vehicle/domain/usecases/add_vehicle.dart';
 import '../../features/vehicle/domain/usecases/get_user_vehicles.dart';
+import '../../features/vehicle/domain/usecases/delete_vehicle.dart';
 import '../../features/vehicle/presentation/bloc/vehicle_bloc.dart';
 import '../../features/notification/data/datasources/notification_remote_datasource.dart';
 import '../../features/notification/data/repositories/notification_repository_impl.dart';
@@ -192,10 +193,12 @@ Future<void> init() async {
   ));
   sl.registerLazySingleton(() => AddVehicle(sl()));
   sl.registerLazySingleton(() => GetUserVehicles(sl()));
+  sl.registerLazySingleton(() => DeleteVehicle(sl()));
   
   sl.registerFactory(() => VehicleBloc(
     getUserVehicles: sl(),
     addVehicle: sl(),
+    deleteVehicle: sl(),
   ));
 
   // Notification dependencies

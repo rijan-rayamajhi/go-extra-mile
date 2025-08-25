@@ -40,4 +40,13 @@ class VehicleFirestoreDataSource {
       throw DatabaseException('Failed to get vehicles for user $userId: $e');
     }
   }
+
+  /// 🔹 Delete a vehicle from user's vehicles subcollection
+  Future<void> deleteVehicle(String vehicleId, String userId) async {
+    try {
+      await _getUserVehiclesCollection(userId).doc(vehicleId).delete();
+    } catch (e) {
+      throw DatabaseException('Failed to delete vehicle: $e');
+    }
+  }
 }

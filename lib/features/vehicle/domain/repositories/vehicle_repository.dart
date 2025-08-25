@@ -7,4 +7,7 @@ abstract class VehicleRepository {
 
   /// Add a new vehicle
   Future<Either<Exception, void>> addVehicle(VehicleEntity vehicle, String userId);
+
+  /// Delete a vehicle
+  Future<Either<Exception, void>> deleteVehicle(String vehicleId, String userId);
 }

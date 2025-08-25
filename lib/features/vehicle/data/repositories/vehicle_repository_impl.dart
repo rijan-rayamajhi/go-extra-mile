@@ -42,4 +42,14 @@ class VehicleRepositoryImpl implements VehicleRepository {
       return Left(Exception('Failed to add vehicle: $e'));
     }
   }
+
+  @override
+  Future<Either<Exception, void>> deleteVehicle(String vehicleId, String userId) async {
+    try {
+      await _firestoreDatasource.deleteVehicle(vehicleId, userId);
+      return const Right(null);
+    } catch (e) {
+      return Left(Exception('Failed to delete vehicle: $e'));
+    }
+  }
 }

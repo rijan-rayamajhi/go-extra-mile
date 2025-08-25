@@ -34,3 +34,5 @@ class VehicleError extends VehicleState {
 
 class VehicleAdded extends VehicleState {}
 
+class VehicleDeleted extends VehicleState {}
+

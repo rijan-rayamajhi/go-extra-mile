@@ -30,3 +30,13 @@ class AddNewVehicle extends VehicleEvent {
   List<Object?> get props => [vehicle, userId];
 }
 
+class DeleteVehicle extends VehicleEvent {
+  final String vehicleId;
+  final String userId;
+
+  const DeleteVehicle(this.vehicleId, this.userId);
+
+  @override
+  List<Object?> get props => [vehicleId, userId];
+}
+
