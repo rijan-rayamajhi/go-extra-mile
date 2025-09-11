@@ -364,10 +364,12 @@ class _MyReferalQrcodeScreenState extends State<MyReferalQrcodeScreen> {
       await file.writeAsBytes(processedBytes);
 
       // Share the QR code
-      await Share.shareXFiles(
-        [XFile(filePath)],
-        text: 'Join Go Extra Mile using my referral code: ${widget.referralCode}\n\n'
-              'Scan the QR code or use the referral code to get started!',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(filePath)],
+          text: 'Join Go Extra Mile using my referral code: ${widget.referralCode}\n\n'
+                'Scan the QR code or use the referral code to get started!',
+        ),
       );
     } catch (e) {
       if (mounted) {

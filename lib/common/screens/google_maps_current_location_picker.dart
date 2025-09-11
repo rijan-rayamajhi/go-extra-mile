@@ -88,7 +88,7 @@ class _GoogleMapsCurrentLocationPickerState
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.error(context, e.toString());
+        AppSnackBar.error(this.context, e.toString());
       }
     }
   }

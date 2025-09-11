@@ -244,7 +244,12 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       rideSummary += '\n---\nShared from Go Extra Mile App';
 
       // Share the ride details
-      await Share.share(rideSummary, subject: 'Check out my ride!');
+      await SharePlus.instance.share(
+        ShareParams(
+          text: rideSummary,
+          subject: 'Check out my ride!',
+        ),
+      );
     } catch (e) {
       // Show error message if sharing fails
       if (mounted) {

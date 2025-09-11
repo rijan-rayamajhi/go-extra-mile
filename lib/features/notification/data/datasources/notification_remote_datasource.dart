@@ -119,7 +119,6 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
     }
     
     final userId = parts[0];
-    print('Deleting notification: $id for user: $userId');
     
     // Delete directly from user's notifications subcollection
     await firestore
@@ -129,7 +128,6 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
         .doc(id)
         .delete();
     
-    print('Notification deleted successfully: $id');
   }
 
 

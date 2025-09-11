@@ -191,7 +191,12 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
   void _shareReferralLink() async {
     final referralCode = await _getReferralCode();
     final shareText = _getShareText(referralCode);
-    Share.share(shareText, subject: 'Join GEM - Earn Rewards Together!');
+    SharePlus.instance.share(
+      ShareParams(
+        text: shareText,
+        subject: 'Join GEM - Earn Rewards Together!',
+      ),
+    );
   }
 
   void _shareViaWhatsApp() async {

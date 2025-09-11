@@ -47,7 +47,12 @@ class _ProfileRideMemoryDetailsScreenState
 #GoExtraMile #RideMemory
 ''';
 
-    Share.share(shareText, subject: 'My Ride Memory: ${rideMemory.title}');
+ SharePlus.instance.share(
+  ShareParams(
+    text: shareText,
+    subject: 'My Ride Memory: ${rideMemory.title}',
+  ),
+);
   }
 
   @override

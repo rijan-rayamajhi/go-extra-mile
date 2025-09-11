@@ -212,8 +212,10 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                 label: "Share",
                 onTap: () {
                   if (referralCode.isNotEmpty) {
-                    Share.share(
-                      "Use my referral code $referralCode to join and earn rewards!",
+                    SharePlus.instance.share(
+                      ShareParams(
+                        text: "Use my referral code $referralCode to join and earn rewards!",
+                      ),
                     );
                   }
                 },

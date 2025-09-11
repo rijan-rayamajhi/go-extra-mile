@@ -33,9 +33,7 @@ class HomeRepositoriesImpl implements HomeRepository {
   @override
   Future<String?> getUserProfileImage() async {
     final uid = _currentUid;
-    print('uid: $uid');
     String? profileImage = await profileDataSource.getUserProfileImage(uid);
-    print('profileImage: $profileImage');
     return profileImage;
   }
 

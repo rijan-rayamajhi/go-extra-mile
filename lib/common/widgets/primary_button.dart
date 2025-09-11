@@ -44,7 +44,7 @@ class PrimaryButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(context.borderRadius(baseButtonRadius)),
         ),
-        minimumSize: Size(buttonWidth, context.buttonHeight(baseButtonHeight)),
+        minimumSize: Size(baseButtonWidth, context.buttonHeight(baseButtonHeight)),
       ),
       onPressed: _handlePress,
       child: isLoading 

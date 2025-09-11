@@ -156,7 +156,6 @@ class ReferralRemoteDataSourceImpl implements ReferralRemoteDataSource {
     if (referralCode.isEmpty) {
       throw Exception('No referral code found');
     }
-    print('Referral code: $referralCode');
     return referralCode;
   }
 
