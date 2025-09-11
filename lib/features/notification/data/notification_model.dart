@@ -7,9 +7,11 @@ class NotificationModel extends NotificationEntity {
     required super.id,
     required super.title,
     required super.message,
-    required super.time,
+    required super.createdAt,
     required super.isRead,
     required super.type,
+    required super.userId,
+    required super.updatedAt,
   });
 
   /// Create from Firestore/JSON Map
@@ -18,12 +20,47 @@ class NotificationModel extends NotificationEntity {
       id: id ?? map['id'] ?? '',
       title: map['title'] ?? '',
       message: map['message'] ?? '',
-      time: map['time'] is DateTime
-          ? map['time']
-          : DateTime.tryParse(map['time'].toString()) ?? DateTime.now(),
+      createdAt: _parseDateTime(map['createdAt']) ?? 
+                 _parseDateTime(map['time']) ?? 
+                 DateTime.now(),
       isRead: map['isRead'] ?? false,
       type: map['type'] ?? 'general',
+      userId: map['userId'] ?? '',
+      updatedAt: _parseDateTime(map['updatedAt']) ?? DateTime.now(),
     );
+  }
+
+  /// Helper method to safely parse DateTime from various formats
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    
+    if (value is DateTime) return value;
+    
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        // Try parsing as timestamp if string parsing fails
+        final timestamp = int.tryParse(value);
+        if (timestamp != null) {
+          return DateTime.fromMillisecondsSinceEpoch(timestamp);
+        }
+        return null;
+      }
+    }
+    
+    if (value is int) {
+      // Handle Firestore Timestamp or Unix timestamp
+      if (value > 1000000000000) {
+        // Milliseconds since epoch
+        return DateTime.fromMillisecondsSinceEpoch(value);
+      } else {
+        // Seconds since epoch
+        return DateTime.fromMillisecondsSinceEpoch(value * 1000);
+      }
+    }
+    
+    return null;
   }
 
   /// Convert to JSON/Map (Firestore or API)
@@ -32,9 +69,12 @@ class NotificationModel extends NotificationEntity {
       'id': id,
       'title': title,
       'message': message,
-      'time': time.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+      'time': createdAt.toIso8601String(), // Keep for backward compatibility
       'isRead': isRead,
       'type': type,
+      'userId': userId,
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
@@ -51,17 +91,21 @@ class NotificationModel extends NotificationEntity {
     String? id,
     String? title,
     String? message,
-    DateTime? time,
+    DateTime? createdAt,
     bool? isRead,
     String? type,
+    String? userId,
+    DateTime? updatedAt,
   }) {
     return NotificationModel(
       id: id ?? this.id,
       title: title ?? this.title,
       message: message ?? this.message,
-      time: time ?? this.time,
+      createdAt: createdAt ?? this.createdAt,
       isRead: isRead ?? this.isRead,
       type: type ?? this.type,
+      userId: userId ?? this.userId,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

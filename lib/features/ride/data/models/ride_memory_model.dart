@@ -1,14 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive/hive.dart';
 import '../../domain/entities/ride_memory_entity.dart';
 
+part 'ride_memory_model.g.dart';
+
+@HiveType(typeId: 5)
 class RideMemoryModel extends RideMemoryEntity {
   const RideMemoryModel({
-    required super.id,
-    required super.title,
-    required super.description,
-    required super.imageUrl,
-    required super.capturedCoordinates,
-    required super.capturedAt,
+    @HiveField(0) required super.id,
+    @HiveField(1) required super.title,
+    @HiveField(2) required super.description,
+    @HiveField(3) required super.imageUrl,
+    @HiveField(4) required super.capturedCoordinates,
+    @HiveField(5) required super.capturedAt,
   });
 
   /// ✅ Firestore -> Model
@@ -122,4 +126,32 @@ class RideMemoryModel extends RideMemoryEntity {
         capturedCoordinates: entity.capturedCoordinates,
         capturedAt: entity.capturedAt,
       );
+
+  /// 🔹 From Hive
+  factory RideMemoryModel.fromHive(Map<String, dynamic> hiveData) {
+    return RideMemoryModel(
+      id: hiveData['id'] as String,
+      title: hiveData['title'] as String,
+      description: hiveData['description'] as String,
+      imageUrl: hiveData['imageUrl'] as String,
+      capturedCoordinates: GeoPoint(
+        hiveData['capturedLat'] as double,
+        hiveData['capturedLng'] as double,
+      ),
+      capturedAt: DateTime.fromMillisecondsSinceEpoch(hiveData['capturedAt'] as int),
+    );
+  }
+
+  /// 🔹 To Hive
+  Map<String, dynamic> toHive() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'imageUrl': imageUrl,
+      'capturedLat': capturedCoordinates.latitude,
+      'capturedLng': capturedCoordinates.longitude,
+      'capturedAt': capturedAt.millisecondsSinceEpoch,
+    };
+  }
 }

@@ -26,8 +26,8 @@ class GEMCoinHistoryModel extends GEMCoinHistoryEntity {
         (e) => e.toString().split('.').last == data['rewardType'],
         orElse: () => GEMCoinTransactionRewardType.otherReward,
       ),
-      amount: data['amount'] ?? 0,
-      balanceAfter: data['balanceAfter'],
+      amount: (data['amount'] ?? 0).toInt(),
+      balanceAfter: data['balanceAfter']?.toInt(),
       reason: data['reason'] ?? '',
       date: (data['date'] as Timestamp).toDate(),
     );

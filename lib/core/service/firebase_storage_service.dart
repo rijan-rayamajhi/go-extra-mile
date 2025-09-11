@@ -68,4 +68,9 @@ class FirebaseStorageService {
       rethrow;
     }
   }
+
+  /// Gets a reference from a download URL.
+  Reference refFromURL(String url) {
+    return _firebaseStorage.refFromURL(url);
+  }
 }

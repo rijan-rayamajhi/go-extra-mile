@@ -1,13 +1,22 @@
-abstract class ReferralEvent {
+import 'package:equatable/equatable.dart';
+
+abstract class ReferralEvent extends Equatable {
   const ReferralEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
-class SubmitReferralCode extends ReferralEvent {
+class SubmitReferralCodeEvent extends ReferralEvent {
   final String referralCode;
 
-  const SubmitReferralCode(this.referralCode);
+  const SubmitReferralCodeEvent(this.referralCode);
+
+  @override
+  List<Object?> get props => [referralCode];
 }
 
-class SkipReferral extends ReferralEvent {
-  const SkipReferral();
-} 
+class GetReferralDataEvent extends ReferralEvent {}
+
+
+class ResetReferralEvent extends ReferralEvent {}

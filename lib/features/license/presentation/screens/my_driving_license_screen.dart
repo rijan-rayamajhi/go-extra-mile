@@ -1,21 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:image_cropper/image_cropper.dart';
+
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/core/utils/image_picker_utils.dart';
 import 'package:go_extra_mile_new/core/utils/date_picker_utils.dart';
+import 'package:go_extra_mile_new/features/license/domain/entities/driving_license.dart';
 import 'package:go_extra_mile_new/features/license/presentation/bloc/driving_license_bloc.dart';
 import 'package:go_extra_mile_new/features/license/presentation/bloc/driving_license_event.dart';
 import 'package:go_extra_mile_new/features/license/presentation/bloc/driving_license_state.dart';
-import 'package:go_extra_mile_new/features/license/domain/entities/driving_license.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shimmer/shimmer.dart';
 
 class MyDrivingLicenseScreen extends StatefulWidget {
-
   const MyDrivingLicenseScreen({super.key});
 
   @override
@@ -23,144 +23,48 @@ class MyDrivingLicenseScreen extends StatefulWidget {
 }
 
 class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
-  File? _frontImage;
-  File? _backImage;
+  File? _frontImage, _backImage;
   DateTime? _dob;
   String? _selectedVehicleType;
   bool _isAuthorized = false;
-  
-  // Track cleared network images
-  bool _frontImageCleared = false;
-  bool _backImageCleared = false;
+  bool _frontCleared = false, _backCleared = false;
 
-  final List<String> _vehicleTypes = [
-    '2 Wheeler',
-    '4 Wheeler',
-    '2 & 4 Wheeler',
-  ];
+  final _vehicleTypes = ['2 Wheeler', '4 Wheeler', '2 & 4 Wheeler'];
 
   @override
   void initState() {
-    _loadDrivingLicense();
+    context.read<DrivingLicenseBloc>().add(GetDrivingLicenseEvent());
     super.initState();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Populate fields with existing data when state changes
-    final state = context.read<DrivingLicenseBloc>().state;
-    if (state is DrivingLicenseLoaded || state is DrivingLicenseSubmitted) {
-      final license = state is DrivingLicenseLoaded 
-          ? state.license 
-          : (state as DrivingLicenseSubmitted).license;
-      _populateFieldsFromLicense(license);
-    }
+  DrivingLicenseEntity? _getCurrentLicense(DrivingLicenseState state) {
+    if (state is DrivingLicenseLoaded) return state.license;
+    if (state is DrivingLicenseSubmitted) return state.license;
+    return null;
   }
 
-  void _populateFieldsFromLicense(DrivingLicenseEntity? license) {
-    if (license == null) return;
-    
-    // Only populate if fields are empty and license has data
-    if (_selectedVehicleType == null && license.licenseType.isNotEmpty) {
-      _selectedVehicleType = license.licenseType;
-    }
-    
-    if (_dob == null && license.dob != null && !_isDefaultDob(license.dob)) {
-      _dob = license.dob;
-    }
-    
-    // Reset cleared flags if we have network images
-    if (license.frontImagePath.isNotEmpty && license.frontImagePath.startsWith('http')) {
-      _frontImageCleared = false;
-    }
-    if (license.backImagePath.isNotEmpty && license.backImagePath.startsWith('http')) {
-      _backImageCleared = false;
-    }
-  }
-
-  void _loadDrivingLicense() {
-    context.read<DrivingLicenseBloc>().add(GetDrivingLicenseEvent());
-  }
-
-  void _saveDrivingLicense() {
-    // Check if we have valid images for both sides
-    final currentState = context.read<DrivingLicenseBloc>().state;
-    bool hasValidFrontImage = _frontImage != null || 
-                             (currentState is DrivingLicenseLoaded && 
-                              currentState.license?.frontImagePath.isNotEmpty == true && 
-                              currentState.license!.frontImagePath.startsWith('http') &&
-                              !_frontImageCleared);
-    
-    bool hasValidBackImage = _backImage != null || 
-                            (currentState is DrivingLicenseLoaded && 
-                             currentState.license?.backImagePath.isNotEmpty == true && 
-                             currentState.license!.backImagePath.startsWith('http') &&
-                             !_backImageCleared);
-
-    // Validate required fields
-    if (!hasValidFrontImage ||
-        !hasValidBackImage ||
-        _selectedVehicleType == null ||
-        _dob == null) {
-      AppSnackBar.info(context, 'Please fill all required fields');
-      return;
-    }
-
-    // Create driving license entity
-    final license = DrivingLicenseEntity(
-      licenseType: _selectedVehicleType!,
-      frontImagePath: _frontImage?.path ?? 
-                     (currentState is DrivingLicenseLoaded && 
-                      currentState.license?.frontImagePath.isNotEmpty == true &&
-                      currentState.license!.frontImagePath.startsWith('http') &&
-                      !_frontImageCleared
-                          ? currentState.license!.frontImagePath
-                          : ''),
-      backImagePath: _backImage?.path ?? 
-                    (currentState is DrivingLicenseLoaded && 
-                     currentState.license?.backImagePath.isNotEmpty == true &&
-                     currentState.license!.backImagePath.startsWith('http') &&
-                     !_backImageCleared
-                         ? currentState.license!.backImagePath
-                         : ''),
-      dob: _dob!,
-    );
-
-    context.read<DrivingLicenseBloc>().add(SubmitDrivingLicenseEvent(license));
-  }
-
-
-
+  // ----------------- IMAGE HANDLING -----------------
   Future<void> _pickImage(bool isFront) async {
     try {
-      final File? pickedFile = await ImagePickerUtils.pickAndCropImage(
+      final file = await ImagePickerUtils.pickAndCropImage(
         context: context,
         maxSizeInMB: 5,
         imageQuality: 80,
         cropStyle: CropStyle.rectangle,
       );
-
-      if (pickedFile != null) {
+      if (file != null) {
         setState(() {
           if (isFront) {
-            _frontImage = pickedFile;
-            _frontImageCleared = false;
+            _frontImage = file;
+            _frontCleared = false;
           } else {
-            _backImage = pickedFile;
-            _backImageCleared = false;
+            _backImage = file;
+            _backCleared = false;
           }
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      AppSnackBar.error(context, 'Error: ${e.toString()}');
     }
   }
 
@@ -168,55 +72,41 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
     setState(() {
       if (isFront) {
         _frontImage = null;
-        _frontImageCleared = true;
+        _frontCleared = true;
       } else {
         _backImage = null;
-        _backImageCleared = true;
+        _backCleared = true;
       }
     });
   }
 
-  // Helper methods for verification status
-  Color _getVerificationStatusColor(DrivingLicenseVerificationStatus status) {
-    switch (status) {
-      case DrivingLicenseVerificationStatus.pending:
-        return Colors.orange;
-      case DrivingLicenseVerificationStatus.rejected:
-        return Colors.red;
-      case DrivingLicenseVerificationStatus.verified:
-        return Colors.green;
+  // ----------------- LICENSE SAVE -----------------
+  void _saveLicense(DrivingLicenseEntity? old) {
+    final hasFront =
+        _frontImage != null ||
+        (old?.frontImagePath.startsWith('http') == true && !_frontCleared);
+    final hasBack =
+        _backImage != null ||
+        (old?.backImagePath.startsWith('http') == true && !_backCleared);
+
+    if (!hasFront || !hasBack || _selectedVehicleType == null || _dob == null) {
+      AppSnackBar.info(context, 'Please fill all required fields');
+      return;
     }
+
+    final license = DrivingLicenseEntity(
+      licenseType: _selectedVehicleType ?? old?.licenseType ?? '',
+      dob: _dob ?? old?.dob ?? DateTime.now(),
+      frontImagePath:
+          _frontImage?.path ?? (hasFront ? old?.frontImagePath ?? '' : ''),
+      backImagePath:
+          _backImage?.path ?? (hasBack ? old?.backImagePath ?? '' : ''),
+    );
+
+    context.read<DrivingLicenseBloc>().add(SubmitDrivingLicenseEvent(license));
   }
 
-  IconData _getVerificationStatusIcon(DrivingLicenseVerificationStatus status) {
-    switch (status) {
-      case DrivingLicenseVerificationStatus.pending:
-        return Icons.schedule;
-      case DrivingLicenseVerificationStatus.rejected:
-        return Icons.cancel;
-      case DrivingLicenseVerificationStatus.verified:
-        return Icons.verified;
-    }
-  }
-
-  String _getVerificationStatusText(DrivingLicenseVerificationStatus status) {
-    switch (status) {
-      case DrivingLicenseVerificationStatus.pending:
-        return 'Pending Review';
-      case DrivingLicenseVerificationStatus.rejected:
-        return 'Rejected';
-      case DrivingLicenseVerificationStatus.verified:
-        return 'Verified';
-    }
-  }
-
-  // Helper method to check if DOB is the default placeholder
-  bool _isDefaultDob(DateTime? dob) {
-    if (dob == null) return true;
-    final now = DateTime.now();
-    return dob.year == now.year - 18 && dob.month == now.month && dob.day == now.day;
-  }
-
+  // ----------------- HELPERS -----------------
   Future<void> _pickDob() async {
     final now = DateTime.now();
     final picked = await DatePickerUtils.pickDate(
@@ -225,166 +115,114 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
       firstDate: DateTime(1900),
       lastDate: now,
     );
-    if (picked != null) {
-      setState(() {
-        _dob = picked;
-      });
-    }
+    if (picked != null) setState(() => _dob = picked);
   }
 
-  void _showAuthorizationDialog() {
+  void _confirmAuthorization() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Authorization Confirmation'),
-          content: const Text(
-            'By checking this box, you confirm that:\n\n'
-            '• You are the legal owner of this driving license\n'
-            '• You have the authority to upload this document\n'
-            '• All information provided is accurate and current\n'
-            '• You consent to the processing of this data',
+      builder: (_) => AlertDialog(
+        title: const Text('Authorization Confirmation'),
+        content: const Text(
+          'By confirming you acknowledge:\n\n'
+          '• You are the license owner\n'
+          '• Information is correct\n'
+          '• You consent to processing',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel', style: TextStyle(color: Colors.red)),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _isAuthorized = true;
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Confirm',
-                style: TextStyle(color: Colors.green),
-              ),
-            ),
-          ],
-        );
-      },
+          TextButton(
+            onPressed: () {
+              setState(() => _isAuthorized = true);
+              Navigator.pop(context);
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
     );
   }
-  // ... existing code ...
 
+  // Verification UI helpers
+  final _statusData = {
+    DrivingLicenseVerificationStatus.pending: {
+      'color': Colors.orange,
+      'icon': Icons.schedule,
+      'text': 'Pending Review',
+    },
+    DrivingLicenseVerificationStatus.rejected: {
+      'color': Colors.red,
+      'icon': Icons.cancel,
+      'text': 'Rejected',
+    },
+    DrivingLicenseVerificationStatus.verified: {
+      'color': Colors.green,
+      'icon': Icons.verified,
+      'text': 'Verified',
+    },
+  };
+
+  bool _isEditingDisabled(DrivingLicenseVerificationStatus s) =>
+      s == DrivingLicenseVerificationStatus.pending ||
+      s == DrivingLicenseVerificationStatus.verified;
+
+  // ----------------- WIDGETS -----------------
   Widget _buildUploadCard(
     String label,
     File? file,
-    String? imageUrl,
-    VoidCallback onTap,
-    VoidCallback onRemove,
-    bool isFront, // Add isFront parameter to identify which image
+    String? url,
+    bool isFront,
+    bool disabled,
   ) {
+    final showUpload =
+        file == null &&
+        ((isFront && _frontCleared) ||
+            (!isFront && _backCleared) ||
+            url?.startsWith('http') != true);
+
     return GestureDetector(
-      onTap: (file == null && 
-              ((isFront && _frontImageCleared) || 
-               (!isFront && _backImageCleared) || 
-               (imageUrl == null || imageUrl.isEmpty || !imageUrl.startsWith('http')))) ? onTap : null,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: (file == null && 
-                  ((isFront && _frontImageCleared) || 
-                   (!isFront && _backImageCleared) || 
-                   (imageUrl == null || imageUrl.isEmpty || !imageUrl.startsWith('http'))))
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.upload_file,
-                      size: 40,
-                      color: Colors.grey.shade600,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Upload $label",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                )
-              : Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: file != null
-                          ? Image.file(
-                              file,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            )
-                          : (!_frontImageCleared && isFront && imageUrl != null && imageUrl.startsWith('http')) || 
-                             (!_backImageCleared && !isFront && imageUrl != null && imageUrl.startsWith('http'))
-                              ? CachedNetworkImage(
-                                  imageUrl: imageUrl!,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  placeholder: (context, url) => Shimmer.fromColors(
-                                    baseColor: Colors.grey.shade300,
-                                    highlightColor: Colors.grey.shade100,
-                                    child: Container(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) => Container(
-                                    color: Colors.grey.shade300,
-                                    child: Icon(
-                                      Icons.error,
-                                      color: Colors.grey.shade600,
-                                      size: 40,
-                                    ),
-                                  ),
-                                )
-                              : Container(
-                                  color: Colors.grey.shade300,
-                                  child: Icon(
-                                    Icons.upload_file,
-                                    size: 40,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                    ),
-
-                    // Label badge
-                    Positioned(
-                      bottom: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          label,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+      onTap: !disabled && showUpload ? () => _pickImage(isFront) : null,
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(
+          minHeight: 200,
+          maxHeight: 400,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade300),
+          color: Colors.grey.shade100,
+        ),
+        child: showUpload
+            ? _buildUploadPlaceholder(label)
+            : Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: file != null
+                        ? Image.file(
+                            file, 
+                            fit: BoxFit.fitWidth,
+                            width: double.infinity,
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: url ?? '',
+                            fit: BoxFit.fitWidth,
+                            width: double.infinity,
+                            placeholder: (_, __) => Shimmer.fromColors(
+                              baseColor: Colors.grey.shade300,
+                              highlightColor: Colors.grey.shade100,
+                              child: Container(color: Colors.grey.shade300),
+                            ),
+                            errorWidget: (_, __, ___) =>
+                                const Icon(Icons.error, size: 40),
                           ),
-                        ),
-                      ),
-                    ),
-
-                    // Remove cross
+                  ),
+                  _buildLabelBadge(label),
+                  if (!disabled)
                     Positioned(
                       top: 8,
                       right: 8,
@@ -392,43 +230,110 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
                         radius: 16,
                         backgroundColor: Colors.black54,
                         child: IconButton(
+                          padding: EdgeInsets.zero,
                           icon: const Icon(
                             Icons.close,
                             size: 16,
                             color: Colors.white,
                           ),
-                          padding: EdgeInsets.zero,
-                          onPressed: onRemove,
+                          onPressed: () => _clearImage(isFront),
                         ),
                       ),
                     ),
-                  ],
-                ),
-        ),
+                ],
+              ),
       ),
     );
   }
 
-  // ... existing code ...
+  Widget _buildUploadPlaceholder(String label) => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.upload_file, size: 40, color: Colors.grey.shade600),
+        const SizedBox(height: 8),
+        Text(
+          "Upload $label",
+          style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildLabelBadge(String label) => Positioned(
+    bottom: 8,
+    left: 8,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+  );
+
+  Widget _buildInfoBox(Color color, IconData icon, String text) => Container(
+    padding: const EdgeInsets.all(16),
+    margin: const EdgeInsets.symmetric(vertical: 12),
+    decoration: BoxDecoration(
+      color: color.withOpacity(.1),
+      border: Border.all(color: color.withOpacity(.3)),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  // ----------------- BUILD -----------------
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return BlocBuilder<DrivingLicenseBloc, DrivingLicenseState>(
       builder: (context, state) {
-        // You can also check for states like Loading, Loaded, Error etc.
         if (state is DrivingLicenseLoading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (state is DrivingLicenseError) {
           return Scaffold(
-            appBar: AppBar(),
-            body: const Center(
+            body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text(
-                    'Loading driving license...',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red.shade400,
+                    size: 60,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(state.message, textAlign: TextAlign.center),
+                  const SizedBox(height: 20),
+                  PrimaryButton(
+                    onPressed: () {
+                      context.read<DrivingLicenseBloc>().add(
+                        GetDrivingLicenseEvent(),
+                      );
+                    },
+                    text: 'Retry',
                   ),
                 ],
               ),
@@ -436,557 +341,151 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
           );
         }
 
-        if (state is DrivingLicenseError) {
-          return Scaffold(
-            appBar: AppBar(),
-            body: Center(
-              child: Padding(
-                padding: EdgeInsets.all(screenPadding),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red.shade300,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error Loading Driving License',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red.shade700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.message,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.red.shade600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    PrimaryButton(
-                      onPressed: () => _loadDrivingLicense(),
-                      text: 'Retry',
-                    ),
-                  ],
+        final license = _getCurrentLicense(state);
+        final disabled =
+            license != null && _isEditingDisabled(license.verificationStatus);
+
+        return Scaffold(
+          appBar: AppBar(title: const Text("Driving License")),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(screenPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (state is DrivingLicenseSubmitted)
+                  _buildInfoBox(
+                    Colors.green,
+                    Icons.check_circle,
+                    "Driving license saved successfully!",
+                  ),
+
+                _buildUploadCard(
+                  "Front Side",
+                  _frontImage,
+                  license?.frontImagePath,
+                  true,
+                  disabled,
                 ),
-              ),
-            ),
-          );
-        }
+                const SizedBox(height: 16),
+                _buildUploadCard(
+                  "Back Side",
+                  _backImage,
+                  license?.backImagePath,
+                  false,
+                  disabled,
+                ),
+                const SizedBox(height: 20),
 
-        if (state is DrivingLicenseLoaded || state is DrivingLicenseSubmitted) {
-          // Default UI - handle both loaded and submitted states
-          final license = state is DrivingLicenseLoaded 
-              ? state.license 
-              : (state as DrivingLicenseSubmitted).license;
-          
-          // If no license exists, show empty form
-          if (license == null) {
-            return Scaffold(
-              appBar: AppBar(),
-              body: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.all(screenPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                // Vehicle type dropdown
+                _buildDropdown(theme, license, disabled),
+                const SizedBox(height: 20),
+
+                // DOB picker
+                _buildDobPicker(disabled, license),
+                const SizedBox(height: 20),
+
+                // Verification status
+                if (license != null &&
+                    (license.frontImagePath.isNotEmpty ||
+                        license.backImagePath.isNotEmpty))
+                  _buildInfoBox(
+                    _statusData[license.verificationStatus]!['color'] as Color,
+                    _statusData[license.verificationStatus]!['icon']
+                        as IconData,
+                    _statusData[license.verificationStatus]!['text'] as String,
+                  ),
+
+                if (!disabled) ...[
+                  Row(
                     children: [
-                      Text(
-                        'Driving License',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                      Checkbox(
+                        value: _isAuthorized,
+                        onChanged: (v) => v == true
+                            ? _confirmAuthorization()
+                            : setState(() => _isAuthorized = false),
+                      ),
+                      const Expanded(
+                        child: Text(
+                          "I am authorized to add this Driving Licence",
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Please upload your driving license photos.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 32),
-
-                      // Show message for new users
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.only(bottom: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline, color: Colors.blue.shade600),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Please upload photos of your driving license.',
-                                style: TextStyle(
-                                  color: Colors.blue.shade700,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Front side DL image
-                      _buildUploadCard(
-                        "Front Side",
-                        _frontImage,
-                        null,
-                        () => _pickImage(true),
-                        () => _clearImage(true),
-                        true, // isFront = true
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Back side DL image
-                      _buildUploadCard(
-                        "Back Side",
-                        _backImage,
-                        null,
-                        () => _pickImage(false),
-                        () => _clearImage(false),
-                        false, // isFront = false
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Vehicle Type Dropdown
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.directions_car,
-                              color: Colors.grey.shade600,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: _selectedVehicleType,
-                                  hint: Text(
-                                    "Select Vehicle Type",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                  isExpanded: true,
-                                  items: _vehicleTypes.map((String type) {
-                                    return DropdownMenuItem<String>(
-                                      value: type,
-                                      child: Text(
-                                        type,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      _selectedVehicleType = newValue;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // DOB Picker
-                      GestureDetector(
-                        onTap: _pickDob,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 18,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today,
-                                color: Colors.grey.shade600,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                                                          Text(
-                              _dob != null
-                                  ? DatePickerUtils.formatDate(_dob!, pattern: 'dd MMM, yyyy')
-                                  : "Select Date of Birth",
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Authorization Checkbox
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _isAuthorized,
-                            onChanged: (bool? value) {
-                              if (value == true) {
-                                _showAuthorizationDialog();
-                              } else {
-                                setState(() {
-                                  _isAuthorized = false;
-                                });
-                              }
-                            },
-                            activeColor: theme.primaryColor,
-                          ),
-                          Expanded(
-                            child: Text(
-                              'I am authorized to add this Driving Licence',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      PrimaryButton(
-                        onPressed: _isAuthorized
-                            ? () {
-                                _saveDrivingLicense();
-                              }
-                            : () {
-                                AppSnackBar.info(
-                                  context,
-                                  'Please check the authorization checkbox to Save',
-                                );
-                              },
-                        text: "Save",
-                      ),
-
-                      const SizedBox(height: 16),
                     ],
                   ),
-                ),
-              ),
-            );
-          }
-          
-          return Scaffold(
-            appBar: AppBar(),
-            body: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(screenPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Show success message if submitted
-                    if (state is DrivingLicenseSubmitted)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.only(bottom: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.green.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.check_circle, color: Colors.green.shade600),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Driving license saved successfully!',
-                                style: TextStyle(
-                                  color: Colors.green.shade700,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    Text(
-                      'Driving License',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Please upload your driving license photos.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    
-                    // Show verification status if license exists and has images
-                    if ((license.frontImagePath.isNotEmpty && license.frontImagePath.startsWith('http')) || 
-                        (license.backImagePath.isNotEmpty && license.backImagePath.startsWith('http')))
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.only(top: 20, bottom: 20),
-                        decoration: BoxDecoration(
-                          color: _getVerificationStatusColor(license.verificationStatus).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _getVerificationStatusColor(license.verificationStatus).withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              _getVerificationStatusIcon(license.verificationStatus),
-                              color: _getVerificationStatusColor(license.verificationStatus),
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Verification Status',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: _getVerificationStatusColor(license.verificationStatus),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _getVerificationStatusText(license.verificationStatus),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: _getVerificationStatusColor(license.verificationStatus),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    
-                    const SizedBox(height: 32),
-
-                    // Show message for new users
-                    if (license.frontImagePath.isEmpty && license.backImagePath.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.only(bottom: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline, color: Colors.blue.shade600),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Please upload photos of your driving license.',
-                                style: TextStyle(
-                                  color: Colors.blue.shade700,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    // Front side DL image
-                    _buildUploadCard(
-                      "Front Side",
-                      _frontImage,
-                      license.frontImagePath,
-                      () => _pickImage(true),
-                      () => _clearImage(true),
-                      true, // isFront = true
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Back side DL image
-                    _buildUploadCard(
-                      "Back Side",
-                      _backImage,
-                      license.backImagePath,
-                      () => _pickImage(false),
-                      () => _clearImage(false),
-                      false, // isFront = false
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Vehicle Type Dropdown
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.directions_car,
-                            color: Colors.grey.shade600,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: _selectedVehicleType ?? 
-                                       (license.licenseType.isNotEmpty ? license.licenseType : null),
-                                hint: Text(
-                                  "Select Vehicle Type",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                                isExpanded: true,
-                                items: _vehicleTypes.map((String type) {
-                                  return DropdownMenuItem<String>(
-                                    value: type,
-                                    child: Text(
-                                      type,
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    _selectedVehicleType = newValue;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // DOB Picker
-                    GestureDetector(
-                      onTap: _pickDob,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 18,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today,
-                              color: Colors.grey.shade600,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              _dob != null && !_isDefaultDob(_dob)
-                                  ? DatePickerUtils.formatDate(_dob!, pattern: 'dd MMM, yyyy')
-                                  : "Select Date of Birth",
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Authorization Checkbox
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _isAuthorized,
-                          onChanged: (bool? value) {
-                            if (value == true) {
-                              _showAuthorizationDialog();
-                            } else {
-                              setState(() {
-                                _isAuthorized = false;
-                              });
-                            }
+                  const SizedBox(height: 12),
+                  PrimaryButton(
+                    onPressed: _isAuthorized
+                        ? () => _saveLicense(license)
+                        : () {
+                            AppSnackBar.info(
+                              context,
+                              "Please authorize before saving",
+                            );
                           },
-                          activeColor: theme.primaryColor,
-                        ),
-                        Expanded(
-                          child: Text(
-                            'I am authorized to add this Driving Licence',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    PrimaryButton(
-                      onPressed: _isAuthorized
-                          ? () {
-                              _saveDrivingLicense();
-                            }
-                          : () {
-                              AppSnackBar.info(
-                                context,
-                                'Please check the authorization checkbox to Save',
-                              );
-                            },
-                      text: "Save",
-                    ),
-
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
+                    text: "Save",
+                  ),
+                ],
+              ],
             ),
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
+          ),
+        );
       },
+    );
+  }
+
+  Widget _buildDropdown(
+    ThemeData theme,
+    DrivingLicenseEntity? license,
+    bool disabled,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: disabled ? Colors.grey.shade200 : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedVehicleType ?? license?.licenseType,
+          hint: const Text("Select Vehicle Type"),
+          isExpanded: true,
+          items: _vehicleTypes
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
+          onChanged: disabled
+              ? null
+              : (v) => setState(() => _selectedVehicleType = v),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDobPicker(bool disabled, DrivingLicenseEntity? license) {
+    final effectiveDob = _dob ?? license?.dob;
+    return GestureDetector(
+      onTap: disabled ? null : _pickDob,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: disabled ? Colors.grey.shade200 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.calendar_today, size: 20),
+            const SizedBox(width: 12),
+            Text(
+              effectiveDob != null
+                  ? DatePickerUtils.formatDate(
+                      effectiveDob,
+                      pattern: 'dd MMM, yyyy',
+                    )
+                  : "Select Date of Birth",
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

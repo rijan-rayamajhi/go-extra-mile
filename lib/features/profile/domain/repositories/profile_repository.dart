@@ -4,6 +4,7 @@ import 'package:go_extra_mile_new/features/profile/domain/entities/profile_entit
 
 abstract class ProfileRepository {
   Future<ProfileEntity?> getProfile(String uid);
+  Future<String?> getUserProfileImage(String uid);
   Future<void> updateProfile(ProfileEntity profile, File? profilePhotoImageFile);
   Future<bool> isUsernameAvailable(String username);
 }

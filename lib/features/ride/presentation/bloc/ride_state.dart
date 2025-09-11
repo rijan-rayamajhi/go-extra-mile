@@ -11,55 +11,28 @@ class RideInitial extends RideState {}
 
 class RideLoading extends RideState {}
 
-class RideStarted extends RideState {
-  final RideEntity ride;
-  RideStarted(this.ride);
-  
-  @override 
-  List<Object?> get props => [ride];
-}
-
-class CurrentRideLoaded extends RideState {
-  final RideEntity? ride;
-  CurrentRideLoaded(this.ride);
-  
-  @override 
-  List<Object?> get props => [ride];
-}
 
 class AllRidesLoaded extends RideState {
   final List<RideEntity> rides;
-  AllRidesLoaded(this.rides);
+  final List<RideEntity> localRides;
+  AllRidesLoaded(this.rides, {this.localRides = const []});
   
   @override 
-  List<Object?> get props => [rides];
+  List<Object?> get props => [rides, localRides];
 }
 
 class RecentRidesLoaded extends RideState {
   final List<RideEntity> rides;
+  final List<RideEntity> localRides;
   final int limit;
-  RecentRidesLoaded(this.rides, this.limit);
+  RecentRidesLoaded(this.rides, this.limit, {this.localRides = const []});
   
   @override 
-  List<Object?> get props => [rides, limit];
+  List<Object?> get props => [rides, localRides, limit];
 }
 
 class RideUploaded extends RideState {}
 
-class RideDiscarded extends RideState {}
-
-class RideFieldsUpdated extends RideState {
-  final String userId;
-  final Map<String, dynamic> updatedFields;
-  
-  RideFieldsUpdated({
-    required this.userId,
-    required this.updatedFields,
-  });
-  
-  @override
-  List<Object?> get props => [userId, updatedFields];
-}
 
 class RideMemoriesLoaded extends RideState {
   final List<RideMemoryEntity> memories;
@@ -69,14 +42,14 @@ class RideMemoriesLoaded extends RideState {
   List<Object?> get props => [memories];
 }
 
-class RecentRideMemoriesLoaded extends RideState {
-  final List<RideMemoryEntity> memories;
-  final int limit;
-  RecentRideMemoriesLoaded(this.memories, this.limit);
+// class RecentRideMemoriesLoaded extends RideState {
+//   final List<RideMemoryEntity> memories;
+//   final int limit;
+//   RecentRideMemoriesLoaded(this.memories, this.limit);
   
-  @override 
-  List<Object?> get props => [memories, limit];
-}
+//   @override 
+//   List<Object?> get props => [memories, limit];
+// }
 
 class RideFailure extends RideState {
   final String message;

@@ -5,7 +5,6 @@ import 'package:go_extra_mile_new/features/gem_coin/domain/entities/gem_coin_his
 import 'package:go_extra_mile_new/features/gem_coin/presentation/bloc/gem_coin_bloc.dart';
 import 'package:go_extra_mile_new/features/gem_coin/presentation/bloc/gem_coin_event.dart';
 import 'package:go_extra_mile_new/features/gem_coin/presentation/bloc/gem_coin_state.dart';
-import 'package:go_extra_mile_new/core/di/injection_container.dart' as di;
 
 
 class GemCoinHistoryScreens extends StatefulWidget {
@@ -506,39 +505,45 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
-                    child: Column(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Coin Icon
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Theme.of(context).primaryColor.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Image.asset(
                             'assets/icons/gem_coin.png',
-                            width: 60,
-                          height: 60,
+                            width: 50,
+                            height: 50,
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        // Balance
-                        Text(
-                          currentBalance.toString(),
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Gem Coins',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
+                        const SizedBox(width: 20),
+                        // Balance and Label
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              currentBalance.toString(),
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Gem Coins',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -715,7 +720,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -730,7 +735,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
@@ -738,23 +743,23 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
             child: Icon(
               icon,
               color: color,
-              size: 24,
+              size: 20,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
             amount,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             title,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               color: Colors.grey[600],
               fontWeight: FontWeight.w500,
             ),

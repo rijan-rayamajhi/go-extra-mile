@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entiry.dart';
 
@@ -40,3 +42,46 @@ class DeleteVehicle extends VehicleEvent {
   List<Object?> get props => [vehicleId, userId];
 }
 
+class UploadVehicleImage extends VehicleEvent {
+  final String vehicleId;
+  final String userId;
+  final File imageFile;
+  final String fieldName;
+
+  const UploadVehicleImage(
+    this.vehicleId,
+    this.userId,
+    this.imageFile,
+    this.fieldName,
+  );
+
+  @override
+  List<Object?> get props => [vehicleId, userId, imageFile, fieldName];
+}
+
+class DeleteVehicleImage extends VehicleEvent {
+  final String vehicleId;
+  final String userId;
+  final String fieldName;
+  final String imageUrl;
+
+  const DeleteVehicleImage(
+    this.vehicleId,
+    this.userId,
+    this.fieldName,
+    this.imageUrl,
+  );
+
+  @override
+  List<Object?> get props => [vehicleId, userId, fieldName, imageUrl];
+}
+
+class VerifyVehicleEvent extends VehicleEvent {
+  final String vehicleId;
+  final String userId;
+
+  const VerifyVehicleEvent(this.vehicleId, this.userId);
+
+  @override
+  List<Object?> get props => [vehicleId, userId];
+}

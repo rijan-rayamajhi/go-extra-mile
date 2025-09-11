@@ -19,6 +19,7 @@ class CustomTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextCapitalization textCapitalization;
   final TextAlign textAlign;
+  final bool showCounter;
 
   const CustomTextField({
     super.key,
@@ -39,6 +40,7 @@ class CustomTextField extends StatelessWidget {
     this.inputFormatters,
     this.textCapitalization = TextCapitalization.none,
     this.textAlign = TextAlign.start,
+    this.showCounter = true,
   });
 
   @override
@@ -106,6 +108,7 @@ class CustomTextField extends StatelessWidget {
               horizontal: 16,
               vertical: 12,
             ),
+            counterText: showCounter ? null : '',
           ),
         ),
       ],

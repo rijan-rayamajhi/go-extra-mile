@@ -107,16 +107,25 @@ class _ProfileRideMemoryDetailsScreenState
             child: SafeArea(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(
-                    alpha: 0.3,
-                  ), // semi-transparent
-                  shape: BoxShape.circle, // circular button
+                  color: Colors.black.withOpacity(0.6),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(
                     Icons.arrow_back_ios_new_rounded,
-                    color: Colors.black,
+                    color: Colors.white,
                     size: 24,
                   ),
                 ),
@@ -130,14 +139,23 @@ class _ProfileRideMemoryDetailsScreenState
             child: SafeArea(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(
-                    alpha: 0.3,
-                  ), // semi-transparent
-                  shape: BoxShape.circle, // circular button
+                  color: Colors.black.withOpacity(0.6),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: IconButton(
                   onPressed: () => _shareRideMemory(images[_currentIndex]),
-                  icon: const Icon(Icons.share, color: Colors.black, size: 24),
+                  icon: const Icon(Icons.share, color: Colors.white, size: 24),
                 ),
               ),
             ),
@@ -154,19 +172,36 @@ class _ProfileRideMemoryDetailsScreenState
                 borderRadius: BorderRadius.circular(20),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(
-                    sigmaX: 12,
-                    sigmaY: 12,
-                  ), // blurred background
+                    sigmaX: 15,
+                    sigmaY: 15,
+                  ), // stronger blur
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3), // soft translucent
+                      // Darker, more opaque background for better contrast
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.7),
+                          Colors.black.withOpacity(0.8),
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.2),
+                        width: 1,
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 40,
+                          offset: const Offset(0, 16),
                         ),
                       ],
                     ),
@@ -180,17 +215,22 @@ class _ProfileRideMemoryDetailsScreenState
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white, // bright text
+                            color: Colors.white,
                             shadows: [
                               Shadow(
-                                color: Colors.black38,
+                                color: Colors.black,
+                                offset: Offset(0, 2),
+                                blurRadius: 4,
+                              ),
+                              Shadow(
+                                color: Colors.black54,
                                 offset: Offset(0, 1),
                                 blurRadius: 2,
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 8),
 
                         // Description
                         Text(
@@ -198,59 +238,105 @@ class _ProfileRideMemoryDetailsScreenState
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: Colors.white70,
+                            color: Colors.white,
                             height: 1.4,
                             shadows: [
                               Shadow(
-                                color: Colors.black26,
+                                color: Colors.black,
                                 offset: Offset(0, 1),
-                                blurRadius: 2,
+                                blurRadius: 3,
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
 
                         // Date
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_today,
-                              size: 14,
-                              color: Colors.white70,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 0.5,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              images[_currentIndex].capturedAt.toString(),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w500,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.calendar_today,
+                                size: 14,
+                                color: Colors.white,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                images[_currentIndex].capturedAt.toString(),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black54,
+                                      offset: Offset(0, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 8),
 
                         // Coordinates
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on,
-                              size: 14,
-                              color: Colors.white70,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 0.5,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${images[_currentIndex].capturedCoordinates.latitude.toStringAsFixed(5)}, '
-                              '${images[_currentIndex].capturedCoordinates.longitude.toStringAsFixed(5)}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w500,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.location_on,
+                                size: 14,
+                                color: Colors.white,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  '${images[_currentIndex].capturedCoordinates.latitude.toStringAsFixed(5)}, '
+                                  '${images[_currentIndex].capturedCoordinates.longitude.toStringAsFixed(5)}',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black54,
+                                        offset: Offset(0, 1),
+                                        blurRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

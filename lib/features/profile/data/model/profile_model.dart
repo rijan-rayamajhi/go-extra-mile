@@ -22,6 +22,9 @@ class ProfileModel extends ProfileEntity {
     super.instagramLink,
     super.youtubeLink,
     super.whatsappLink,
+    super.showInstagram,
+    super.showYoutube,
+    super.showWhatsapp,
     super.referralCode,
   });
 
@@ -46,6 +49,9 @@ class ProfileModel extends ProfileEntity {
       instagramLink: map['instagramLink'],
       youtubeLink: map['youtubeLink'],
       whatsappLink: map['whatsappLink'], // Backward compatibility
+      showInstagram: map['showInstagram'] ?? true, // Default to true for backward compatibility
+      showYoutube: map['showYoutube'] ?? true, // Default to true for backward compatibility
+      showWhatsapp: map['showWhatsapp'] ?? true, // Default to true for backward compatibility
       referralCode: map['referralCode'],
     );
   }
@@ -72,6 +78,9 @@ class ProfileModel extends ProfileEntity {
       'youtubeLink': youtubeLink,
       'whatsappLink': whatsappLink,
       'whatsappNumber': whatsappLink, // Backward compatibility during transition
+      'showInstagram': showInstagram,
+      'showYoutube': showYoutube,
+      'showWhatsapp': showWhatsapp,
       'referralCode': referralCode,
     };
   }
@@ -96,6 +105,9 @@ class ProfileModel extends ProfileEntity {
     String? instagramLink,
     String? youtubeLink,
     String? whatsappLink,
+    bool? showInstagram,
+    bool? showYoutube,
+    bool? showWhatsapp,
     String? referralCode,
   }) {
     return ProfileModel(
@@ -118,6 +130,9 @@ class ProfileModel extends ProfileEntity {
       instagramLink: instagramLink ?? this.instagramLink,
       youtubeLink: youtubeLink ?? this.youtubeLink,
       whatsappLink: whatsappLink ?? this.whatsappLink,
+      showInstagram: showInstagram ?? this.showInstagram,
+      showYoutube: showYoutube ?? this.showYoutube,
+      showWhatsapp: showWhatsapp ?? this.showWhatsapp,
       referralCode: referralCode ?? this.referralCode,
     );
   }

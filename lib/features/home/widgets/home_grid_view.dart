@@ -7,7 +7,14 @@ import 'package:go_extra_mile_new/features/vehicle/presentation/screens/my_vechi
 
 
 class HomeGridView extends StatelessWidget {
-  const HomeGridView({super.key});
+  final String unverifiedVehicleCount;
+  final String unreadNotificationCount;
+  
+  const HomeGridView({
+    super.key,
+    this.unverifiedVehicleCount = '0',
+    this.unreadNotificationCount = '0',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +24,9 @@ class HomeGridView extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        childAspectRatio: 1.2,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        mainAxisExtent: 100,
+        childAspectRatio: 0.75,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
       ),
       itemBuilder: (context, index) {
         return _buildGridItem(context, index);
@@ -35,6 +41,7 @@ class HomeGridView extends StatelessWidget {
         icon: FontAwesomeIcons.car,
         label: 'My Vehicles',
         color: Theme.of(context).colorScheme.onSurface,
+        badgeCount: unverifiedVehicleCount,
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => MyVehicleScreen()));
         }
@@ -107,33 +114,82 @@ class HomeGridView extends StatelessWidget {
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: item.color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                item.icon,
-                color: item.color,
-                size: 20,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: item.color.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      item.icon,
+                      color: item.color,
+                      size: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Flexible(
+                    child: Text(
+                      item.label,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        height: 1.1,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              item.label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-                height: 1.2,
+            // Show badge if there's a count
+            if (item.badgeCount != null && 
+                item.badgeCount!.isNotEmpty && 
+                int.tryParse(item.badgeCount!) != null && 
+                int.parse(item.badgeCount!) > 0)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    item.badgeCount!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -145,12 +201,14 @@ class GridItemData {
   final IconData icon;
   final String label;
   final Color color;
+  final String? badgeCount;
   final VoidCallback onTap;
 
   GridItemData({
     required this.icon,
     required this.label,
     required this.color,
+    this.badgeCount,
     required this.onTap,
   });
 } 

@@ -4,247 +4,148 @@ import 'package:go_extra_mile_new/common/widgets/custome_divider.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_details_screen.dart';
 import '../../ride/presentation/bloc/ride_bloc.dart';
 import '../../ride/presentation/bloc/ride_event.dart';
-import '../../ride/presentation/bloc/ride_state.dart';
-import '../../auth/presentation/bloc/auth_bloc.dart';
-import '../../auth/presentation/bloc/auth_state.dart';
 import '../../ride/domain/entities/ride_entity.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../common/widgets/ride_card_widget.dart';
 
-class HomeRecentRide extends StatefulWidget {
-  const HomeRecentRide({super.key});
+class HomeRecentRide extends StatelessWidget {
+  final List<RideEntity> remoteRides;
+  final List<RideEntity> localRides;
 
-  @override
-  State<HomeRecentRide> createState() => _HomeRecentRideState();
-}
-
-class _HomeRecentRideState extends State<HomeRecentRide> {
-  @override
-  void initState() {
-    super.initState();
-    // Fetch recent rides when widget is initialized
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchRecentRides();
-    });
-  }
-
-  void _fetchRecentRides() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      context.read<RideBloc>().add(
-        GetRecentRidesByUserIdEvent(
-          userId: authState.user.uid,
-          limit: 1, // Get the 3 most recent rides
-        ),
-      );
-    }
-  }
+  const HomeRecentRide({
+    super.key,
+    this.remoteRides = const [],
+    this.localRides = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, authState) {
-        if (authState is! AuthAuthenticated) {
-          return const SizedBox.shrink(); // Don't show if not authenticated
-        }
+    // Combine remote and local rides, removing duplicates
+    final allRides = <RideEntity>[];
+    final seenIds = <String>{};
+    
+    // Add remote rides first
+    for (final ride in remoteRides) {
+      if (!seenIds.contains(ride.id)) {
+        allRides.add(ride);
+        seenIds.add(ride.id);
+      }
+    }
+    
+    // Add local rides that aren't already uploaded
+    for (final ride in localRides) {
+      if (!seenIds.contains(ride.id)) {
+        allRides.add(ride);
+        seenIds.add(ride.id);
+      }
+    }
+    
+    // Sort by start date (most recent first) and limit to 1
+    allRides.sort((a, b) => b.startedAt.compareTo(a.startedAt));
+    final recentRides = allRides.take(1).toList();
 
-        return BlocBuilder<RideBloc, RideState>(
-          builder: (context, rideState) {
-            if (rideState is RideLoading) {
-              return _buildLoadingCard(theme);
-            } else if (rideState is RecentRidesLoaded && rideState.rides.isNotEmpty) {
-              return Column(
-                children: [
-                  CustomeDivider(text: 'Recent Rides'),
+    if (recentRides.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-                  SizedBox(height: 16),
-                  _buildRecentRidesList(theme, rideState.rides),
-                ],
-              );
-            } else if (rideState is RideFailure) {
-              return _buildErrorCard(theme, rideState.message);
-            } else {
-              // No rides available
-              return SizedBox.shrink();
-            }
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildLoadingCard(ThemeData theme) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: Colors.grey.shade300,
-          width: 1.2,
-        ),
-      ),
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    width: 120,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Shimmer for ride stats
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildShimmerStat(),
-                  _divider(),
-                  _buildShimmerStat(),
-                  _divider(),
-                  _buildShimmerStat(),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Shimmer for date text
-              Container(
-                width: 150,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShimmerStat() {
     return Column(
       children: [
-        Container(
-          width: 30,
-          height: 16,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: 40,
-          height: 12,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
+        const CustomeDivider(text: 'Recent Rides'),
+        const SizedBox(height: 16),
+        _buildRecentRidesList(context, theme, recentRides, remoteRides),
       ],
     );
   }
+  
 
-  Widget _divider() {
-    return Container(
-      height: 28,
-      width: 1,
-      color: Colors.grey.shade300,
-    );
-  }
-
-  Widget _buildRecentRidesList(ThemeData theme, List<RideEntity> rides) {
+  Widget _buildRecentRidesList(BuildContext context, ThemeData theme, List<RideEntity> rides, List<RideEntity> remoteRides) {
     return Column(
       children: rides.map((ride) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: RideCardWidget(ride: ride , onTap: () {
-          //navigate to RideDetailsScreen
-          Navigator.push(context, MaterialPageRoute(builder: (context) => RideDetailsScreen(ride: ride)));
-        },),
+        child: _buildRideCard(context, ride, remoteRides),
       )).toList(),
     );
   }
 
-
-
-  Widget _buildErrorCard(ThemeData theme, String errorMessage) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: Colors.red.shade300,
-          width: 1.2,
+  Widget _buildRideCard(BuildContext context, RideEntity ride, List<RideEntity> remoteRides) {
+    final isLocal = !remoteRides.any((remoteRide) => remoteRide.id == ride.id);
+    
+    return Stack(
+      children: [
+        RideCardWidget(
+          ride: ride,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RideDetailsScreen(ride: ride)),
+            );
+          },
+          icon: Icons.directions_bike_outlined,
+          iconColor: isLocal ? Colors.orange : Colors.blue,
+          iconBackgroundColor: isLocal 
+              ? Colors.orange.withValues(alpha: 0.1)
+              : Colors.blue.withValues(alpha: 0.1),
         ),
-      ),
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    shape: BoxShape.circle,
+        // Upload button for local rides
+        if (isLocal)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    spreadRadius: 1,
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
                   ),
-                  padding: const EdgeInsets.all(10),
-                  child: Icon(Icons.error_outline,
-                      color: Colors.red.shade700, size: 22),
+                ],
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.cloud_upload, size: 20),
+                color: Colors.orange,
+                onPressed: () => _uploadRide(context, ride),
+                tooltip: 'Upload ride',
+                constraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  "Error Loading Ride",
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.red.shade700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              errorMessage,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.red.shade600,
+                padding: EdgeInsets.zero,
               ),
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: _fetchRecentRides,
-                child: const Text("Retry"),
+          ),
+        // Local ride indicator
+        if (isLocal)
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'LOCAL',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 
+  void _uploadRide(BuildContext context, RideEntity ride) {
+    context.read<RideBloc>().add(UploadRideEvent(rideEntity: ride));
+  }
 
 }

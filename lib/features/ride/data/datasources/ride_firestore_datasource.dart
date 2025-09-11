@@ -89,7 +89,6 @@ class RideFirestoreDataSource {
                 allMemories.add(memory);
               } catch (e) {
                 // Skip invalid memory data
-                print('Skipping invalid memory data: $e');
               }
             }
           }

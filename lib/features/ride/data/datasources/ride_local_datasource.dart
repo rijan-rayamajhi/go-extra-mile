@@ -1,139 +1,163 @@
-import 'dart:convert';
-import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:hive/hive.dart';
+import '../../domain/entities/ride_entity.dart';
 import '../models/ride_model.dart';
-import '../models/ride_memory_model.dart';
-import '../../domain/entities/ride_memory_entity.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/error/exceptions.dart';
 
 class RideLocalDatasource {
+  static const String _ridesBoxName = 'rides';
+  static const String _userRidesBoxName = 'user_rides';
+  Box<RideModel>? _ridesBox;
+  Box<List<String>>? _userRidesBox;
+
+  /// 🔹 Initialize Hive boxes for rides
+  Future<void> init() async {
+    _ridesBox = await Hive.openBox<RideModel>(_ridesBoxName);
+    _userRidesBox = await Hive.openBox<List<String>>(_userRidesBoxName);
+  }
+
   /// 🔹 Get cache key for a specific user
-  String _getCacheKey(String userId) => "ride_cache_$userId";
+  String _getUserRidesKey(String userId) => 'user_rides_$userId';
 
-  /// 🔹 Save single ride for a specific user
-  Future<void> saveRide(RideModel ride) async {
-    final prefs = await SharedPreferences.getInstance();
-    final cacheKey = _getCacheKey(ride.userId);
-    await prefs.setString(cacheKey, jsonEncode(ride.toJson()));
-    
-    // Notify listeners about the update
-    _notifyRideUpdate(ride.userId, ride);
-  }
+  /// 🔹 Get cache key for a specific ride
+  String _getRideKey(String rideId) => 'ride_$rideId';
 
-  /// 🔹 Get cached ride for a specific user (or null if not exists)
-  Future<RideModel?> getRide(String userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final cacheKey = _getCacheKey(userId);
-    final rideJsonString = prefs.getString(cacheKey);
-
-    if (rideJsonString == null) return null;
-
-    final Map<String, dynamic> json = jsonDecode(rideJsonString);
-    return RideModel.fromJson(json);
-  }
-
-  /// 🔹 Clear cached ride for a specific user
-  Future<void> clearRide(String userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final cacheKey = _getCacheKey(userId);
-    await prefs.remove(cacheKey);
-    
-    // Notify listeners that ride was cleared
-    _notifyRideUpdate(userId, null);
-  }
-
-  /// 🔹 Stream current ride data for a specific user
-  Stream<RideModel?> watchCurrentRide(String userId) {
-    // Create a stream controller for this specific user
-    final controller = StreamController<RideModel?>.broadcast();
-    
-    // Get initial value and emit it
-    getRide(userId).then((ride) {
-      controller.add(ride);
-    });
-    
-    // Store the controller for this user
-    _userControllers[userId] = controller;
-    
-    return controller.stream;
-  }
-
-  /// 🔹 Store stream controllers for each user
-  final Map<String, StreamController<RideModel?>> _userControllers = {};
-  
-  /// 🔹 Notify listeners about ride updates for a specific user
-  void _notifyRideUpdate(String userId, RideModel? ride) {
-    final controller = _userControllers[userId];
-    if (controller != null && !controller.isClosed) {
-      controller.add(ride);
-    }
-  }
-  
-  /// 🔹 Dispose stream controller for a specific user
-  void disposeUserStream(String userId) {
-    final controller = _userControllers[userId];
-    if (controller != null) {
-      controller.close();
-      _userControllers.remove(userId);
-    }
-  }
-
-  /// 🔹 Update specific fields of the current ride
-  Future<void> updateRideFields(String userId, Map<String, dynamic> fields) async {
-    final currentRide = await getRide(userId);
-    if (currentRide != null) {
-      // Handle rideMemories conversion if present
-      List<RideMemoryEntity>? updatedRideMemories;
-      if (fields['rideMemories'] != null) {
-        if (fields['rideMemories'] is List<Map<String, dynamic>>) {
-          // Convert from Firestore format to RideMemoryEntity
-          updatedRideMemories = (fields['rideMemories'] as List<Map<String, dynamic>>)
-              .map((memoryMap) => RideMemoryModel.fromFirestore(memoryMap))
-              .toList();
-        } else if (fields['rideMemories'] is List<RideMemoryEntity>) {
-          // Already in correct format
-          updatedRideMemories = fields['rideMemories'] as List<RideMemoryEntity>;
-        }
-      }
-
-      // Handle routePoints conversion if present
-      List<GeoPoint>? updatedRoutePoints;
-      if (fields['routePoints'] != null) {
-        if (fields['routePoints'] is List<Map<String, dynamic>>) {
-          // Convert from JSON format to GeoPoint
-          updatedRoutePoints = (fields['routePoints'] as List<Map<String, dynamic>>)
-              .map((pointMap) => GeoPoint(
-                (pointMap['latitude'] as num).toDouble(),
-                (pointMap['longitude'] as num).toDouble(),
-              ))
-              .toList();
-        } else if (fields['routePoints'] is List<GeoPoint>) {
-          // Already in correct format
-          updatedRoutePoints = fields['routePoints'] as List<GeoPoint>;
-        }
-      }
-
-      // Create a new ride model with updated fields
-      final updatedRide = RideModel(
-        id: currentRide.id,
-        userId: currentRide.userId,
-        vehicleId: currentRide.vehicleId,
-        status: fields['status'] ?? currentRide.status,
-        startedAt: currentRide.startedAt,
-        startCoordinates: currentRide.startCoordinates,
-        endCoordinates: fields['endCoordinates'] ?? currentRide.endCoordinates,
-        endedAt: fields['endedAt'] ?? currentRide.endedAt,
-        totalDistance: fields['totalDistance'] ?? currentRide.totalDistance,
-        totalTime: fields['totalTime'] ?? currentRide.totalTime,
-        totalGEMCoins: fields['totalGEMCoins'] ?? currentRide.totalGEMCoins,
-        rideMemories: updatedRideMemories ?? currentRide.rideMemories,
-        rideTitle: fields['rideTitle'] ?? currentRide.rideTitle,
-        rideDescription: fields['rideDescription'] ?? currentRide.rideDescription,
-        topSpeed: fields['topSpeed'] ?? currentRide.topSpeed,
-        averageSpeed: fields['averageSpeed'] ?? currentRide.averageSpeed,
-        routePoints: updatedRoutePoints ?? currentRide.routePoints,
+  /// 🔹 Save ride locally using Hive
+  Future<void> saveRide(RideEntity rideEntity) async {
+    try {
+      if (_ridesBox == null || _userRidesBox == null) await init();
+      
+      // Convert entity to model for Hive storage
+      final rideModel = RideModel(
+        id: rideEntity.id,
+        userId: rideEntity.userId,
+        vehicleId: rideEntity.vehicleId,
+        status: rideEntity.status,
+        startedAt: rideEntity.startedAt,
+        startCoordinates: rideEntity.startCoordinates,
+        endCoordinates: rideEntity.endCoordinates,
+        endedAt: rideEntity.endedAt,
+        totalDistance: rideEntity.totalDistance,
+        totalTime: rideEntity.totalTime,
+        totalGEMCoins: rideEntity.totalGEMCoins,
+        rideMemories: rideEntity.rideMemories,
+        rideTitle: rideEntity.rideTitle,
+        rideDescription: rideEntity.rideDescription,
+        topSpeed: rideEntity.topSpeed,
+        averageSpeed: rideEntity.averageSpeed,
+        routePoints: rideEntity.routePoints,
+        isPublic: rideEntity.isPublic,
       );
-      await saveRide(updatedRide);
+
+      // Store ride with ride ID as key
+      await _ridesBox!.put(_getRideKey(rideEntity.id), rideModel);
+      
+      // Also store ride ID in user's ride list for easy retrieval
+      final userRidesKey = _getUserRidesKey(rideEntity.userId);
+      final existingRides = _userRidesBox!.get(userRidesKey, defaultValue: <String>[]) ?? [];
+      
+      if (!existingRides.contains(rideEntity.id)) {
+        existingRides.add(rideEntity.id);
+        await _userRidesBox!.put(userRidesKey, existingRides);
+      }
+    } catch (e) {
+      throw DataException('Failed to save ride locally: $e');
     }
+  }
+
+  /// 🔹 Get ride locally by ride ID
+  Future<RideEntity?> getRide(String rideId) async {
+    try {
+      if (_ridesBox == null) await init();
+      
+      final rideModel = _ridesBox!.get(_getRideKey(rideId));
+      return rideModel;
+    } catch (e) {
+      throw DataException('Failed to get ride locally: $e');
+    }
+  }
+
+  /// 🔹 Get all rides for a specific user
+  Future<List<RideEntity>> getUserRides(String userId) async {
+    try {
+      if (_ridesBox == null || _userRidesBox == null) await init();
+      
+      final userRidesKey = _getUserRidesKey(userId);
+      final rideIds = _userRidesBox!.get(userRidesKey, defaultValue: <String>[]) ?? [];
+      
+      final rides = <RideEntity>[];
+      for (final rideId in rideIds) {
+        final ride = _ridesBox!.get(_getRideKey(rideId));
+        if (ride != null) {
+          rides.add(ride);
+        }
+      }
+      
+      // Sort by startedAt descending (most recent first)
+      rides.sort((a, b) => b.startedAt.compareTo(a.startedAt));
+      
+      return rides;
+    } catch (e) {
+      throw DataException('Failed to get user rides locally: $e');
+    }
+  }
+
+  /// 🔹 Clear all rides for a specific user
+  Future<void> clearRide(String userId) async {
+    try {
+      if (_ridesBox == null || _userRidesBox == null) await init();
+      
+      final userRidesKey = _getUserRidesKey(userId);
+      final rideIds = _userRidesBox!.get(userRidesKey, defaultValue: <String>[]) ?? [];
+      
+      // Remove individual ride entries
+      for (final rideId in rideIds) {
+        await _ridesBox!.delete(_getRideKey(rideId));
+      }
+      
+      // Remove user's ride list
+      await _userRidesBox!.delete(userRidesKey);
+    } catch (e) {
+      throw DataException('Failed to clear rides for user: $e');
+    }
+  }
+
+  /// 🔹 Clear a specific ride
+  Future<void> clearSpecificRide(String rideId) async {
+    try {
+      if (_ridesBox == null || _userRidesBox == null) await init();
+      
+      // Get the ride to find the user ID
+      final ride = _ridesBox!.get(_getRideKey(rideId));
+      if (ride != null) {
+        // Remove from user's ride list
+        final userRidesKey = _getUserRidesKey(ride.userId);
+        final rideIds = _userRidesBox!.get(userRidesKey, defaultValue: <String>[]) ?? [];
+        rideIds.remove(rideId);
+        await _userRidesBox!.put(userRidesKey, rideIds);
+      }
+      
+      // Remove the ride entry
+      await _ridesBox!.delete(_getRideKey(rideId));
+    } catch (e) {
+      throw DataException('Failed to clear specific ride: $e');
+    }
+  }
+
+  /// 🔹 Clear all rides (use with caution)
+  Future<void> clearAllRides() async {
+    try {
+      if (_ridesBox == null || _userRidesBox == null) await init();
+      await _ridesBox!.clear();
+      await _userRidesBox!.clear();
+    } catch (e) {
+      throw DataException('Failed to clear all rides: $e');
+    }
+  }
+
+  /// 🔹 Close the Hive boxes
+  Future<void> close() async {
+    await _ridesBox?.close();
+    await _userRidesBox?.close();
   }
 }

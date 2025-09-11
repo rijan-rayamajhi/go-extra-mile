@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:io';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -19,6 +21,14 @@ class PrimaryButton extends StatelessWidget {
     this.iconImage,
   });
 
+  void _handlePress() {
+    // Provide haptic feedback for iOS users
+    if (Platform.isIOS) {
+      HapticFeedback.lightImpact();
+    }
+    onPressed();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
@@ -35,7 +45,7 @@ class PrimaryButton extends StatelessWidget {
         ),
         minimumSize: const Size(buttonWidth,buttonHeight),
       ),
-      onPressed: onPressed,
+      onPressed: _handlePress,
       child: isLoading 
         ?  CircularProgressIndicator(
             color: Theme.of(context).colorScheme.onPrimary,

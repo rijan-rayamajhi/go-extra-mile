@@ -50,28 +50,22 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) async {
     try {
-      print('ProfileBloc: Starting profile update for user ${event.profile.uid}');
-      print('ProfileBloc: Current privateProfile value: ${event.profile.privateProfile}');
       
       emit(ProfileUpdating(event.profile));
       
       await _updateProfile(event.profile, event.profilePhotoImageFile);
       
-      print('ProfileBloc: Profile update completed, fetching refreshed profile');
       
       // Fetch the latest profile from the backend to ensure computed fields are up-to-date
       final refreshedProfile = await _getProfile(event.profile.uid);
       
       if (refreshedProfile != null) {
-        print('ProfileBloc: Refreshed profile privateProfile value: ${refreshedProfile.privateProfile}');
         emit(ProfileUpdated(refreshedProfile));
       } else {
-        print('ProfileBloc: Failed to refresh profile, using event profile');
         // Fallback to the event profile if refresh fails
         emit(ProfileUpdated(event.profile));
       }
     } catch (e) {
-      print('ProfileBloc: Error updating profile: $e');
       emit(ProfileError(e.toString()));
     }
   }

@@ -3,10 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_extra_mile_new/features/notification/data/notification_model.dart';
 
 abstract class NotificationRemoteDataSource {
-  Future<List<NotificationModel>> getNotifications();
+  Future<List<NotificationModel>> getNotifications(String userId);
   Future<NotificationModel> getNotificationById(String id);
   Future<void> markAsRead(String id);
-  Future<void> markAllAsRead();
+  Future<void> markAllAsRead(String userId);
+  Future<void> deleteNotification(String id);
+  Future<String> getUnreadNotification(String userId);
 }
 
 class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
@@ -14,41 +16,134 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
 
   NotificationRemoteDataSourceImpl({required this.firestore});
 
-  CollectionReference get _notificationCollection =>
-      firestore.collection('notifications');
-
   @override
-  Future<List<NotificationModel>> getNotifications() async {
-    final snapshot = await _notificationCollection
-        .orderBy('time', descending: true)
+  Future<List<NotificationModel>> getNotifications(String userId) async {
+    // Get notifications from user's notifications subcollection
+    final snapshot = await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .orderBy('createdAt', descending: true)
         .get();
-
-    return snapshot.docs
-        .map((doc) =>
-            NotificationModel.fromMap(doc.data() as Map<String, dynamic>, id: doc.id))
+    
+    // Convert Firestore documents to NotificationModel objects
+    final notifications = snapshot.docs
+        .map((doc) => NotificationModel.fromMap(
+              doc.data(),
+              id: doc.id,
+            ))
         .toList();
+    
+    return notifications;
   }
 
   @override
   Future<NotificationModel> getNotificationById(String id) async {
-    final doc = await _notificationCollection.doc(id).get();
-    if (!doc.exists) throw Exception('Notification not found');
-    return NotificationModel.fromMap(doc.data() as Map<String, dynamic>, id: doc.id);
+    // Extract user ID from notification ID
+    final parts = id.split('_');
+    if (parts.length < 3) {
+      throw Exception('Invalid notification ID format');
+    }
+    
+    final userId = parts[0];
+    
+    // Get notification directly from user's notifications subcollection
+    final doc = await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .doc(id)
+        .get();
+    
+    if (!doc.exists) {
+      throw Exception('Notification not found');
+    }
+    
+    return NotificationModel.fromMap(doc.data()!, id: doc.id);
   }
 
   @override
   Future<void> markAsRead(String id) async {
-    await _notificationCollection.doc(id).update({'isRead': true});
+    // Extract user ID from notification ID
+    final parts = id.split('_');
+    if (parts.length < 3) {
+      throw Exception('Invalid notification ID format');
+    }
+    
+    final userId = parts[0];
+    
+    // Update notification directly in user's notifications subcollection
+    await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .doc(id)
+        .update({
+      'isRead': true,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   @override
-  Future<void> markAllAsRead() async {
-    final snapshot = await _notificationCollection.get();
+  Future<void> markAllAsRead(String userId) async {
+    final snapshot = await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .where('isRead', isEqualTo: false)
+        .get();
+    
     final batch = firestore.batch();
+    bool hasUpdates = false;
 
     for (var doc in snapshot.docs) {
-      batch.update(doc.reference, {'isRead': true});
+      batch.update(doc.reference, {
+        'isRead': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      hasUpdates = true;
     }
-    await batch.commit();
+    
+    if (hasUpdates) {
+      await batch.commit();
+    }
   }
+
+  @override
+  Future<void> deleteNotification(String id) async {
+    // The notification ID contains the user ID, so we can extract it
+    // Format: {userId}_{type}_{timestamp}
+    final parts = id.split('_');
+    if (parts.length < 3) {
+      throw Exception('Invalid notification ID format');
+    }
+    
+    final userId = parts[0];
+    print('Deleting notification: $id for user: $userId');
+    
+    // Delete directly from user's notifications subcollection
+    await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .doc(id)
+        .delete();
+    
+    print('Notification deleted successfully: $id');
+  }
+
+
+  @override
+  Future<String> getUnreadNotification(String userId) async {
+    final snapshot = await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .where('isRead', isEqualTo: false)
+        .get();
+    
+    return snapshot.docs.length.toString();
+  }
+
+
 }

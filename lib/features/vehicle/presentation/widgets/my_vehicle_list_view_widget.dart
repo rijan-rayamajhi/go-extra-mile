@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entiry.dart';
-import 'package:go_extra_mile_new/features/vehicle/presentation/screens/my_vehicle_verification_screen.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/screens/my_vehicle_details_screen.dart';
 
 
 class MyVehicleListViewWidget extends StatelessWidget {
@@ -29,7 +29,7 @@ class MyVehicleListViewWidget extends StatelessWidget {
   }) {
     return GestureDetector(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => MyVehicleVerificationScreen(vehicle: vehicle,)));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MyVehicleDetailsScreen(vehicleId: vehicle.id,)));
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),

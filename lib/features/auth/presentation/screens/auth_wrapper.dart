@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
+import 'package:go_extra_mile_new/common/screens/loading_screen.dart';
+import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
+import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_bloc.dart';
+import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_event.dart';
+import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_state.dart';
+import 'package:go_extra_mile_new/features/auth/presentation/screens/account_deleted_screen.dart';
+import 'package:go_extra_mile_new/features/main_screen.dart';
 import 'auth_screen.dart';
-import '../../../main_screen.dart';
 import '../../../referral/presentation/screens/referral_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
@@ -19,51 +22,43 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void initState() {
     super.initState();
     // Trigger authentication check when widget is created
-    context.read<AuthBloc>().add(CheckAuthStatusEvent());
+    context.read<KAuthBloc>().add(KCheckAuthStatusEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocConsumer<KAuthBloc, KAuthState>(
+      listener: (context, state) {
+        if (state is KAuthFailure) {
+          // AppSnackBar.error(context, 'Something went wrong');
+        }
+      },
       builder: (context, state) {
-        // Debug: Print current state
-        
-        // Show loading while checking authentication or during logout
-        if (state is AuthInitial || state is AuthLoading) {
-          return const Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    strokeWidth: 2,
-                  ),
-                  SizedBox(height: 16),
-                  Text('Please wait...'),
-                ],
-              ),
-            ),
-          );
-        }
-        
-        // If authenticated and referral step completed, go to main screen
-        if (state is AuthAuthenticated) {
-          return const MainScreen();
-        }
-        
-        // If authenticated but needs to complete referral step, show referral screen
-        if (state is AuthNeedsReferral) {
-          return ReferralScreen();
-        }
-        
-        // If not authenticated or account deleted, show auth screen
-        if (state is AuthUnauthenticated) {
+        if (state is KAuthInitial) {
           return const AuthScreen();
         }
-        
+
+        // Show loading while checking authentication or during logout
+        if (state is KAuthLoading) {
+          return LoadingScreen();
+        }
+        // Handle deleted account
+        if (state is KAuthDeletedUser) {
+          return const AccountDeletedScreen();
+        }
+
+        // Handle new user - redirect to referral screen
+        if (state is KAuthNewUser) {
+          return const ReferralScreen();
+        }
+
+        // Legacy authenticated state (fallback to main screen)
+        if (state is KAuthAuthenticated) {
+          return const MainScreen();
+        }
         // For any other state (like AuthFailure), show auth screen as fallback
         return const AuthScreen();
       },
     );
   }
-} 
+}

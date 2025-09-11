@@ -77,8 +77,6 @@ class RideCaptureMemoriesButton extends StatelessWidget {
           // 3. Update ride state with new memory
           // 4. Store the download URL for future use
           
-          print('Memory uploaded successfully! Download URL: $downloadUrl');
-          print('Storage path: $storagePath');
           
         } catch (uploadError) {
           // Handle upload errors
@@ -88,7 +86,6 @@ class RideCaptureMemoriesButton extends StatelessWidget {
               'Failed to upload memory: ${uploadError.toString()}',
             );
           }
-          print('Upload error: $uploadError');
         }
       }
     } catch (e) {

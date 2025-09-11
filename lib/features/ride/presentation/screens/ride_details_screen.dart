@@ -3,13 +3,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_entity.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_section.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_info_row.dart';
 import 'package:go_extra_mile_new/core/service/location_service.dart'
     as location_service;
 import 'package:share_plus/share_plus.dart';
+import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entiry.dart';
+import 'package:go_extra_mile_new/features/vehicle/domain/repositories/vehicle_repository.dart';
+import 'package:go_extra_mile_new/core/di/injection_container.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class RideDetailsScreen extends StatefulWidget {
   final RideEntity ride;
@@ -27,6 +30,11 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
   String? _startAddress;
   String? _endAddress;
   bool _isLoadingAddresses = false;
+  
+  // Vehicle state management
+  VehicleEntity? _vehicle;
+  bool _isLoadingVehicle = false;
+  bool _vehicleNotFound = false;
 
   Set<Marker> get _markers {
     if (_routePoints.isEmpty) return {};
@@ -133,6 +141,53 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     }
   }
 
+  Future<void> _loadVehicle() async {
+    setState(() {
+      _isLoadingVehicle = true;
+      _vehicleNotFound = false;
+    });
+
+    try {
+      final vehicleRepository = sl<VehicleRepository>();
+      final result = await vehicleRepository.getUserVehicles(widget.ride.userId);
+      
+      result.fold(
+        (exception) {
+          if (mounted) {
+            setState(() {
+              _vehicleNotFound = true;
+              _isLoadingVehicle = false;
+            });
+          }
+        },
+        (vehicles) {
+          if (mounted) {
+            try {
+              final vehicle = vehicles.firstWhere((v) => v.id == widget.ride.vehicleId);
+              setState(() {
+                _vehicle = vehicle;
+                _isLoadingVehicle = false;
+              });
+            } catch (e) {
+              // Vehicle not found in user's vehicles
+              setState(() {
+                _vehicleNotFound = true;
+                _isLoadingVehicle = false;
+              });
+            }
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _vehicleNotFound = true;
+          _isLoadingVehicle = false;
+        });
+      }
+    }
+  }
+
   Future<void> _shareRideDetails() async {
     try {
       final ride = widget.ride;
@@ -169,9 +224,12 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
 
       // GEM Coins
       final gemCoins =
-          ride.totalGEMCoins?.toStringAsFixed(0) ??
-          (ride.totalDistance?.floor().toString() ?? '0');
-      rideSummary += '💎 GEM Coins: $gemCoins\n\n';
+          ride.totalGEMCoins?.toStringAsFixed(2) ??
+          ((ride.totalDistance ?? 0) / 1000).toStringAsFixed(2);
+      rideSummary += '💎 GEM Coins: $gemCoins\n';
+      
+      // Privacy Status
+      rideSummary += '🔒 Privacy: ${(ride.isPublic ?? true) ? "Public" : "Private"}\n\n';
 
       // Route info
       rideSummary += '🗺️ Route\n';
@@ -209,6 +267,193 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           .toList();
     }
     _loadAddresses();
+    _loadVehicle();
+  }
+
+  Widget _buildVehicleCard() {
+    if (_isLoadingVehicle) {
+      return Container(
+        padding: const EdgeInsets.all(screenPadding),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.black.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_vehicleNotFound || _vehicle == null) {
+      return Container(
+        padding: const EdgeInsets.all(screenPadding),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.black.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.directions_bike,
+                size: 30,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Vehicle Information',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Vehicle details not available',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(screenPadding),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Vehicle brand image
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _vehicle!.vehicleBrandImage.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: _vehicle!.vehicleBrandImage,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey.shade200,
+                        child: Icon(
+                          Icons.directions_bike,
+                          size: 30,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey.shade200,
+                      child: Icon(
+                        Icons.directions_bike,
+                        size: 30,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Vehicle details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${_vehicle!.vehicleBrandName} ${_vehicle!.vehicleModelName}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _vehicle!.vehicleRegistrationNumber,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _vehicle!.vehicleType,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Verification status
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _vehicle!.verificationStatus == VehicleVerificationStatus.verified
+                  ? Colors.green.shade100
+                  : Colors.orange.shade100,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _vehicle!.verificationStatus == VehicleVerificationStatus.verified
+                    ? Colors.green.shade300
+                    : Colors.orange.shade300,
+              ),
+            ),
+            child: Text(
+              _vehicle!.verificationStatus == VehicleVerificationStatus.verified
+                  ? 'Verified'
+                  : 'Pending',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: _vehicle!.verificationStatus == VehicleVerificationStatus.verified
+                    ? Colors.green.shade700
+                    : Colors.orange.shade700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -280,13 +525,58 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.ride.rideTitle ?? "Untitled Ride",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade800,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.ride.rideTitle ?? "Untitled Ride",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ),
+                      // Privacy Status Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: (widget.ride.isPublic ?? true) 
+                              ? Colors.green.shade100 
+                              : Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: (widget.ride.isPublic ?? true) 
+                                ? Colors.green.shade300 
+                                : Colors.orange.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              (widget.ride.isPublic ?? true) ? Icons.public : Icons.lock,
+                              size: 16,
+                              color: (widget.ride.isPublic ?? true) 
+                                  ? Colors.green.shade700 
+                                  : Colors.orange.shade700,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              (widget.ride.isPublic ?? true) ? 'Public' : 'Private',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: (widget.ride.isPublic ?? true) 
+                                    ? Colors.green.shade700 
+                                    : Colors.orange.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -301,6 +591,11 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                 ],
               ),
             ),
+
+            const SizedBox(height: 16),
+
+            // Vehicle Information Card
+            _buildVehicleCard(),
 
             const SizedBox(height: 16),
 
@@ -467,7 +762,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                         ),
                       ),
                       Text(
-                        "${widget.ride.totalGEMCoins?.toStringAsFixed(0) ?? (widget.ride.totalDistance?.floor() ?? 0)} GEM Coins",
+                        "${widget.ride.totalGEMCoins?.toStringAsFixed(2) ?? ((widget.ride.totalDistance ?? 0) / 1000).toStringAsFixed(2)} GEM Coins",
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,

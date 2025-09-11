@@ -6,7 +6,6 @@ import 'package:go_extra_mile_new/common/widgets/app_bar_widget.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/core/utils/image_picker_utils.dart';
 import 'package:go_extra_mile_new/core/utils/text_validators.dart';
-import 'package:go_extra_mile_new/core/utils/date_picker_utils.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
 import 'package:go_extra_mile_new/features/license/presentation/screens/my_driving_license_screen.dart';
 import 'package:go_extra_mile_new/features/profile/domain/entities/profile_entity.dart';
@@ -59,6 +58,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   DateTime? _selectedDob;
   String? _selectedGender;
   String? _selectedAddress;
+  bool _showInstagram = true;
+  bool _showYoutube = true;
+  bool _showWhatsapp = true;
   @override
   void initState() {
     super.initState();
@@ -79,6 +81,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _selectedDob = widget.profile.dateOfBirth;
     _selectedGender = widget.profile.gender;
     _selectedAddress = widget.profile.address;
+    _showInstagram = widget.profile.showInstagram ?? true;
+    _showYoutube = widget.profile.showYoutube ?? true;
+    _showWhatsapp = widget.profile.showWhatsapp ?? true;
   }
 
   @override
@@ -335,6 +340,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       instagramLink: _instagramController.text.trim().isEmpty ? null : _instagramController.text.trim(),
       youtubeLink: _youtubeController.text.trim().isEmpty ? null : _youtubeController.text.trim(),
       whatsappLink: _whatsappController.text.trim().isEmpty ? null : _whatsappController.text.trim(),
+      showInstagram: _showInstagram,
+      showYoutube: _showYoutube,
+      showWhatsapp: _showWhatsapp,
       // Note: Other fields like totalGemCoins, totalRide, interests, referralCode, etc.
       // are not included as they are not being edited in this screen
       // The repository will handle partial updates by only updating non-null fields
@@ -703,26 +711,206 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildInstagramSection() {
-    return EditProfileInstagramField(
-      controller: _instagramController,
-      validationError: _instagramValidationError,
-      onChanged: _onInstagramChanged,
+    final bool hasInstagramLink = _instagramController.text.trim().isNotEmpty;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Instagram',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            if (hasInstagramLink) ...[
+              Row(
+                children: [
+                  Text(
+                    _showInstagram ? 'Show' : 'Hide',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _showInstagram 
+                          ? Theme.of(context).colorScheme.primary 
+                          : Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Switch(
+                    value: _showInstagram,
+                    onChanged: (value) {
+                      setState(() {
+                        _showInstagram = value;
+                      });
+                    },
+                    activeColor: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+              ),
+            ] else ...[
+              Text(
+                'Add link to enable',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        EditProfileInstagramField(
+          controller: _instagramController,
+          validationError: _instagramValidationError,
+          onChanged: (value) {
+            _onInstagramChanged(value);
+            // Update visibility toggle when field content changes
+            setState(() {
+              if (value.trim().isEmpty) {
+                _showInstagram = true; // Reset to show when field is empty
+              }
+            });
+          },
+        ),
+      ],
     );
   }
 
   Widget _buildYoutubeSection() {
-    return EditProfileYoutubeField(
-      controller: _youtubeController,
-      validationError: _youtubeValidationError,
-      onChanged: _onYoutubeChanged,
+    final bool hasYoutubeLink = _youtubeController.text.trim().isNotEmpty;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'YouTube',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            if (hasYoutubeLink) ...[
+              Row(
+                children: [
+                  Text(
+                    _showYoutube ? 'Show' : 'Hide',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _showYoutube 
+                          ? Theme.of(context).colorScheme.primary 
+                          : Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Switch(
+                    value: _showYoutube,
+                    onChanged: (value) {
+                      setState(() {
+                        _showYoutube = value;
+                      });
+                    },
+                    activeColor: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+              ),
+            ] else ...[
+              Text(
+                'Add link to enable',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        EditProfileYoutubeField(
+          controller: _youtubeController,
+          validationError: _youtubeValidationError,
+          onChanged: (value) {
+            _onYoutubeChanged(value);
+            // Update visibility toggle when field content changes
+            setState(() {
+              if (value.trim().isEmpty) {
+                _showYoutube = true; // Reset to show when field is empty
+              }
+            });
+          },
+        ),
+      ],
     );
   }
 
   Widget _buildWhatsappSection() {
-    return EditProfileWhatsappField(
-      controller: _whatsappController,
-      validationError: _whatsappValidationError,
-      onChanged: _onWhatsappChanged,
+    final bool hasWhatsappLink = _whatsappController.text.trim().isNotEmpty;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'WhatsApp Number',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            if (hasWhatsappLink) ...[
+              Row(
+                children: [
+                  Text(
+                    _showWhatsapp ? 'Show' : 'Hide',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _showWhatsapp 
+                          ? Theme.of(context).colorScheme.primary 
+                          : Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Switch(
+                    value: _showWhatsapp,
+                    onChanged: (value) {
+                      setState(() {
+                        _showWhatsapp = value;
+                      });
+                    },
+                    activeColor: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+              ),
+            ] else ...[
+              Text(
+                'Add number to enable',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        EditProfileWhatsappField(
+          controller: _whatsappController,
+          validationError: _whatsappValidationError,
+          onChanged: (value) {
+            _onWhatsappChanged(value);
+            // Update visibility toggle when field content changes
+            setState(() {
+              if (value.trim().isEmpty) {
+                _showWhatsapp = true; // Reset to show when field is empty
+              }
+            });
+          },
+        ),
+      ],
     );
   }
 }

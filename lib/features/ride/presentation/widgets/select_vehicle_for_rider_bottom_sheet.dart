@@ -1,16 +1,16 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:uuid/uuid.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_screen.dart';
 import 'package:go_extra_mile_new/core/service/location_service.dart';
-import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_bloc.dart';
-import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_event.dart';
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_entity.dart';
 import 'package:go_extra_mile_new/core/di/injection_container.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_bloc.dart';
@@ -20,10 +20,12 @@ import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entir
 
 class SelectVehicleForRiderBottomSheet extends StatefulWidget {
   final Function(int)? onVehicleSelected;
+  // final VoidCallback? onTakeOdometerPicture;
 
   const SelectVehicleForRiderBottomSheet({
     super.key,
     this.onVehicleSelected,
+    // this.onTakeOdometerPicture,
   });
 
   @override
@@ -37,6 +39,8 @@ class _SelectVehicleForRiderBottomSheetState
   int _currentIndex = 0;
   final LocationService _locationService = LocationService();
   bool _isLoading = false;
+  File? _odometerPicture;
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -62,6 +66,27 @@ class _SelectVehicleForRiderBottomSheetState
       );
       // Call the callback when a vehicle is selected
       widget.onVehicleSelected?.call(index);
+    }
+  }
+
+  Future<void> _captureOdometerImage() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      );
+      
+      if (image != null) {
+        setState(() {
+          _odometerPicture = File(image.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.error(context, 'Failed to capture image: $e');
+      }
     }
   }
 
@@ -104,9 +129,8 @@ class _SelectVehicleForRiderBottomSheetState
         startCoordinates: GeoPoint(position.latitude, position.longitude),
       );
 
-      // Dispatch StartRideEvent through RideBloc
-      final rideBloc = sl<RideBloc>();
-      rideBloc.add(StartRideEvent(rideEntity: rideEntity));
+      // Note: Ride will be started when navigating to RideScreen
+      // The RideEntity is passed directly to the screen
       
       if (mounted) {
         // Navigate to ride screen
@@ -134,6 +158,7 @@ class _SelectVehicleForRiderBottomSheetState
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -411,14 +436,15 @@ class _SelectVehicleForRiderBottomSheetState
 
                 const SizedBox(height: 20),
 
-                SizedBox(
-                  width: 200,
-                  child: PrimaryButton(
-                    text: _isLoading ? 'Starting...' : 'Start Ride',
-                    onPressed: _isLoading ? () {} : () => _startRide(vehicles),
-                    icon: Icons.motorcycle,
-                  ),
-                ),
+                // Row with both buttons
+                 SizedBox(
+                      width: 200,
+                      child: PrimaryButton(
+                        text: _isLoading ? 'Starting...' : 'Start Ride',
+                        onPressed: _isLoading ? () {} : () => _startRide(vehicles),
+                        icon: Icons.motorcycle,
+                      ),
+                    ),
               ],
             ),
           ),

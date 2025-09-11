@@ -34,6 +34,8 @@ class RideStatsWidget extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           value,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: Theme.of(context).colorScheme.onSurface,
@@ -44,6 +46,8 @@ class RideStatsWidget extends StatelessWidget {
         Text(
           label,
           textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurface,
             height: 1.2,

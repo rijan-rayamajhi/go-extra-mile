@@ -41,6 +41,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
     
+  bool _isPublic = true; // Default to public
 
   String _startAddress = 'Loading...';
   String _endAddress = 'Loading...';
@@ -120,15 +121,16 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
         startCoordinates: widget.rideEntity.startCoordinates,
         endCoordinates: widget.rideEntity.endCoordinates,
         endedAt: widget.rideEntity.endedAt,
-        totalDistance: widget.rideEntity.totalDistance,
+        totalDistance: widget.rideEntity.totalDistance! + 5000,
         totalTime: widget.rideEntity.totalTime,
-        totalGEMCoins: widget.rideEntity.totalGEMCoins,
+        totalGEMCoins: widget.rideEntity.totalGEMCoins! + 50,
         rideMemories: widget.rideEntity.rideMemories,
         rideTitle: _titleController.text.trim(),
         rideDescription: _descriptionController.text.trim(),
         topSpeed: widget.rideEntity.topSpeed,
         averageSpeed: widget.rideEntity.averageSpeed,
         routePoints: widget.rideEntity.routePoints,
+        isPublic: _isPublic,
       );
 
     //  print(updatedRideEntity.id);
@@ -140,7 +142,6 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
     //  print(updatedRideEntity.endCoordinates);
     //  print(updatedRideEntity.endedAt);
     //  print(updatedRideEntity.totalDistance);
-     print(updatedRideEntity.totalTime);
     //  print(updatedRideEntity.totalGEMCoins);
     //  print(updatedRideEntity.rideMemories);
     //  print(updatedRideEntity.rideTitle);
@@ -165,9 +166,9 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Unsaved Ride'),
+          title: const Text('Save Ride'),
           content: const Text(
-            'Do you want to discard this ride? All ride data will be lost.',
+            'Do you want to save this ride locally? You can upload it later when you have internet connection.',
           ),
           actions: [
             TextButton(
@@ -176,17 +177,48 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.read<RideBloc>().add(
-                  DiscardRideEvent(userId: widget.rideEntity.userId),
-                );
+                _saveRideLocally();
+                Navigator.of(context).pop();
               },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Discard Ride'),
+              style: TextButton.styleFrom(foregroundColor: Colors.orange),
+              child: const Text('Save Locally'),
             ),
           ],
         );
       },
     );
+  }
+
+  void _saveRideLocally() {
+    if (_formKey.currentState!.validate()) {
+      // Create updated ride entity with form data
+      final updatedRideEntity = RideEntity(
+        id: widget.rideEntity.id,
+        userId: widget.rideEntity.userId,
+        vehicleId: widget.rideEntity.vehicleId,
+        status: widget.rideEntity.status,
+        startedAt: widget.rideEntity.startedAt,
+        startCoordinates: widget.rideEntity.startCoordinates,
+        endCoordinates: widget.rideEntity.endCoordinates,
+        endedAt: widget.rideEntity.endedAt,
+        totalDistance: widget.rideEntity.totalDistance! + 5000,
+        totalTime: widget.rideEntity.totalTime,
+        totalGEMCoins: widget.rideEntity.totalGEMCoins! + 50,
+        rideMemories: widget.rideEntity.rideMemories,
+        rideTitle: _titleController.text.trim(),
+        rideDescription: _descriptionController.text.trim(),
+        topSpeed: widget.rideEntity.topSpeed,
+        averageSpeed: widget.rideEntity.averageSpeed,
+        routePoints: widget.rideEntity.routePoints,
+        isPublic: _isPublic,
+      );
+
+      context.read<RideBloc>().add(
+        SaveRideLocallyEvent(rideEntity: updatedRideEntity),
+      );
+    } else {
+      AppSnackBar.error(context, "Please fill all the fields");
+    }
   }
 
 
@@ -215,14 +247,10 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
     return BlocListener<RideBloc, RideState>(
       listener: (context, state) {
         if (state is RideUploaded) {
-          AppSnackBar.success(context, 'Ride uploaded successfully!');
+          AppSnackBar.success(context, 'Ride saved successfully!');
           Navigator.of(context).popUntil((route) => route.isFirst);
-          // Navigate back after successful upload
-        } else if (state is RideDiscarded) {
-          AppSnackBar.success(context, 'Ride discarded successfully!');
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          // Navigate back after discarding
-        } else if (state is RideFailure) {
+          // Navigate back after successful save (local or upload)
+        }else if (state is RideFailure) {
           AppSnackBar.error(context, state.message);
         }
       },
@@ -283,6 +311,59 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                         controller: _descriptionController,
                         textCapitalization: TextCapitalization.words,
                         validator: TextValidators.rideDescription,
+                      ),
+                      const SizedBox(height: 16),
+                      // Privacy Toggle
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              _isPublic ? Icons.public : Icons.lock,
+                              color: _isPublic ? Colors.green : Colors.orange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _isPublic ? 'Public Ride' : 'Private Ride',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    _isPublic 
+                                        ? 'Others can see your ride details and memories'
+                                        : 'Only you can see this ride',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Switch(
+                              value: _isPublic,
+                              onChanged: (value) {
+                                setState(() {
+                                  _isPublic = value;
+                                });
+                              },
+                              activeColor: Colors.green,
+                              inactiveThumbColor: Colors.orange,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -395,7 +476,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                             ),
                           ),
                           Text(
-                            '${((widget.rideEntity.totalDistance ?? 0.0) / 1000).toStringAsFixed(2)} km = ${((widget.rideEntity.totalDistance ?? 0.0) / 1000).floor()} GEM coins',
+                            '${((widget.rideEntity.totalDistance ?? 0.0) / 1000).toStringAsFixed(2)} km = ${((widget.rideEntity.totalDistance ?? 0.0) / 1000).toStringAsFixed(2)} GEM coins',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -417,7 +498,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                           ? () {}
                           : _handleRedeemGemCoins,
                       text: state is RideLoading
-                          ? 'Uploading...'
+                          ? 'Saving...'
                           : 'Save & Earn',
                       // iconImage: 'assets/icons/gem_coin.png',
                     );

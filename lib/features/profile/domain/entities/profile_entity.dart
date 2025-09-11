@@ -20,6 +20,9 @@ class ProfileEntity extends Equatable {
   final String? instagramLink;
   final String? youtubeLink;
   final String? whatsappLink;
+  final bool? showInstagram;
+  final bool? showYoutube;
+  final bool? showWhatsapp;
   final String? referralCode;
    
   const ProfileEntity({
@@ -42,11 +45,14 @@ class ProfileEntity extends Equatable {
     this.instagramLink,
     this.youtubeLink,
     this.whatsappLink,
+    this.showInstagram,
+    this.showYoutube,
+    this.showWhatsapp,
     this.referralCode,
   });
 
   @override
-  List<Object?> get props => [uid, displayName, email, photoUrl, userName, gender, totalGemCoins, dateOfBirth, privateProfile, totalDistance, totalRide, createdAt, updatedAt, bio, interests, address, instagramLink, youtubeLink, whatsappLink, referralCode];
+  List<Object?> get props => [uid, displayName, email, photoUrl, userName, gender, totalGemCoins, dateOfBirth, privateProfile, totalDistance, totalRide, createdAt, updatedAt, bio, interests, address, instagramLink, youtubeLink, whatsappLink, showInstagram, showYoutube, showWhatsapp, referralCode];
 }
 
 

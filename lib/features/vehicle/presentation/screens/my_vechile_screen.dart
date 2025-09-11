@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:go_extra_mile_new/core/di/injection_container.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_bloc.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_event.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_state.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/screens/my_vehicle_no_vehicle_screen.dart';
-import 'package:go_extra_mile_new/features/vehicle/presentation/screens/my_vehicle_details_screen.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/screens/my_vehicle_list_screen.dart';
 
 class MyVehicleScreen extends StatefulWidget {
   const MyVehicleScreen({super.key});
@@ -16,24 +15,6 @@ class MyVehicleScreen extends StatefulWidget {
 }
 
 class _MyVehicleScreenState extends State<MyVehicleScreen> {
-  
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<VehicleBloc>(),
-      child: const MyVehicleScreenContent(),
-    );
-  }
-}
-
-class MyVehicleScreenContent extends StatefulWidget {
-  const MyVehicleScreenContent({super.key});
-
-  @override
-  State<MyVehicleScreenContent> createState() => _MyVehicleScreenContentState();
-}
-
-class _MyVehicleScreenContentState extends State<MyVehicleScreenContent> {
   
   @override
   void initState() {
@@ -60,7 +41,7 @@ class _MyVehicleScreenContentState extends State<MyVehicleScreenContent> {
           );
         } else if (state is VehicleLoaded) {
           if (state.vehicles.isNotEmpty) {
-            return MyVehicleDetailsScreen(vehicles: state.vehicles);
+            return MyVehicleListScreen(vehicles: state.vehicles);
           } else {
             return const MyVehicleNoVehicleScreen();
           }

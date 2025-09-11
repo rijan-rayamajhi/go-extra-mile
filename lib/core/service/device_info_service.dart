@@ -25,6 +25,36 @@ class DeviceInfoService {
     }
   }
 
+  /// Gets a unique device identifier for tracking purposes.
+  /// Uses identifierForVendor on iOS and androidId on Android.
+  Future<String> getUniqueDeviceId() async {
+    try {
+      if (Platform.isAndroid) {
+        final androidInfo = await _deviceInfoPlugin.androidInfo;
+        final androidId = androidInfo.id;
+        if (androidId.isEmpty) {
+          // Fallback to a combination of other identifiers
+          final fallbackId = 'android_${androidInfo.model}_${androidInfo.manufacturer}_${androidInfo.fingerprint}';
+          return fallbackId.hashCode.toString();
+        }
+        return androidId;
+      } else if (Platform.isIOS) {
+        final iosInfo = await _deviceInfoPlugin.iosInfo;
+        final identifier = iosInfo.identifierForVendor;
+        if (identifier == null || identifier.isEmpty) {
+          // Fallback to a combination of other identifiers
+          final fallbackId = 'ios_${iosInfo.model}_${iosInfo.name}_${iosInfo.systemVersion}';
+          return fallbackId.hashCode.toString();
+        }
+        return identifier;
+      } else {
+        return 'unsupported_platform';
+      }
+    } catch (e) {
+      return 'error_getting_device_id_${DateTime.now().millisecondsSinceEpoch}';
+    }
+  }
+
   /// Gets detailed Android device info as a map.
   Future<Map<String, dynamic>?> getAndroidDeviceInfo() async {
     if (!Platform.isAndroid) return null;

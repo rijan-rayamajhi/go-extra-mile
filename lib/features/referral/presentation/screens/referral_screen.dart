@@ -1,11 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_extra_mile_new/common/screens/loading_screen.dart';
+import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
+import 'package:go_extra_mile_new/common/widgets/custom_text_field.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
-import 'package:go_extra_mile_new/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:go_extra_mile_new/features/auth/presentation/bloc/auth_event.dart';
-import '../bloc/referral_bloc.dart';
-import '../bloc/referral_event.dart';
-import '../bloc/referral_state.dart';
+import 'package:go_extra_mile_new/core/constants/app_constants.dart';
+import 'package:go_extra_mile_new/features/main_screen.dart';
+import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_bloc.dart';
+import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_event.dart';
+import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_state.dart';
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
+  }
+}
 
 class ReferralScreen extends StatefulWidget {
   const ReferralScreen({super.key});
@@ -24,88 +41,79 @@ class _ReferralScreenState extends State<ReferralScreen> {
     super.dispose();
   }
 
-  String? _validateReferralCode(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Please enter a unique referral code';
-    }
-    
-    final trimmedValue = value.trim();
-    
-    if (trimmedValue.length != 6) {
-      return 'Referral code must be exactly 6 characters';
-    }
-    
-    if (!RegExp(r'^[A-Z0-9]+$').hasMatch(trimmedValue)) {
-      return 'Only capital letters and numbers are allowed';
-    }
-    
-    return null;
-  }
-
-  void _handleReferralSubmit() {
-    if (!_formKey.currentState!.validate()) return;
-    
-    context.read<ReferralBloc>().add(
-      SubmitReferralCode(_referralController.text),
+  void _handleSkip() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const MainScreen()),
+      (route) => false,
     );
   }
 
-  void _handleSkip() {
-    context.read<ReferralBloc>().add(const SkipReferral());
+  void _handleReferralSubmit() {
+    if (_formKey.currentState!.validate()) {
+      context.read<ReferralBloc>().add(
+        SubmitReferralCodeEvent(_referralController.text.trim()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ReferralBloc, ReferralState>(
+    return BlocConsumer<ReferralBloc, ReferralState>(
       listener: (context, state) {
-        if (state is ReferralError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
+        if (state is ReferralSuccess) {
+          AppSnackBar.success(context, state.message);
+          // Navigate back or to next screen after successful submission
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+            (route) => false,
           );
-        } else if (state is ReferralSuccess) {
-          // Emit event to auth bloc to mark referral as completed
-          context.read<AuthBloc>().add(ReferralCompletedEvent());
-        } else if (state is ReferralSkipped) {
-          // Emit event to auth bloc to mark referral as completed
-          context.read<AuthBloc>().add(ReferralCompletedEvent());
+        } else if (state is ReferralError) {
+          AppSnackBar.error(context, state.message);
         }
       },
-      child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8, right: 16),
-                  child: TextButton(
-                    onPressed: _handleSkip,
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    ),
-                    child: const Text('Skip'),
-                  ),
+      builder: (context, state) {
+        if (state is ReferralLoading) {
+          return const Scaffold(
+            body: Center(child: LoadingScreen()),
+          );
+        }
+
+        
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            actions: [
+              TextButton(
+                onPressed: _handleSkip,
+                child: Text(
+                  'Skip',
+                  style: TextStyle(color: Colors.black.withValues(alpha: 0.5)),
                 ),
               ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
+            ],
+            actionsPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(screenPadding),
                     child: Form(
                       key: _formKey,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          //TODO : Referral Image
+                          Image.asset(
+                            'assets/images/undraw_share_1zw4.png',
+                            height: 250,
+                            width: 250,
+                          ),
                           const SizedBox(height: 32),
                           const Text(
                             'Got a referral code?',
                             style: TextStyle(
                               fontSize: 24,
-                              fontFamily: 'Gilroy',
                               fontWeight: FontWeight.w700,
                             ),
                             textAlign: TextAlign.center,
@@ -113,60 +121,50 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           const SizedBox(height: 8),
                           const Text(
                             'Enter your friend\'s referral code to get rewarded',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontFamily: 'Gilroy',
-                            ),
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 32),
-                          TextFormField(
+                          CustomTextField(
                             controller: _referralController,
-                            validator: _validateReferralCode,
+                            hintText: 'Enter your friend\'s referral code',
+                            prefixIcon: Icons.card_giftcard_outlined,
+                            maxLength: 7,
+                            showCounter: false,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter a referral code';
+                              }
+                              if (value.length != 7) {
+                                return 'Referral code must be exactly 7 characters';
+                              }
+                              // Check if it contains only letters and numbers
+                              if (!RegExp(r'^[A-Z0-9]+$').hasMatch(value)) {
+                                return 'Referral code can only contain letters and numbers';
+                              }
+                              return null;
+                            },
                             textCapitalization: TextCapitalization.characters,
-                            autofocus: false,
-                            maxLength: 6,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Gilroy',
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: 'Referral Code',
-                              hintText: 'Enter friend\'s referral code',
-                              floatingLabelBehavior: FloatingLabelBehavior.always,
-                              prefixIcon: Icon(
-                                Icons.card_giftcard_outlined,
-                              ),
-                              counterText: '',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
+                            inputFormatters: [UpperCaseTextFormatter()],
                           ),
+                          const SizedBox(height: 32),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(24),
-                child: BlocBuilder<ReferralBloc, ReferralState>(
-                  builder: (context, state) {
-                    return PrimaryButton(
-                      onPressed: _handleReferralSubmit, 
-                      text: 'Continue',
-                      isLoading: state is ReferralLoading,
-                    );
-                  },
+                Padding(
+                  padding: EdgeInsets.all(screenPadding),
+                  child: PrimaryButton(
+                    onPressed: _handleReferralSubmit,
+                    text: 'Continue',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

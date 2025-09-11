@@ -47,7 +47,6 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
       return referralCode;
     } catch (e) {
       // Log error for debugging
-      print('Error fetching referral code: $e');
       
       // Fallback: try to generate from current user UID
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -77,7 +76,6 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
 
       return _formatNumber(total.toInt());
     } catch (e) {
-      print('Error fetching total GEM coins: $e');
       return '0';
     }
   }
@@ -99,7 +97,6 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
 
       return _formatNumber(total.toInt());
     } catch (e) {
-      print('Error fetching total distance: $e');
       return '0';
     }
   }
@@ -121,7 +118,6 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
 
       return _formatNumber(total);
     } catch (e) {
-      print('Error fetching total rides: $e');
       return '0';
     }
   }

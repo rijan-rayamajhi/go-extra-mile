@@ -32,7 +32,11 @@ class VehicleError extends VehicleState {
   List<Object?> get props => [message];
 }
 
-class VehicleAdded extends VehicleState {}
+class VehicleVerificationSubmitted extends VehicleState {
+  final String message;
 
-class VehicleDeleted extends VehicleState {}
+  const VehicleVerificationSubmitted(this.message);
 
+  @override
+  List<Object?> get props => [message];
+}

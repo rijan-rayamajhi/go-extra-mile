@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../features/ride/domain/entities/ride_entity.dart';
-import '../../core/service/location_service.dart';
 
 class RideCardWidget extends StatefulWidget {
   final RideEntity ride;
@@ -26,54 +25,13 @@ class RideCardWidget extends StatefulWidget {
 }
 
 class _RideCardWidgetState extends State<RideCardWidget> {
-  final LocationService _locationService = LocationService();
-  String? _startAddress;
-  String? _endAddress;
-  bool _isLoadingAddresses = false;
 
   @override
   void initState() {
     super.initState();
-    _loadAddresses();
   }
 
-  Future<void> _loadAddresses() async {
-    setState(() {
-      _isLoadingAddresses = true;
-    });
 
-    try {
-      // Load start address
-      final startAddress = await _locationService
-          .getFormattedAddressFromCoordinates(
-            widget.ride.startCoordinates.latitude,
-            widget.ride.startCoordinates.longitude,
-          );
-
-      // Load end address if available
-      String? endAddress;
-      if (widget.ride.endCoordinates != null) {
-        endAddress = await _locationService.getFormattedAddressFromCoordinates(
-          widget.ride.endCoordinates!.latitude,
-          widget.ride.endCoordinates!.longitude,
-        );
-      }
-
-      if (mounted) {
-        setState(() {
-          _startAddress = startAddress;
-          _endAddress = endAddress;
-          _isLoadingAddresses = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingAddresses = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,135 +109,136 @@ class _RideCardWidgetState extends State<RideCardWidget> {
     );
   }
 
-  Widget _rideStat(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-      ],
-    );
-  }
+  // Widget _rideStat(String label, String value) {
+  //   return Column(
+  //     children: [
+  //       Text(
+  //         value,
+  //         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+  //       ),
+  //       const SizedBox(height: 4),
+  //       Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+  //     ],
+  //   );
+  // }
 
-  Widget _divider() {
-    return Container(height: 28, width: 1, color: Colors.grey.shade300);
-  }
+  // Widget _divider() {
+  //   return Container(height: 28, width: 1, color: Colors.grey.shade300);
+  // }
 
-  Widget _buildAddresses() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Start Point
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _startAddress ?? 'Start location',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+  // Widget _buildAddresses() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       // Start Point
+  //       Row(
+  //         children: [
+  //           Container(
+  //             width: 8,
+  //             height: 8,
+  //             decoration: BoxDecoration(
+  //               color: Colors.green,
+  //               shape: BoxShape.circle,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 8),
+  //           Expanded(
+  //             child: Text(
+  //               _startAddress ?? 'Start location',
+  //               style: const TextStyle(
+  //                 fontSize: 12,
+  //                 fontWeight: FontWeight.w500,
+  //               ),
+  //               maxLines: 2,
+  //               overflow: TextOverflow.ellipsis,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 8),
 
-        // End Point (if available)
-        if (widget.ride.endCoordinates != null) ...[
-          Row(
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  _endAddress ?? 'End location',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
+  //       // End Point (if available)
+  //       if (widget.ride.endCoordinates != null) ...[
+  //         Row(
+  //           children: [
+  //             Container(
+  //               width: 8,
+  //               height: 8,
+  //               decoration: BoxDecoration(
+  //                 color: Colors.red,
+  //                 shape: BoxShape.circle,
+  //               ),
+  //             ),
+  //             const SizedBox(width: 8),
+  //             Expanded(
+  //               child: Text(
+  //                 _endAddress ?? 'End location',
+  //                 style: const TextStyle(
+  //                   fontSize: 12,
+  //                   fontWeight: FontWeight.w500,
+  //                 ),
+  //                 maxLines: 2,
+  //                 overflow: TextOverflow.ellipsis,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ],
+  //   );
+  // }
 
-  Widget _buildAddressLoading() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade400,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Container(
-                height: 12,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade400,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Container(
-                height: 12,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+  // Widget _buildAddressLoading() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Row(
+  //         children: [
+  //           Container(
+  //             width: 8,
+  //             height: 8,
+  //             decoration: BoxDecoration(
+  //               color: Colors.grey.shade400,
+  //               shape: BoxShape.circle,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 8),
+  //           Expanded(
+  //             child: Container(
+  //               height: 12,
+  //               decoration: BoxDecoration(
+  //                 color: Colors.grey.shade300,
+  //                 borderRadius: BorderRadius.circular(4),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 8),
+  //       Row(
+  //         children: [
+  //           Container(
+  //             width: 8,
+  //             height: 8,
+  //             decoration: BoxDecoration(
+  //               color: Colors.grey.shade400,
+  //               shape: BoxShape.circle,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 8),
+  //           Expanded(
+  //             child: Container(
+  //               height: 12,
+  //               decoration: BoxDecoration(
+  //                 color: Colors.grey.shade300,
+  //                 borderRadius: BorderRadius.circular(4),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
+
 }

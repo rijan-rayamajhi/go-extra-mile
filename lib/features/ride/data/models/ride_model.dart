@@ -1,27 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive/hive.dart';
 import '../../domain/entities/ride_entity.dart';
 import '../../domain/entities/ride_memory_entity.dart';
 import 'ride_memory_model.dart';
 
+part 'ride_model.g.dart';
+
+@HiveType(typeId: 4)
 class RideModel extends RideEntity {
   const RideModel({
-    required super.id,
-    required super.userId,
-    required super.vehicleId,
-    required super.status,
-    required super.startedAt,
-    required super.startCoordinates,
-    super.endCoordinates,
-    super.endedAt,
-    super.totalDistance,
-    super.totalTime,
-    super.totalGEMCoins,
-    super.rideMemories,
-    super.rideTitle,
-    super.rideDescription,
-    super.topSpeed,
-    super.averageSpeed,
-    super.routePoints,
+    @HiveField(0) required super.id,
+    @HiveField(1) required super.userId,
+    @HiveField(2) required super.vehicleId,
+    @HiveField(3) required super.status,
+    @HiveField(4) required super.startedAt,
+    @HiveField(5) required super.startCoordinates,
+    @HiveField(6) super.endCoordinates,
+    @HiveField(7) super.endedAt,
+    @HiveField(8) super.totalDistance,
+    @HiveField(9) super.totalTime,
+    @HiveField(10) super.totalGEMCoins,
+    @HiveField(11) super.rideMemories,
+    @HiveField(12) super.rideTitle,
+    @HiveField(13) super.rideDescription,
+    @HiveField(14) super.topSpeed,
+    @HiveField(15) super.averageSpeed,
+    @HiveField(16) super.routePoints,
+    @HiveField(17) super.isPublic,
   });
 
   /// 🔹 copyWith
@@ -43,6 +48,7 @@ class RideModel extends RideEntity {
     double? topSpeed,
     double? averageSpeed,
     List<GeoPoint>? routePoints,
+    bool? isPublic,
   }) {
     return RideModel(
       id: id ?? this.id,
@@ -62,6 +68,7 @@ class RideModel extends RideEntity {
       topSpeed: topSpeed ?? this.topSpeed,
       averageSpeed: averageSpeed ?? this.averageSpeed,
       routePoints: routePoints ?? this.routePoints,
+      isPublic: isPublic ?? this.isPublic,
     );
   }
 
@@ -94,6 +101,7 @@ class RideModel extends RideEntity {
               .map((point) => point as GeoPoint)
               .toList()
           : null,
+      isPublic: data['isPublic'] as bool?,
     );
   }
 
@@ -121,6 +129,7 @@ class RideModel extends RideEntity {
       'topSpeed': topSpeed,
       'averageSpeed': averageSpeed,
       'routePoints': routePoints,
+      'isPublic': isPublic,
     };
   }
 
@@ -163,6 +172,7 @@ class RideModel extends RideEntity {
               ))
               .toList()
           : null,
+      isPublic: json['isPublic'] as bool?,
     );
   }
 
@@ -196,6 +206,86 @@ class RideModel extends RideEntity {
         'latitude': point.latitude,
         'longitude': point.longitude,
       }).toList(),
+      'isPublic': isPublic,
+    };
+  }
+
+  /// 🔹 From Hive
+  factory RideModel.fromHive(Map<String, dynamic> hiveData) {
+    return RideModel(
+      id: hiveData['id'] as String,
+      userId: hiveData['userId'] as String,
+      vehicleId: hiveData['vehicleId'] as String,
+      status: hiveData['status'] as String,
+      startedAt: DateTime.fromMillisecondsSinceEpoch(hiveData['startedAt'] as int),
+      startCoordinates: GeoPoint(
+        hiveData['startLat'] as double,
+        hiveData['startLng'] as double,
+      ),
+      endCoordinates: hiveData['endLat'] != null && hiveData['endLng'] != null
+          ? GeoPoint(
+              hiveData['endLat'] as double,
+              hiveData['endLng'] as double,
+            )
+          : null,
+      endedAt: hiveData['endedAt'] != null 
+          ? DateTime.fromMillisecondsSinceEpoch(hiveData['endedAt'] as int) 
+          : null,
+      totalDistance: hiveData['totalDistance'] as double?,
+      totalTime: hiveData['totalTime'] as double?,
+      totalGEMCoins: hiveData['totalGEMCoins'] as double?,
+      rideMemories: hiveData['rideMemories'] != null
+          ? (hiveData['rideMemories'] as List<dynamic>)
+              .map((memory) => RideMemoryModel.fromHive(memory as Map<String, dynamic>))
+              .toList()
+          : null,
+      rideTitle: hiveData['rideTitle'] as String?,
+      rideDescription: hiveData['rideDescription'] as String?,
+      topSpeed: hiveData['topSpeed'] as double?,
+      averageSpeed: hiveData['averageSpeed'] as double?,
+      routePoints: hiveData['routePoints'] != null
+          ? (hiveData['routePoints'] as List<dynamic>)
+              .map((point) => GeoPoint(
+                point['latitude'] as double,
+                point['longitude'] as double,
+              ))
+              .toList()
+          : null,
+      isPublic: hiveData['isPublic'] as bool?,
+    );
+  }
+
+  /// 🔹 To Hive
+  Map<String, dynamic> toHive() {
+    return {
+      'id': id,
+      'userId': userId,
+      'vehicleId': vehicleId,
+      'status': status,
+      'startedAt': startedAt.millisecondsSinceEpoch,
+      'startLat': startCoordinates.latitude,
+      'startLng': startCoordinates.longitude,
+      'endLat': endCoordinates?.latitude,
+      'endLng': endCoordinates?.longitude,
+      'endedAt': endedAt?.millisecondsSinceEpoch,
+      'totalDistance': totalDistance,
+      'totalTime': totalTime,
+      'totalGEMCoins': totalGEMCoins,
+      'rideMemories': rideMemories?.map((memory) {
+        if (memory is RideMemoryModel) {
+          return memory.toHive();
+        }
+        return RideMemoryModel.fromEntity(memory).toHive();
+      }).toList(),
+      'rideTitle': rideTitle,
+      'rideDescription': rideDescription,
+      'topSpeed': topSpeed,
+      'averageSpeed': averageSpeed,
+      'routePoints': routePoints?.map((point) => {
+        'latitude': point.latitude,
+        'longitude': point.longitude,
+      }).toList(),
+      'isPublic': isPublic,
     };
   }
 }

@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_extra_mile_new/features/home/home_screen.dart';
+import 'package:go_extra_mile_new/features/gem_coin/presentation/screens/earn_gem_coin_screen.dart';
+import 'package:go_extra_mile_new/features/home/presentation/home_screen.dart';
+import 'package:go_extra_mile_new/features/redeem/redeem_screen.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_vehicle_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -18,19 +20,9 @@ class _MainScreenState extends State<MainScreen> {
   // List of pages for each tab
   late final List<Widget> _pages = [
     const HomeScreen(),
-    const Center(
-      child: Text(
-        'Earn GEM Coins',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-      ),
-    ),
+    EarnGemCoinScreen(),
     const RideVehicleScreen(), // This won't be used directly due to navigation logic
-    const Center(
-      child: Text(
-        'Redeem GEM Coins',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-      ),
-    ),
+    const RedeemScreen(),
     const Center(
       child: Text(
         'Rewards',
@@ -42,19 +34,18 @@ class _MainScreenState extends State<MainScreen> {
   void _onItemTapped(int index) async {
     if (_isNavigating) return; // Prevent multiple taps
 
-    if (index == 2) { // Ride tab
+    if (index == 2) {
+      // Ride tab
       setState(() => _isNavigating = true);
-      
+
       try {
         // Check if user is authenticated
-        
+
         if (mounted) {
           // Navigate to RideVehicleScreen
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const RideVehicleScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const RideVehicleScreen()),
           );
         }
       } catch (e) {
@@ -63,9 +54,7 @@ class _MainScreenState extends State<MainScreen> {
         if (mounted) {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const RideVehicleScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const RideVehicleScreen()),
           );
         }
       } finally {
@@ -87,10 +76,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: PremiumBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
@@ -115,7 +101,7 @@ class PremiumBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 25),
       height: 70,
@@ -207,15 +193,12 @@ class PremiumBottomNavBar extends StatelessWidget {
         height: 60,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: isNavigating 
+            colors: isNavigating
                 ? [
                     theme.primaryColor.withOpacity(0.6),
                     theme.primaryColor.withOpacity(0.4),
                   ]
-                : [
-                    theme.primaryColor,
-                    theme.primaryColor.withOpacity(0.8),
-                  ],
+                : [theme.primaryColor, theme.primaryColor.withOpacity(0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -292,9 +275,7 @@ class PremiumBottomNavBar extends StatelessWidget {
                     : null,
                 child: FaIcon(
                   icon,
-                  color: isSelected 
-                      ? theme.primaryColor 
-                      : Colors.grey.shade600,
+                  color: isSelected ? theme.primaryColor : Colors.grey.shade600,
                   size: isSelected ? 18 : 16,
                 ),
               ),
@@ -307,9 +288,7 @@ class PremiumBottomNavBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: isSelected ? 10 : 9,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected 
-                      ? theme.primaryColor 
-                      : Colors.grey.shade600,
+                  color: isSelected ? theme.primaryColor : Colors.grey.shade600,
                 ),
               ),
             ],

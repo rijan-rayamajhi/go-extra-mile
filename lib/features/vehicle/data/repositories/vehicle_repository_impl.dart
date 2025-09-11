@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import '../../domain/repositories/vehicle_repository.dart';
 import '../../domain/entities/vehicle_entiry.dart';
@@ -50,6 +52,36 @@ class VehicleRepositoryImpl implements VehicleRepository {
       return const Right(null);
     } catch (e) {
       return Left(Exception('Failed to delete vehicle: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Exception, String>> uploadVehicleImage(String vehicleId, String userId, File imageFile, String fieldName) async {
+    try {
+      final imageUrl = await _firestoreDatasource.uploadVehicleImage(vehicleId, userId, imageFile, fieldName);
+      return Right(imageUrl);
+    } catch (e) {
+      return Left(Exception('Failed to upload vehicle image: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Exception, void>> deleteVehicleImage(String vehicleId, String userId, String fieldName, String imageUrl) async {
+    try {
+      await _firestoreDatasource.deleteVehicleImage(vehicleId, userId, fieldName, imageUrl);
+      return const Right(null);
+    } catch (e) {
+      return Left(Exception('Failed to delete vehicle image: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Exception, void>> verifyVehicle(String vehicleId, String userId) async {
+    try {
+      await _firestoreDatasource.verifyVehicle(vehicleId, userId);
+      return const Right(null);
+    } catch (e) {
+      return Left(Exception('Failed to verify vehicle: $e'));
     }
   }
 }

@@ -268,7 +268,7 @@ class TextValidators {
       return 'Vehicle registration number is required';
     }
     
-    final trimmedValue = value.trim();
+    final trimmedValue = value.trim().toUpperCase();
     
     if (trimmedValue.length < 4) {
       return 'Vehicle registration number must be at least 4 characters long';
@@ -278,10 +278,19 @@ class TextValidators {
       return 'Vehicle registration number must be less than 15 characters';
     }
     
-    // Allow only numbers
-    const pattern = r'^[0-9]+$';
+    // Allow alphanumeric characters (letters and numbers)
+    const pattern = r'^[A-Z0-9]+$';
     if (!RegExp(pattern).hasMatch(trimmedValue)) {
-      return 'Vehicle registration number can only contain numbers';
+      return 'Vehicle registration number can only contain letters and numbers';
+    }
+    
+    // Check for at least one letter and one number
+    if (!RegExp(r'[A-Z]').hasMatch(trimmedValue)) {
+      return 'Vehicle registration number must contain at least one letter';
+    }
+    
+    if (!RegExp(r'[0-9]').hasMatch(trimmedValue)) {
+      return 'Vehicle registration number must contain at least one number';
     }
     
     return null;

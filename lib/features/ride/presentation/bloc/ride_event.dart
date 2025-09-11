@@ -7,28 +7,8 @@ abstract class RideEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class StartRideEvent extends RideEvent {
-  final RideEntity rideEntity;
-  
-  StartRideEvent({
-    required this.rideEntity,
-  });
-  
-  @override
-  List<Object?> get props => [rideEntity];
-}
 
-class GetCurrentRideEvent extends RideEvent {
-  final String userId;
-  
-  GetCurrentRideEvent({
-    required this.userId,
-  });
-  
-  @override
-  List<Object?> get props => [userId];
-}
-
+// Fetches all rides for a specific user - used in MyRideScreen to display complete ride history
 class GetAllRidesByUserIdEvent extends RideEvent {
   final String userId;
   
@@ -40,6 +20,7 @@ class GetAllRidesByUserIdEvent extends RideEvent {
   List<Object?> get props => [userId];
 }
 
+// Fetches recent rides for a user with optional limit - used for displaying recent ride history on home screen
 class GetRecentRidesByUserIdEvent extends RideEvent {
   final String userId;
   final int limit;
@@ -53,6 +34,7 @@ class GetRecentRidesByUserIdEvent extends RideEvent {
   List<Object?> get props => [userId, limit];
 }
 
+// Saves a completed ride to the database - used in SaveRideScreen to persist ride data
 class UploadRideEvent extends RideEvent {
   final RideEntity rideEntity;
   
@@ -64,50 +46,26 @@ class UploadRideEvent extends RideEvent {
   List<Object?> get props => [rideEntity];
 }
 
-class DiscardRideEvent extends RideEvent {
+// Saves a ride locally for offline access - used for caching ride data before upload
+class SaveRideLocallyEvent extends RideEvent {
+  final RideEntity rideEntity;
+  
+  SaveRideLocallyEvent({
+    required this.rideEntity,
+  });
+  
+  @override
+  List<Object?> get props => [rideEntity];
+}
+
+// Retrieves rides stored locally for a specific user - used for offline ride history
+class GetRideLocallyEvent extends RideEvent {
   final String userId;
   
-  DiscardRideEvent({
+  GetRideLocallyEvent({
     required this.userId,
   });
   
   @override
   List<Object?> get props => [userId];
-}
-
-class UpdateRideFieldsEvent extends RideEvent {
-  final String userId;
-  final Map<String, dynamic> fields;
-  
-  UpdateRideFieldsEvent({
-    required this.userId,
-    required this.fields,
-  });
-  
-  @override
-  List<Object?> get props => [userId, fields];
-}
-
-class GetRideMemoriesByUserIdEvent extends RideEvent {
-  final String userId;
-  
-  GetRideMemoriesByUserIdEvent({
-    required this.userId,
-  });
-  
-  @override
-  List<Object?> get props => [userId];
-}
-
-class GetRecentRideMemoriesByUserIdEvent extends RideEvent {
-  final String userId;
-  final int limit;
-  
-  GetRecentRideMemoriesByUserIdEvent({
-    required this.userId,
-    this.limit = 10,
-  });
-  
-  @override
-  List<Object?> get props => [userId, limit];
 }

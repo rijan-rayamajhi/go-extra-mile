@@ -11,6 +11,12 @@ class VehicleModel extends VehicleEntity {
     required super.vehicleRegistrationNumber,
     required super.vehicleTyreType,
     required super.verificationStatus,
+    super.vehicleSlideImages,
+    super.vehicleInsuranceImage,
+    super.vehicleFrontImage,
+    super.vehicleBackImage,
+    super.vehicleRCFrontImage,
+    super.vehicleRCBackImage,
   });
 
   /// Convert Firestore document to VehicleModel
@@ -25,6 +31,12 @@ class VehicleModel extends VehicleEntity {
       vehicleRegistrationNumber: data['vehicleRegistrationNumber'] ?? '',
       vehicleTyreType: data['vehicleTyreType'] ?? '',
       verificationStatus: _mapVerificationStatus(data['verificationStatus']),
+      vehicleSlideImages: _parseVehicleSlideImages(data['vehicleSlideImages']),
+      vehicleInsuranceImage: data['vehicleInsuranceImage'],
+      vehicleFrontImage: data['vehicleFrontImage'],
+      vehicleBackImage: data['vehicleBackImage'],
+      vehicleRCFrontImage: data['vehicleRCFrontImage'],
+      vehicleRCBackImage: data['vehicleRCBackImage'],
     );
   }
 
@@ -38,6 +50,12 @@ class VehicleModel extends VehicleEntity {
       'vehicleRegistrationNumber': vehicleRegistrationNumber,
       'vehicleTyreType': vehicleTyreType,
       'verificationStatus': verificationStatus.name, // save enum as string
+      'vehicleSlideImages': vehicleSlideImages,
+      'vehicleInsuranceImage': vehicleInsuranceImage,
+      'vehicleFrontImage': vehicleFrontImage,
+      'vehicleBackImage': vehicleBackImage,
+      'vehicleRCFrontImage': vehicleRCFrontImage,
+      'vehicleRCBackImage': vehicleRCBackImage,
     };
   }
 
@@ -55,5 +73,14 @@ class VehicleModel extends VehicleEntity {
       default:
         return VehicleVerificationStatus.notVerified;
     }
+  }
+
+  /// Helper: parse vehicle slide images from Firestore data
+  static List<String>? _parseVehicleSlideImages(dynamic data) {
+    if (data == null) return null;
+    if (data is List) {
+      return data.map((item) => item.toString()).toList();
+    }
+    return null;
   }
 }

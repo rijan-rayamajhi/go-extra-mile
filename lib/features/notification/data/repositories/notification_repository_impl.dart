@@ -12,9 +12,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
   NotificationRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, List<NotificationEntity>>> getNotifications() async {
+  Future<Either<Failure, List<NotificationEntity>>> getNotifications(String userId) async {
     try {
-      final models = await remoteDataSource.getNotifications();
+      final models = await remoteDataSource.getNotifications(userId);
       return Right(models); // ✅ Model extends Entity
     } catch (e) {
       return Left(ServerFailure( e.toString()));
@@ -42,9 +42,19 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }
 
   @override
-  Future<Either<Failure, void>> markAllAsRead() async {
+  Future<Either<Failure, void>> markAllAsRead(String userId) async {
     try {
-      await remoteDataSource.markAllAsRead();
+      await remoteDataSource.markAllAsRead(userId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteNotification(String id) async {
+    try {
+      await remoteDataSource.deleteNotification(id);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

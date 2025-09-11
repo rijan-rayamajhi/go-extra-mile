@@ -368,13 +368,11 @@ USAGE EXAMPLES
 final picked = await DatePickerUtils.pickDate(context);
 if (picked != null) {
   final pretty = DatePickerUtils.formatDate(picked, pattern: 'dd MMM, yyyy');
-  print(pretty);
 }
 
 2) Pick a range (Material):
 final range = await DatePickerUtils.pickDateRange(context);
 if (range != null) {
-  print(DatePickerUtils.formatRange(range, pattern: 'dd/MM/yyyy'));
 }
 
 3) Pick time:

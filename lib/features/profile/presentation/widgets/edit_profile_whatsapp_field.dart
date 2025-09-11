@@ -19,11 +19,6 @@ class EditProfileWhatsappField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'WhatsApp Number',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 8),
         CustomTextField(
           controller: controller,
           enabled: true,

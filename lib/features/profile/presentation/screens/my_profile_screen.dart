@@ -6,6 +6,7 @@ import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/common/widgets/image_viewer.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
+import 'package:go_extra_mile_new/features/auth/presentation/screens/delete_account_screen.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_event.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_state.dart';
@@ -17,9 +18,9 @@ import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/common/widgets/customer_care_bottom_sheet.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/widgets/profile_ride_memory_gridview.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/widgets/profile_ride_stats.dart';
-import 'package:go_extra_mile_new/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:go_extra_mile_new/features/auth/presentation/bloc/auth_event.dart';
-import 'package:go_extra_mile_new/features/auth/presentation/bloc/auth_state.dart';
+import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_bloc.dart';
+import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_state.dart';
+import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_event.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/screens/auth_wrapper.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -46,33 +47,18 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<ProfileBloc, ProfileState>(
-          listener: (context, state) {
-            if (state is ProfileUpdated) {
-              AppSnackBar.success(context, 'Profile updated successfully');
-            }
-            // Cache valid profile states
-            if (state is ProfileLoaded ||
-                state is ProfileUpdated ||
-                state is ProfileUpdating) {
-              _lastValidProfileState = state;
-            }
-          },
-        ),
-        BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state is AuthUnauthenticated) {
-              // Navigate to auth screen when user becomes unauthenticated
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const AuthWrapper()),
-                (route) => false,
-              );
-            }
-          },
-        ),
-      ],
+    return BlocListener<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileUpdated) {
+          AppSnackBar.success(context, 'Profile updated successfully');
+        }
+        // Cache valid profile states
+        if (state is ProfileLoaded ||
+            state is ProfileUpdated ||
+            state is ProfileUpdating) {
+          _lastValidProfileState = state;
+        }
+      },
       child: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           if (state is ProfileLoading) {
@@ -113,7 +99,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               child: TextButton(
                 onPressed: () {
                   //log out
-                  context.read<AuthBloc>().add(SignOutEvent());
+                  context.read<KAuthBloc>().add(KSignOutEvent());
                 },
                 child: const Text('Something went wrong'),
               ),
@@ -264,9 +250,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       },
                     ),
                     const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                         Text(
                           profile.displayName,
                           style: Theme.of(context).textTheme.titleLarge
@@ -274,6 +261,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                 fontWeight: FontWeight.w800,
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
 
                         //address
@@ -305,7 +294,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             //instagram
-                            if (profile.instagramLink != null) ...[
+                            if (profile.instagramLink != null && (profile.showInstagram ?? true)) ...[
                               IconButton(
                                 onPressed: () {
                                   launchUrl(Uri.parse(profile.instagramLink!));
@@ -328,7 +317,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               SizedBox.shrink(),
                             ],
 
-                            if (profile.youtubeLink != null) ...[
+                            if (profile.youtubeLink != null && (profile.showYoutube ?? true)) ...[
                               IconButton(
                                 onPressed: () {
                                   launchUrl(Uri.parse(profile.youtubeLink!));
@@ -353,7 +342,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             //youtube
 
                             //whatsapp
-                            if (profile.whatsappLink != null) ...[
+                            if (profile.whatsappLink != null && (profile.showWhatsapp ?? true)) ...[
                               IconButton(
                                 onPressed: () {
                                   // Create WhatsApp URL from phone number
@@ -381,6 +370,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           ],
                         ),
                       ],
+                    ),
                     ),
                   ],
                 ),
@@ -451,10 +441,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    RideStatsWidget(
-                      value: (profile.totalGemCoins ?? 0).toString(),
-                      label: 'GEM Coins',
-                      icon: FontAwesomeIcons.gem,
+                    Flexible(
+                      child: RideStatsWidget(
+                        value: (profile.totalGemCoins ?? 0).toStringAsFixed(2),
+                        label: 'GEM Coins',
+                        icon: FontAwesomeIcons.gem,
+                      ),
                     ),
                     Container(
                       width: 1,
@@ -463,12 +455,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         context,
                       ).dividerColor.withValues(alpha: 0.18),
                     ),
-                    RideStatsWidget(
-                      value: profile.totalDistance != null 
-                          ? '${(profile.totalDistance! / 1000).toStringAsFixed(2)} km'
-                          : '0.00 km',
-                      label: 'Total Distance',
-                      icon: FontAwesomeIcons.road,
+                    Flexible(
+                      child: RideStatsWidget(
+                        value: profile.totalDistance != null 
+                            ? '${(profile.totalDistance! / 1000).toStringAsFixed(2)} km'
+                            : '0.00 km',
+                        label: 'Total Distance',
+                        icon: FontAwesomeIcons.road,
+                      ),
                     ),
                     Container(
                       width: 1,
@@ -477,10 +471,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         context,
                       ).dividerColor.withValues(alpha: 0.18),
                     ),
-                    RideStatsWidget(
-                      value: (profile.totalRide ?? 0).toString(),
-                      label: 'Rides',
-                      icon: FontAwesomeIcons.motorcycle,
+                    Flexible(
+                      child: RideStatsWidget(
+                        value: (profile.totalRide ?? 0).toString(),
+                        label: 'Rides',
+                        icon: FontAwesomeIcons.motorcycle,
+                      ),
                     ),
                   ],
                 ),
@@ -555,18 +551,17 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         _showLogoutConfirmation(context);
                       },
                     ),
-                    // const SizedBox(height: 12),
-                    // _buildOptionItem(
-                    //   context,
-                    //   icon: Icons.delete_forever,
-                    //   title: 'Delete Account',
-                    //   subtitle: 'Permanently delete your account',
-                    //   color: theme.colorScheme.error,
-                    //   onTap: () {
-                    //     Navigator.pop(context);
-                    //     _showDeleteAccountConfirmation(context);
-                    //   },
-                    // ),
+                    const SizedBox(height: 12),
+                    _buildOptionItem(
+                      context,
+                      icon: Icons.delete_forever,
+                      title: 'Delete Account',
+                      subtitle: 'Permanently delete your account',
+                      color: theme.colorScheme.error,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const DeleteAccountScreen()));
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -684,16 +679,16 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          BlocBuilder<AuthBloc, AuthState>(
+          BlocBuilder<KAuthBloc, KAuthState>(
             builder: (context, state) {
               return TextButton(
-                onPressed: state is AuthLoading
+                onPressed: state is KAuthLoading
                     ? null
                     : () {
                         Navigator.pop(context);
                         _performLogout();
                       },
-                child: state is AuthLoading
+                child: state is KAuthLoading
                     ? const SizedBox(
                         width: 16,
                         height: 16,
@@ -707,46 +702,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       ),
     );
   }
-
-  // void _showDeleteAccountConfirmation(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: const Text('Delete Account'),
-  //       content: const Text(
-  //         'Are you sure you want to delete your account? This action cannot be undone.',
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           child: const Text('Cancel'),
-  //         ),
-  //         BlocBuilder<AuthBloc, AuthState>(
-  //           builder: (context, state) {
-  //             return TextButton(
-  //               onPressed: state is DeletingAccount
-  //                   ? null
-  //                   : () {
-  //                       Navigator.pop(context);
-  //                       _performDeleteAccount();
-  //                     },
-  //               style: TextButton.styleFrom(
-  //                 foregroundColor: Theme.of(context).colorScheme.error,
-  //               ),
-  //               child: state is DeletingAccount
-  //                   ? const SizedBox(
-  //                       width: 16,
-  //                       height: 16,
-  //                       child: CircularProgressIndicator(strokeWidth: 2),
-  //                     )
-  //                   : const Text('Delete'),
-  //             );
-  //           },
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   void _showPrivacyConfirmation(BuildContext context, ProfileEntity profile) {
     final currentPrivacy = profile.privateProfile ?? false;
@@ -789,16 +744,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           .copyWith(privateProfile: newPrivacyValue);
 
       // Log the change for debugging
-      print(
-        'Profile privacy changing from ${profile.privateProfile} to $newPrivacyValue',
-      );
 
       context.read<ProfileBloc>().add(
         UpdateProfileEvent(updatedProfile),
       );
     } catch (e) {
       // Show error message if update fails
-      print('Error updating profile privacy: $e');
       AppSnackBar.error(
         context,
         'Failed to update privacy setting',
@@ -809,32 +760,19 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   void _performLogout() async {
     try {
       // Use the auth bloc to handle logout
-      context.read<AuthBloc>().add(SignOutEvent());
+      context.read<KAuthBloc>().add(KSignOutEvent());
       
-      // Don't navigate immediately - let the auth state change handle navigation
-      // The AuthWrapper will automatically show the auth screen when state becomes AuthUnauthenticated
+      // Navigate to auth screen immediately after logout
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const AuthWrapper()),
+          (route) => false,
+        );
+      }
     } catch (e) {
       if (mounted) {
         AppSnackBar.error(context, 'Failed to logout: $e');
       }
     }
   }
-
-  // void _performDeleteAccount() async {
-  //   try {
-  //     final user = FirebaseAuth.instance.currentUser;
-  //     if (user != null) {
-  //       // Use the auth bloc to handle account deletion (this will delete Firestore data first)
-  //       context.read<AuthBloc>().add(DeleteAccountEvent(user.uid));
-  //     } else {
-  //       if (mounted) {
-  //         AppSnackBar.error(context, 'No user found to delete');
-  //       }
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       AppSnackBar.error(context, 'Failed to delete account: $e');
-  //     }
-  //   }
-  // }
 }

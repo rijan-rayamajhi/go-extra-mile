@@ -7,7 +7,8 @@ import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/common/widgets/map_circular_button.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
-import 'package:go_extra_mile_new/core/service/location_service.dart' hide LatLng;
+import 'package:go_extra_mile_new/core/service/location_service.dart'
+    hide LatLng;
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_entity.dart';
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_memory_entity.dart';
 import 'package:go_extra_mile_new/features/ride/data/models/ride_memory_model.dart';
@@ -38,44 +39,39 @@ class _RideScreenState extends State<RideScreen> {
   final GlobalKey<RideGoogleMapState> _mapKey = GlobalKey<RideGoogleMapState>();
 
   late List<RideMemoryEntity> _allMemories;
-
   StreamSubscription<Position>? _locationStream;
 
-  // Distance
-  double _currentDistance = 0.0;
-  Position? _lastPosition;
-
-  // Speed
-  double _currentSpeed = 0.0;
+  // Ride stats
+  double _currentDistance = 0.0; // meters
+  double _currentSpeed = 0.0; // km/h
   double _maxSpeed = 0.0;
+  Position? _lastPosition;
   DateTime? _lastPositionTime;
 
-  // Time
+  // Duration
   DateTime? _tripStartTime;
   Duration _currentDuration = Duration.zero;
   Timer? _tripTimer;
-  
-  // Route tracking
+
+  // Route
   final List<GeoPoint> _routePoints = [];
-  
-  // Loading state
+
+  // UI state
   bool _isEndingRide = false;
-  
+
   @override
   void initState() {
     super.initState();
     _allMemories = List<RideMemoryEntity>.from(
       widget.rideEntity.rideMemories ?? [],
     );
-
-    // Start ride tracking
     _startDurationTracking();
     _startLocationTracking();
   }
- 
-  /// --- Start Location Tracking ---
-  void _startLocationTracking() async {
-    // Get initial position first
+
+  // -------------------- Location Tracking --------------------
+
+  Future<void> _startLocationTracking() async {
     try {
       final initialPosition = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -87,90 +83,101 @@ class _RideScreenState extends State<RideScreen> {
       debugPrint('Error getting initial position: $e');
     }
 
-    // Start streaming location updates
-    _locationStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 1,
-      ),
-    ).listen((Position position) {
-      _updateDistance(position);
-      _updateSpeed(position);
-      _updateRoute(position);
-    });
+    _locationStream =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 5, // update only if moved 10m+
+          ),
+        ).listen((pos) {
+          _updateDistance(pos);
+          _updateSpeed(pos);
+          _updateRoute(pos);
+        });
   }
 
-  /// --- ROUTE TRACKING ---
-  void _updateRoute(Position newPosition) {
-    final newPoint = GeoPoint(newPosition.latitude, newPosition.longitude);
-    
-    // Add the new point to the route
-    setState(() {
-      _routePoints.add(newPoint);
-    });
-    
-    // Update the map with the new route
+  void _updateRoute(Position pos) {
+    final newPoint = GeoPoint(pos.latitude, pos.longitude);
+    _routePoints.add(newPoint);
+
     final mapState = _mapKey.currentState;
     if (mapState != null) {
-      // Convert GeoPoint to LatLng for the map widget
-      final latLngRoutePoints = _routePoints.map((point) => 
-        LatLng(point.latitude, point.longitude)
-      ).toList();
-      mapState.updateRoute(latLngRoutePoints);
+      final latLngPoints = _routePoints
+          .map((p) => LatLng(p.latitude, p.longitude))
+          .toList();
+      mapState.updateRoute(latLngPoints);
     }
   }
 
-  /// --- DISTANCE CALCULATION ---
-  void _updateDistance(Position newPosition) {
-    if (_lastPosition != null) {
-      double distance = Geolocator.distanceBetween(
+  // Configurable thresholds
+  static const double _minDistanceThreshold = 5.0; // meters
+  static const double _maxAllowedSpeed = 60.0; // m/s (~216 km/h)
+
+  // -------------------- Distance --------------------
+  void _updateDistance(Position newPos) {
+    if (_lastPosition != null && _lastPositionTime != null) {
+      final distance = Geolocator.distanceBetween(
         _lastPosition!.latitude,
         _lastPosition!.longitude,
-        newPosition.latitude,
-        newPosition.longitude,
+        newPos.latitude,
+        newPos.longitude,
       );
 
-      if (distance > 0) {
-        setState(() {
+      final timeDiffSec = DateTime.now()
+          .difference(_lastPositionTime!)
+          .inSeconds;
+
+      if (timeDiffSec > 0) {
+        final speed = distance / timeDiffSec; // m/s
+
+        // ✅ Only accept if movement is valid
+        if (distance >= _minDistanceThreshold && speed <= _maxAllowedSpeed) {
           _currentDistance += distance;
-        });
+          _lastPosition = newPos;
+          _lastPositionTime = DateTime.now();
+        }
       }
+    } else {
+      // First position
+      _lastPosition = newPos;
+      _lastPositionTime = DateTime.now();
     }
-    _lastPosition = newPosition;
   }
 
-  /// --- SPEED CALCULATION ---
-  void _updateSpeed(Position newPosition) {
+  // -------------------- Speed --------------------
+  void _updateSpeed(Position newPos) {
     if (_lastPosition != null && _lastPositionTime != null) {
-      DateTime currentTime = DateTime.now();
-      Duration timeDiff = currentTime.difference(_lastPositionTime!);
+      final currentTime = DateTime.now();
+      final timeDiff = currentTime
+          .difference(_lastPositionTime!)
+          .inMilliseconds;
 
-      if (timeDiff.inMilliseconds > 0) {
-        double distance = Geolocator.distanceBetween(
+      if (timeDiff > 0) {
+        final distance = Geolocator.distanceBetween(
           _lastPosition!.latitude,
           _lastPosition!.longitude,
-          newPosition.latitude,
-          newPosition.longitude,
+          newPos.latitude,
+          newPos.longitude,
         );
 
-        double speedInMs = distance / (timeDiff.inMilliseconds / 1000);
-        double speedInKmh = speedInMs * 3.6;
+        final speedMps = distance / (timeDiff / 1000.0);
+        final speedKmh = speedMps * 3.6;
 
-        setState(() {
-          _currentSpeed = speedInKmh;
-          if (_currentSpeed > _maxSpeed) {
-            _maxSpeed = _currentSpeed;
-          }
-        });
+        // ✅ Ignore unrealistic spikes
+        if (speedMps <= _maxAllowedSpeed) {
+          _currentSpeed = speedKmh;
+          _maxSpeed = _currentSpeed > _maxSpeed ? _currentSpeed : _maxSpeed;
+        }
       }
     }
     _lastPositionTime = DateTime.now();
   }
 
-  /// --- TIME TRACKING ---
+  // -------------------- Duration --------------------
+
   void _startDurationTracking() {
     _tripStartTime = DateTime.now();
-    _tripTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _tripTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() {
         _currentDuration = DateTime.now().difference(_tripStartTime!);
       });
@@ -178,116 +185,72 @@ class _RideScreenState extends State<RideScreen> {
   }
 
   String _formatDuration(Duration d) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    return "${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
+    String two(int n) => n.toString().padLeft(2, '0');
+    return "${two(d.inMinutes.remainder(60))}:${two(d.inSeconds.remainder(60))}";
   }
 
-  void _handleMyLocationPressed() {
+  // -------------------- Memories --------------------
+
+  Future<void> _handleMemoryCaptured(String url) async {
     final mapState = _mapKey.currentState;
-    if (mapState != null) {
-      mapState.animateToMyLocation();
-    }
+    if (mapState == null) return;
+
+    final memory = await mapState.handleMemoryCaptured(url);
+    if (memory == null) return;
+
+    setState(() => _allMemories.add(memory));
   }
 
-  Future<void> _handleMemoryCaptured(String downloadUrl) async {
-    final mapState = _mapKey.currentState;
-    if (mapState != null) {
-      final memory = await mapState.handleMemoryCaptured(downloadUrl);
-
-      if (memory != null) {
-        setState(() {
-          _allMemories.add(memory);
-        });
-
-        final rideBloc = context.read<RideBloc>();
-        final fields = {
-          'rideMemories': _allMemories
-              .map((memory) => RideMemoryModel.fromEntity(memory).toFirestore())
-              .toList(),
-        };
-        rideBloc.add(
-          UpdateRideFieldsEvent(
-            userId: widget.rideEntity.userId,
-            fields: fields,
-          ),
-        );
-      }
-      print('Memory captured and stored: ${memory?.id}');
-    }
+  void _handleMemoryMarkerTapped(RideMemoryEntity memory) {
+    AppSnackBar.show(context, message: memory.title);
   }
 
-  void _handleMemoryMarkerTapped(RideMemoryEntity rideMemory) {
-    AppSnackBar.show(context, message: rideMemory.title);
-  }
+  // -------------------- Exit / End Ride --------------------
 
   void _showExitRideDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Exit Ride'),
-          content: const Text(
-            'Are you sure you want to exit? This will end your current ride and all progress will be lost. \n\nBackground Ride Tracking Comming Soon..',
+      builder: (_) => AlertDialog(
+        title: const Text('Exit Ride'),
+        content: const Text(
+          'Are you sure you want to exit? This will end your current ride and all progress will be lost.\n\nBackground Ride Tracking Coming Soon..',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(), // Close dialog
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).popUntil((route) => route.isFirst); // Exit ride
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Exit Ride'),
-            ),
-          ],
-        );
-      },
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Exit Ride'),
+          ),
+        ],
+      ),
     );
   }
 
   Future<void> _handleEndRide() async {
-    setState(() {
-      _isEndingRide = true;
-    });
+    setState(() => _isEndingRide = true);
     try {
-      final locationService = LocationService();
-      final position = await locationService.getCurrentPosition();
-
+      final position = await LocationService().getCurrentPosition();
       if (position == null) {
         AppSnackBar.show(context, message: 'Unable to get current location');
         return;
       }
 
-      // Stop timers & streams
       _tripTimer?.cancel();
       await _locationStream?.cancel();
-      
-      // Store route points before clearing
+
       final finalRoutePoints = List<GeoPoint>.from(_routePoints);
-      
-      // Clear route tracking
-      setState(() {
-        _routePoints.clear();
-      });
+      _routePoints.clear();
 
-      // Calculate average speed
-      double averageSpeed = 0.0;
-      if (_currentDistance > 0 && _currentDuration.inSeconds > 0) {
-        // Convert distance from meters to kilometers
-        double distanceInKm = _currentDistance / 1000;
-        // Convert duration from seconds to hours
-        double durationInHours = _currentDuration.inSeconds / 3600;
-        
-        // Avoid division by zero
-        if (durationInHours > 0) {
-          averageSpeed = distanceInKm / durationInHours;
-        }
-      }
+      final avgSpeed = _calculateAverageSpeed();
 
-      final myRide = RideEntity(
+      final ride = RideEntity(
         id: widget.rideEntity.id,
         userId: widget.rideEntity.userId,
         vehicleId: widget.rideEntity.vehicleId,
@@ -296,42 +259,46 @@ class _RideScreenState extends State<RideScreen> {
         startCoordinates: widget.rideEntity.startCoordinates,
         endCoordinates: GeoPoint(position.latitude, position.longitude),
         endedAt: DateTime.now(),
-        totalDistance: _currentDistance, // in km
+        totalDistance: _currentDistance,
         totalTime: _currentDuration.inSeconds.toDouble(),
-        totalGEMCoins: (_currentDistance / 1000).floor().toDouble(), // Calculate GEM coins based on distance
+        totalGEMCoins: _currentDistance / 1000,
         rideMemories: _allMemories,
-        rideTitle: widget.rideEntity.rideTitle ?? 'Ride on ${DateTime.now().toString().split(' ')[0]}',
-        rideDescription: widget.rideEntity.rideDescription ?? 'Completed ride with ${(_currentDistance / 1000).toStringAsFixed(2)} km distance',
+        rideTitle:
+            widget.rideEntity.rideTitle ??
+            'Ride on ${DateTime.now().toString().split(' ')[0]}',
+        rideDescription:
+            widget.rideEntity.rideDescription ??
+            'Completed ride with ${(_currentDistance / 1000).toStringAsFixed(2)} km distance',
         topSpeed: _maxSpeed,
-        averageSpeed: averageSpeed,
+        averageSpeed: avgSpeed,
         routePoints: finalRoutePoints,
+        isPublic: widget.rideEntity.isPublic ?? true, // Default to public if not set
       );
 
-      // Debug logging
-      debugPrint('=== RIDE ENTITY DEBUG ===');
-      debugPrint('rideTitle: ${myRide.rideTitle}');
-      debugPrint('rideDescription: ${myRide.rideDescription}');
-      debugPrint('topSpeed: ${myRide.topSpeed}');
-      debugPrint('averageSpeed: ${myRide.averageSpeed}');
-      debugPrint('routePoints count: ${myRide.routePoints?.length ?? 0}');
-      debugPrint('========================');
-
-      Navigator.of(context).push(
+      Navigator.push(
+        context,
         MaterialPageRoute(
-          builder: (context) => SaveRideScreen(
-            rideEntity: myRide,
+          builder: (_) => SaveRideScreen(
+            rideEntity: ride,
             selectedVehicle: widget.selectedVechile,
           ),
         ),
       );
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error getting location: $e');
+      AppSnackBar.show(context, message: 'Error: $e');
     } finally {
-      setState(() {
-        _isEndingRide = false;
-      });
+      setState(() => _isEndingRide = false);
     }
   }
+
+  double _calculateAverageSpeed() {
+    if (_currentDistance <= 0 || _currentDuration.inSeconds <= 0) return 0.0;
+    final km = _currentDistance / 1000;
+    final hours = _currentDuration.inSeconds / 3600;
+    return hours > 0 ? km / hours : 0.0;
+  }
+
+  // -------------------- Lifecycle --------------------
 
   @override
   void dispose() {
@@ -340,278 +307,190 @@ class _RideScreenState extends State<RideScreen> {
     super.dispose();
   }
 
+  // -------------------- UI --------------------
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RideBloc, RideState>(
       listener: (context, state) {
-        if (state is RideFieldsUpdated) {
-          AppSnackBar.show(context, message: 'Memory saved successfully!');
-        } else if (state is RideFailure) {
-          AppSnackBar.show(
-            context,
-            message: 'Failed to save memory: ${state.message}',
-          );
+        if (state is RideFailure) {
+          AppSnackBar.show(context, message: 'Failed: ${state.message}');
         }
       },
-            builder: (context, state) {
+      builder: (context, state) {
         return PopScope(
           canPop: false,
-          onPopInvoked: (didPop) {
-            if (!didPop) {
-              _showExitRideDialog();
-            }
-          },
+          onPopInvoked: (didPop) => !didPop ? _showExitRideDialog() : null,
           child: Scaffold(
-                    body: Stack(
-            children: [
-              // Show loading overlay when ride bloc is processing
-              if (state is RideLoading)
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.black.withOpacity(0.3),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+            body: Stack(
+              children: [
+                if (state is RideLoading) _buildLoadingOverlay(),
+
+                RideGoogleMap(
+                  key: _mapKey,
+                  currentLocationMarkerImageUrl:
+                      widget.selectedVechile.vehicleBrandImage,
+                  customMarkers: _allMemories,
+                  onMemoryMarkerTapped: _handleMemoryMarkerTapped,
+                  routePoints: _routePoints
+                      .map((p) => LatLng(p.latitude, p.longitude))
+                      .toList(),
+                ),
+
+                Positioned(
+                  left: 16,
+                  child: MapCircularButton(
+                    icon: Icons.close,
+                    onPressed: _showExitRideDialog,
                   ),
                 ),
-            RideGoogleMap(
-              key: _mapKey,
-              currentLocationMarkerImageUrl: widget.selectedVechile.vehicleBrandImage,
-              customMarkers: _allMemories,
-              onMemoryMarkerTapped: _handleMemoryMarkerTapped,
-              routePoints: _routePoints.map((point) => 
-                LatLng(point.latitude, point.longitude)
-              ).toList(),
-            ),
-
-            // Close button
-            Positioned(
-              left: 16,
-              child: MapCircularButton(
-                icon: Icons.close,
-                onPressed: () {
-                  _showExitRideDialog();
-                },
-              ),
-            ),
-
-            // GEM coin UI
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                child: Center(
-                  child: IntrinsicWidth(
-                    child: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            'assets/icons/gem_coin.png',
-                            width: 24,
-                            height: 24,
-                          ),
-                          const SizedBox(width: 8),
-                    // ... existing code ...
-                          Text(
-                            '${(_currentDistance / 1000).floor()}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-// ... existing code ...
-                        ],
-                      ),
-                    ),
+                Positioned(
+                  right: 16,
+                  child: MapCircularButton(
+                    icon: Icons.my_location,
+                    onPressed: _handleMyLocationPressed,
                   ),
                 ),
-              ),
-            ),
 
-            // My location button
-            Positioned(
-              right: 16,
-              child: MapCircularButton(
-                icon: Icons.my_location,
-                onPressed: _handleMyLocationPressed,
-              ),
+                _buildGemCoinUI(),
+                _buildCaptureButton(),
+                _buildBottomSheet(),
+                _buildVehicleImage(),
+              ],
             ),
-
-            // // SOS button
-            // Positioned(
-            //   bottom: 220 + 16,
-            //   left: 16,
-            //   child: MapCircularButton(
-            //     icon: Icons.sos,
-            //     backgroundColor: Colors.red,
-            //     onPressed: () {
-            //       showDialog(
-            //         context: context,
-            //         builder: (context) => const RideSOSDilogue(),
-            //       );
-            //     },
-            //   ),
-            // ),
-
-            // Take picture button
-            Positioned(
-              bottom: 220 + 16,
-              right: 16,
-              child: RideCaptureMemoriesButton(
-                onMemoryCaptured: _handleMemoryCaptured,
-              ),
-            ),
-
-            // Bottom sheet
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 250,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 65),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Distance
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                "${(_currentDistance / 1000).toStringAsFixed(2)} km",
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Distance',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 40,
-                          width: 1,
-                          color: Colors.grey.withOpacity(0.3),
-                        ),
-                        // Speed
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                "${_currentSpeed.toStringAsFixed(1)} km/h",
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Speed',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 40,
-                          width: 1,
-                          color: Colors.grey.withOpacity(0.3),
-                        ),
-                        // Time
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                _formatDuration(_currentDuration),
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Time',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    SizedBox(
-                      width: 200,
-                      child: PrimaryButton(
-                        text: _isEndingRide ? 'Ending...' : 'End Ride',
-                        onPressed: _isEndingRide ? () {} : () => _handleEndRide(),
-                        icon: Icons.motorcycle,
-                        isLoading: _isEndingRide,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Vehicle image
-            Positioned(
-              bottom: 200,
-              left: 0,
-              right: 0,
-              child: Container(
-                alignment: Alignment.center,
-                child: CircularImage(
-                  imageUrl: widget.selectedVechile.vehicleBrandImage,
-                ),
-              ),
-            ),
-          ],
-        ),
-        ),
-      );
+          ),
+        );
       },
     );
   }
+
+  Widget _buildLoadingOverlay() => Positioned.fill(
+    child: Container(
+      color: Colors.black.withOpacity(0.3),
+      child: const Center(child: CircularProgressIndicator()),
+    ),
+  );
+
+  Widget _buildGemCoinUI() => Positioned(
+    top: 0,
+    left: 0,
+    right: 0,
+    child: SafeArea(
+      child: Center(
+        child: IntrinsicWidth(
+          child: Container(
+            height: 50,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/icons/gem_coin.png', width: 24, height: 24),
+                const SizedBox(width: 8),
+                Text(
+                  (_currentDistance / 1000).toStringAsFixed(2),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  Widget _buildCaptureButton() => Positioned(
+    bottom: 236,
+    right: 16,
+    child: RideCaptureMemoriesButton(onMemoryCaptured: _handleMemoryCaptured),
+  );
+
+  Widget _buildBottomSheet() => Positioned(
+    bottom: 0,
+    left: 0,
+    right: 0,
+    child: Container(
+      height: 250,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 65),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildStat(
+                "${(_currentDistance / 1000).toStringAsFixed(2)} km",
+                "Distance",
+              ),
+              _divider(),
+              _buildStat("${_currentSpeed.toStringAsFixed(1)} km/h", "Speed"),
+              _divider(),
+              _buildStat(_formatDuration(_currentDuration), "Time"),
+            ],
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: 200,
+            child: PrimaryButton(
+              text: _isEndingRide ? 'Ending...' : 'End Ride',
+              onPressed: () {
+                if (_isEndingRide) return;
+                _handleEndRide();
+              },
+              icon: Icons.motorcycle,
+              isLoading: _isEndingRide,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _buildStat(String value, String label) => Expanded(
+    child: Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ],
+    ),
+  );
+
+  Widget _divider() =>
+      Container(height: 40, width: 1, color: Colors.grey.withOpacity(0.3));
+
+  Widget _buildVehicleImage() => Positioned(
+    bottom: 200,
+    left: 0,
+    right: 0,
+    child: Center(
+      child: CircularImage(imageUrl: widget.selectedVechile.vehicleBrandImage),
+    ),
+  );
+
+  void _handleMyLocationPressed() =>
+      _mapKey.currentState?.animateToMyLocation();
 }
