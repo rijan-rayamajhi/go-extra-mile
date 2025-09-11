@@ -7,20 +7,52 @@ import 'package:flutter/material.dart';
 const String appName = 'Go Extra Mile';
 const String appDescription = 'Ride & Earn';
 
-//paddings
+// Responsive Design Constants
+// These are base values that will be scaled using ResponsiveUtils
+
+// Base paddings (will be scaled responsively)
+const double baseScreenPadding = 16.0;
+const double baseCardPadding = 12.0;
+const double baseButtonPadding = 16.0;
+
+// Base radius values (will be scaled responsively)
+const double baseButtonRadius = 16.0;
+const double baseCardRadius = 12.0;
+const double baseInputRadius = 8.0;
+
+// Base button dimensions (will be scaled responsively)
+const double baseButtonHeight = 48.0;
+const double baseButtonWidth = double.infinity;
+const double baseIconButtonSize = 40.0;
+
+// Base spacing values (will be scaled responsively)
+const double baseSpacing = 16.0;
+const double baseSmallSpacing = 8.0;
+const double baseLargeSpacing = 24.0;
+
+// Base font sizes (will be scaled responsively)
+const double baseSmallFontSize = 12.0;
+const double baseMediumFontSize = 14.0;
+const double baseLargeFontSize = 16.0;
+const double baseXLargeFontSize = 18.0;
+const double baseXXLargeFontSize = 24.0;
+
+// Base icon sizes (will be scaled responsively)
+const double baseSmallIconSize = 16.0;
+const double baseMediumIconSize = 24.0;
+const double baseLargeIconSize = 32.0;
+const double baseXLargeIconSize = 48.0;
+
+// Legacy constants for backward compatibility (deprecated - use ResponsiveUtils instead)
+@deprecated
 const double screenPadding = 16.0;
-
-//radius
+@deprecated
 const double buttonRadius = 16;
-
-//button height
+@deprecated
 const double buttonHeight = 48;
-
-//button width
+@deprecated
 const double buttonWidth = double.infinity;
-
-
-//spacing 
+@deprecated
 const double spacing = 16;
 
 // Memory marker colors for ride feature

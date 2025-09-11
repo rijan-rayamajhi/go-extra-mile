@@ -7,6 +7,7 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image/image.dart' as img;
+import 'package:go_extra_mile_new/core/utils/responsive_utils.dart';
 
 class MyReferalQrcodeScreen extends StatefulWidget {
   final String referralCode;
@@ -82,8 +83,8 @@ class _MyReferalQrcodeScreenState extends State<MyReferalQrcodeScreen> {
                   RepaintBoundary(
                     key: _qrKey,
                     child: SizedBox(
-                      width: 200,
-                      height: 200,
+                      width: context.width(50),
+                      height: context.width(50),
                       child: PrettyQrView.data(
                         data: widget.referralCode,
                         decoration: const PrettyQrDecoration(

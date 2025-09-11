@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_extra_mile_new/core/utils/responsive_utils.dart';
+import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 
 class RideStatsWidget extends StatelessWidget {
   final String value;
@@ -13,13 +15,13 @@ class RideStatsWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.all(3),
+          padding: context.padding(all: 3),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
           ),
           child: Container(
-            padding: const EdgeInsets.all(14),
+            padding: context.padding(all: 14),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               shape: BoxShape.circle,
@@ -27,11 +29,11 @@ class RideStatsWidget extends StatelessWidget {
             child: Icon(
               icon,
               color: Theme.of(context).colorScheme.primary,
-              size: 26,
+              size: context.iconSize(26),
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: context.spacing(baseSmallSpacing)),
         Text(
           value,
           overflow: TextOverflow.ellipsis,
@@ -42,7 +44,7 @@ class RideStatsWidget extends StatelessWidget {
             height: 1.1,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: context.spacing(6)),
         Text(
           label,
           textAlign: TextAlign.center,

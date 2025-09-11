@@ -4,12 +4,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:go_extra_mile_new/core/utils/responsive_utils.dart';
 
 class ProfileShimmerLoading extends StatelessWidget {
   const ProfileShimmerLoading({super.key});
 
-  static const double _avatarSize = 96;
-  static const double _padding = 20;
+  static const double _baseAvatarSize = 96;
+  static const double _basePadding = 20;
 
   @override
   Widget build(BuildContext context) {
@@ -30,19 +31,19 @@ class ProfileShimmerLoading extends StatelessWidget {
         highlightColor: highlightColor,
         period: const Duration(milliseconds: 1200), // smoother animation
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(_padding),
+          padding: context.padding(all: _basePadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(baseColor),
-              const SizedBox(height: 28),
+              _buildHeader(baseColor, context),
+              SizedBox(height: context.spacing(28)),
               _buildStatsRow(baseColor, context),
-              const SizedBox(height: 28),
+              SizedBox(height: context.spacing(28)),
               _buildBioSection(baseColor, context),
-              const SizedBox(height: 28),
+              SizedBox(height: context.spacing(28)),
               Divider(color: baseColor, thickness: 1, height: 1),
-              const SizedBox(height: 20),
-              ...List.generate(6, (_) => _buildListTilePlaceholder(baseColor)),
+              SizedBox(height: context.spacing(20)),
+              ...List.generate(6, (_) => _buildListTilePlaceholder(baseColor, context)),
             ],
           ),
         ),
@@ -50,12 +51,12 @@ class ProfileShimmerLoading extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(Color baseColor) {
+  Widget _buildHeader(Color baseColor, BuildContext context) {
     return Row(
       children: [
         Container(
-          width: _avatarSize,
-          height: _avatarSize,
+          width: context.iconSize(_baseAvatarSize),
+          height: context.iconSize(_baseAvatarSize),
           decoration: BoxDecoration(
             color: baseColor,
             shape: BoxShape.circle,
@@ -68,20 +69,20 @@ class ProfileShimmerLoading extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: context.spacing(20)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _roundedBox(baseColor, height: 20, width: 140),
-              const SizedBox(height: 10),
-              _roundedBox(baseColor, height: 16, width: 100),
-              const SizedBox(height: 12),
+              _roundedBox(baseColor, height: 20, width: 140, context: context),
+              SizedBox(height: context.spacing(10)),
+              _roundedBox(baseColor, height: 16, width: 100, context: context),
+              SizedBox(height: context.spacing(12)),
               Row(
                 children: [
-                  _roundedBox(baseColor, height: 14, width: 80),
-                  const SizedBox(width: 14),
-                  _roundedBox(baseColor, height: 14, width: 80),
+                  _roundedBox(baseColor, height: 14, width: 80, context: context),
+                  SizedBox(width: context.spacing(14)),
+                  _roundedBox(baseColor, height: 14, width: 80, context: context),
                 ],
               ),
             ],
@@ -98,15 +99,15 @@ class ProfileShimmerLoading extends StatelessWidget {
         return Expanded(
           child: Column(
             children: [
-              _roundedBox(baseColor, height: 16, width: 40),
-              const SizedBox(height: 10),
-              _roundedBox(baseColor, height: 14, width: double.infinity),
+              _roundedBox(baseColor, height: 16, width: 40, context: context),
+              SizedBox(height: context.spacing(10)),
+              _roundedBox(baseColor, height: 14, width: double.infinity, context: context),
             ],
           ),
         );
       }).expand((w) sync* {
         yield w;
-        yield const SizedBox(width: 16);
+        yield SizedBox(width: context.spacing(16));
       }).toList()
         ..removeLast(),
     );
@@ -116,26 +117,26 @@ class ProfileShimmerLoading extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _roundedBox(baseColor, height: 14, width: double.infinity),
-        const SizedBox(height: 8),
-        _roundedBox(baseColor, height: 14, width: double.infinity),
-        const SizedBox(height: 8),
-        _roundedBox(baseColor, height: 14, width: MediaQuery.of(context).size.width * 0.6),
+        _roundedBox(baseColor, height: 14, width: double.infinity, context: context),
+        SizedBox(height: context.spacing(8)),
+        _roundedBox(baseColor, height: 14, width: double.infinity, context: context),
+        SizedBox(height: context.spacing(8)),
+        _roundedBox(baseColor, height: 14, width: context.width(60), context: context),
       ],
     );
   }
 
-  Widget _buildListTilePlaceholder(Color baseColor) {
+  Widget _buildListTilePlaceholder(Color baseColor, BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: context.padding(vertical: 12),
       child: Row(
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: context.iconSize(52),
+            height: context.iconSize(52),
             decoration: BoxDecoration(
               color: baseColor,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(context.borderRadius(14)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black12,
@@ -145,31 +146,31 @@ class ProfileShimmerLoading extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: context.spacing(16)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _roundedBox(baseColor, height: 14, width: double.infinity),
-                const SizedBox(height: 8),
-                _roundedBox(baseColor, height: 12, width: 120),
+                _roundedBox(baseColor, height: 14, width: double.infinity, context: context),
+                SizedBox(height: context.spacing(8)),
+                _roundedBox(baseColor, height: 12, width: 120, context: context),
               ],
             ),
           ),
-          const SizedBox(width: 16),
-          _roundedBox(baseColor, height: 26, width: 26),
+          SizedBox(width: context.spacing(16)),
+          _roundedBox(baseColor, height: 26, width: 26, context: context),
         ],
       ),
     );
   }
 
-  Widget _roundedBox(Color color, {required double height, required double width}) {
+  Widget _roundedBox(Color color, {required double height, required double width, BuildContext? context}) {
     return Container(
-      height: height,
-      width: width,
+      height: context != null ? context.height(height * 100 / context.screenHeight) : height,
+      width: context != null ? context.width(width * 100 / context.screenWidth) : width,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(context?.borderRadius(8) ?? 8),
       ),
     );
   }

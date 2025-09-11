@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
+import 'package:go_extra_mile_new/core/utils/responsive_utils.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -37,13 +38,13 @@ class PrimaryButton extends StatelessWidget {
         backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontSize: 18,
+          fontSize: context.fontSize(baseXLargeFontSize),
           fontWeight: FontWeight.w600,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(buttonRadius),
+          borderRadius: BorderRadius.circular(context.borderRadius(baseButtonRadius)),
         ),
-        minimumSize: const Size(buttonWidth,buttonHeight),
+        minimumSize: Size(buttonWidth, context.buttonHeight(baseButtonHeight)),
       ),
       onPressed: _handlePress,
       child: isLoading 
@@ -58,10 +59,10 @@ class PrimaryButton extends StatelessWidget {
               children: [
                 Image.asset(
                   iconImage!,
-                  width: 24,
-                  height: 24,
+                  width: context.iconSize(baseMediumIconSize),
+                  height: context.iconSize(baseMediumIconSize),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: context.spacing(baseSmallSpacing)),
                 Text(text),
               ],
             )
@@ -69,8 +70,8 @@ class PrimaryButton extends StatelessWidget {
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: 24),
-                  const SizedBox(width: 16),
+                  Icon(icon, size: context.iconSize(baseMediumIconSize)),
+                  SizedBox(width: context.spacing(baseSmallSpacing)),
                   Text(text),
                 ],
               )
