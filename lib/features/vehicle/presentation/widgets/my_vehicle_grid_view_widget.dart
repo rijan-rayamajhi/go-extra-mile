@@ -124,12 +124,12 @@ class PremiumVehicleCard extends StatelessWidget {
                 // Dark overlay
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.25),
+                    color: Colors.black.withValues(alpha: 0.25),
                   ),
                 ),
                 // Content
                 Padding(
-                  padding: const EdgeInsets.all(screenPadding),
+                  padding: const EdgeInsets.all(baseScreenPadding),
                   child: Stack(
                     children: [
                       // Brand logo + status badge

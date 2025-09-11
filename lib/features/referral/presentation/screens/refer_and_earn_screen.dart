@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
-import 'package:go_extra_mile_new/core/constants/app_constants.dart'
-    show screenPadding;
+import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_bloc.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_event.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_state.dart';
@@ -51,7 +50,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
         builder: (context, state) {
           if (state is ReferralLoading) {
             return SingleChildScrollView(
-              padding: EdgeInsets.all(screenPadding),
+              padding: EdgeInsets.all(baseScreenPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -68,7 +67,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
             final referredUsers = state.myReferalUsers;
             
             return SingleChildScrollView(
-              padding: EdgeInsets.all(screenPadding),
+              padding: EdgeInsets.all(baseScreenPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -82,7 +81,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
             );
           } else if (state is ReferralError) {
             return SingleChildScrollView(
-              padding: EdgeInsets.all(screenPadding),
+              padding: EdgeInsets.all(baseScreenPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -104,7 +103,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
           } else {
             // Initial state
             return SingleChildScrollView(
-              padding: EdgeInsets.all(screenPadding),
+              padding: EdgeInsets.all(baseScreenPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [

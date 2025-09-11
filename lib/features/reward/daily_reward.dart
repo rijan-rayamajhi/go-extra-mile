@@ -138,7 +138,7 @@ class _DailyRewardScreenState extends State<DailyRewardScreen> {
                     child: Container(
                       width: double.infinity,
                       height: double.infinity,
-                      color: Colors.white.withOpacity(0.2), // frosted glass tint
+                      color: Colors.white.withValues(alpha: 0.2), // frosted glass tint
                     ),
                   ),
                 ),
@@ -374,7 +374,7 @@ class _DailyRewardScreenState extends State<DailyRewardScreen> {
               height: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
               ),
             ),
             Center(

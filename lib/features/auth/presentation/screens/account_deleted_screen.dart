@@ -79,7 +79,7 @@ class _AccountDeletedScreenState extends State<AccountDeletedScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 width: 2,
               ),
             ),
@@ -93,7 +93,7 @@ class _AccountDeletedScreenState extends State<AccountDeletedScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -155,7 +155,7 @@ class _AccountDeletedScreenState extends State<AccountDeletedScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -308,11 +308,11 @@ class _AccountDeletedScreenState extends State<AccountDeletedScreen> {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(25),
-                        color: Colors.black.withOpacity(
+                        color: Colors.black.withValues(alpha: 
                           0.04,
                         ), // very subtle glass
                         border: Border.all(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                         ),
                       ),
                       child: Column(
@@ -403,7 +403,7 @@ class ClockProgressPainter extends CustomPainter {
 
     // Background circle
     final backgroundPaint = Paint()
-      ..color = Colors.grey.withOpacity(0.1)
+      ..color = Colors.grey.withValues(alpha: 0.1)
       ..strokeWidth = 8
       ..style = PaintingStyle.stroke;
 
@@ -411,7 +411,7 @@ class ClockProgressPainter extends CustomPainter {
 
     // Progress arc
     final progressPaint = Paint()
-      ..color = Colors.red.withOpacity(0.7)
+      ..color = Colors.red.withValues(alpha: 0.7)
       ..strokeWidth = 8
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;

@@ -140,8 +140,8 @@ class _MyVehicleDetailsInsuranceImageWidgetState
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               colors: [
-                Colors.white.withOpacity(0.95),
-                Colors.grey.shade100.withOpacity(0.9),
+                Colors.white.withValues(alpha: 0.95),
+                Colors.grey.shade100.withValues(alpha: 0.9),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -233,7 +233,7 @@ class _MyVehicleDetailsInsuranceImageWidgetState
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade700.withOpacity(0.8),
+                        color: Colors.blue.shade700.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Row(
@@ -262,7 +262,7 @@ class _MyVehicleDetailsInsuranceImageWidgetState
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade700.withOpacity(0.8),
+                      color: Colors.grey.shade700.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const SizedBox(

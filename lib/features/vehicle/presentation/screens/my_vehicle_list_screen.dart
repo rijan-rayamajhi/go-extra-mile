@@ -80,7 +80,7 @@ class _MyVehicleListScreenState extends State<MyVehicleListScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsetsGeometry.all(screenPadding),
+          padding: EdgeInsetsGeometry.all(baseScreenPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

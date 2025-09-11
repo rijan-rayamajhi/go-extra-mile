@@ -21,7 +21,7 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(screenPadding),
+          padding: const EdgeInsets.all(baseScreenPadding),
           child: Column(
             children: [
               const Spacer(),
@@ -39,7 +39,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: spacing / 2),
+                    const SizedBox(height: baseSpacing / 2),
                     Text(
                       appDescription,
                       style: Theme.of(
@@ -49,7 +49,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: spacing * 2),
+                    const SizedBox(height: baseSpacing * 2),
                   ],
                 ),
               ),
@@ -62,7 +62,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   context.read<KAuthBloc>().add(KSignInWithGoogleEvent());
                 },
               ),
-              const SizedBox(height: spacing),
+              const SizedBox(height: baseSpacing),
               // Apple Sign-In button (only show on iOS)
               if (Platform.isIOS) ...[
                 PrimaryButton(
@@ -72,7 +72,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     context.read<KAuthBloc>().add(KSignInWithAppleEvent());
                   },
                 ),
-                const SizedBox(height: spacing),
+                const SizedBox(height: baseSpacing),
               ],
 
               //terms and conditions

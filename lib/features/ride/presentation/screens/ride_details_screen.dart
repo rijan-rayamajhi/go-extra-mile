@@ -273,7 +273,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
   Widget _buildVehicleCard() {
     if (_isLoadingVehicle) {
       return Container(
-        padding: const EdgeInsets.all(screenPadding),
+        padding: const EdgeInsets.all(baseScreenPadding),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
@@ -289,7 +289,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
 
     if (_vehicleNotFound || _vehicle == null) {
       return Container(
-        padding: const EdgeInsets.all(screenPadding),
+        padding: const EdgeInsets.all(baseScreenPadding),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
@@ -342,7 +342,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(screenPadding),
+      padding: const EdgeInsets.all(baseScreenPadding),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
@@ -507,14 +507,14 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(screenPadding),
+        padding: const EdgeInsets.all(baseScreenPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Ride Title & Description
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(screenPadding),
+              padding: const EdgeInsets.all(baseScreenPadding),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -811,8 +811,9 @@ class _RideMemoryRoadState extends State<RideMemoryRoad> {
   }
 
   void _updateProgress() {
-    if (!_controller.hasClients || !_controller.position.hasContentDimensions)
+    if (!_controller.hasClients || !_controller.position.hasContentDimensions) {
       return;
+    }
 
     final maxScroll = _controller.position.maxScrollExtent;
     final currentScroll = _controller.offset;
@@ -888,7 +889,7 @@ class _RideMemoryRoadState extends State<RideMemoryRoad> {
           end: alignment == Alignment.centerLeft
               ? Alignment.centerRight
               : Alignment.centerLeft,
-          colors: [Colors.white, Colors.white.withOpacity(0.0)],
+          colors: [Colors.white, Colors.white.withValues(alpha: 0.0)],
         ),
       ),
     );

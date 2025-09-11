@@ -23,7 +23,7 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
   final PageController _pageController = PageController();
 
   // Add markers list
-  Set<Marker> _markers = {};
+  // Set<Marker> _markers = {}; // Unused field
   
   // Add selected vehicle index (default to first vehicle so a marker is shown immediately)
   int? _selectedVehicleIndex = 0;
@@ -79,7 +79,7 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
     // If no vehicle is selected, don't show any marker
     if (_selectedVehicleIndex == null) {
       setState(() {
-        _markers = {};
+        // _markers = {}; // Unused field
       });
       return;
     }
@@ -87,17 +87,17 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
     // Since vehicles are now loaded through the bloc in the bottom sheet,
     // we'll create a simple default marker for now
     // The actual vehicle-specific marker will be created when a vehicle is selected
-    final defaultMarker = Marker(
-      markerId: const MarkerId('selected_vehicle'),
-      position: _currentLocation!,
-      infoWindow: const InfoWindow(
-        title: 'Selected Vehicle',
-        snippet: 'Your selected vehicle',
-      ),
-    );
+    // final defaultMarker = Marker( // Unused variable
+    //   markerId: const MarkerId('selected_vehicle'),
+    //   position: _currentLocation!,
+    //   infoWindow: const InfoWindow(
+    //     title: 'Selected Vehicle',
+    //     snippet: 'Your selected vehicle',
+    //   ),
+    // );
 
     setState(() {
-      _markers = {defaultMarker};
+      // _markers = {defaultMarker}; // Unused field
     });
   }
 
@@ -184,7 +184,7 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
           left: 16,
           child: SafeArea(
             child: Material(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               shape: const CircleBorder(),
               elevation: 2,
               child: IconButton(
@@ -201,7 +201,7 @@ class _RideVehicleScreenState extends State<RideVehicleScreen> {
           right: 16,
           child: SafeArea(
             child: Material(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               shape: const CircleBorder(),
               elevation: 2,
               child: IconButton(

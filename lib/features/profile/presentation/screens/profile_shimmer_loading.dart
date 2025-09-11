@@ -36,13 +36,13 @@ class ProfileShimmerLoading extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(baseColor, context),
-              SizedBox(height: context.spacing(28)),
+              SizedBox(height: context.baseSpacing(28)),
               _buildStatsRow(baseColor, context),
-              SizedBox(height: context.spacing(28)),
+              SizedBox(height: context.baseSpacing(28)),
               _buildBioSection(baseColor, context),
-              SizedBox(height: context.spacing(28)),
+              SizedBox(height: context.baseSpacing(28)),
               Divider(color: baseColor, thickness: 1, height: 1),
-              SizedBox(height: context.spacing(20)),
+              SizedBox(height: context.baseSpacing(20)),
               ...List.generate(6, (_) => _buildListTilePlaceholder(baseColor, context)),
             ],
           ),
@@ -69,19 +69,19 @@ class ProfileShimmerLoading extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(width: context.spacing(20)),
+        SizedBox(width: context.baseSpacing(20)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _roundedBox(baseColor, height: 20, width: 140, context: context),
-              SizedBox(height: context.spacing(10)),
+              SizedBox(height: context.baseSpacing(10)),
               _roundedBox(baseColor, height: 16, width: 100, context: context),
-              SizedBox(height: context.spacing(12)),
+              SizedBox(height: context.baseSpacing(12)),
               Row(
                 children: [
                   _roundedBox(baseColor, height: 14, width: 80, context: context),
-                  SizedBox(width: context.spacing(14)),
+                  SizedBox(width: context.baseSpacing(14)),
                   _roundedBox(baseColor, height: 14, width: 80, context: context),
                 ],
               ),
@@ -100,14 +100,14 @@ class ProfileShimmerLoading extends StatelessWidget {
           child: Column(
             children: [
               _roundedBox(baseColor, height: 16, width: 40, context: context),
-              SizedBox(height: context.spacing(10)),
+              SizedBox(height: context.baseSpacing(10)),
               _roundedBox(baseColor, height: 14, width: double.infinity, context: context),
             ],
           ),
         );
       }).expand((w) sync* {
         yield w;
-        yield SizedBox(width: context.spacing(16));
+        yield SizedBox(width: context.baseSpacing(16));
       }).toList()
         ..removeLast(),
     );
@@ -118,9 +118,9 @@ class ProfileShimmerLoading extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _roundedBox(baseColor, height: 14, width: double.infinity, context: context),
-        SizedBox(height: context.spacing(8)),
+        SizedBox(height: context.baseSpacing(8)),
         _roundedBox(baseColor, height: 14, width: double.infinity, context: context),
-        SizedBox(height: context.spacing(8)),
+        SizedBox(height: context.baseSpacing(8)),
         _roundedBox(baseColor, height: 14, width: context.width(60), context: context),
       ],
     );
@@ -146,18 +146,18 @@ class ProfileShimmerLoading extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: context.spacing(16)),
+          SizedBox(width: context.baseSpacing(16)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _roundedBox(baseColor, height: 14, width: double.infinity, context: context),
-                SizedBox(height: context.spacing(8)),
+                SizedBox(height: context.baseSpacing(8)),
                 _roundedBox(baseColor, height: 12, width: 120, context: context),
               ],
             ),
           ),
-          SizedBox(width: context.spacing(16)),
+          SizedBox(width: context.baseSpacing(16)),
           _roundedBox(baseColor, height: 26, width: 26, context: context),
         ],
       ),

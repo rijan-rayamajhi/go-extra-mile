@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/screens/loading_screen.dart';
-import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_bloc.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_event.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_state.dart';

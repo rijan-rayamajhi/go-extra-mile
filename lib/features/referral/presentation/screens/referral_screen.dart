@@ -99,7 +99,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
               children: [
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.all(screenPadding),
+                    padding: EdgeInsets.all(baseScreenPadding),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -154,7 +154,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(screenPadding),
+                  padding: EdgeInsets.all(baseScreenPadding),
                   child: PrimaryButton(
                     onPressed: _handleReferralSubmit,
                     text: 'Continue',

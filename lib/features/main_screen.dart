@@ -195,23 +195,23 @@ class PremiumBottomNavBar extends StatelessWidget {
           gradient: LinearGradient(
             colors: isNavigating
                 ? [
-                    theme.primaryColor.withOpacity(0.6),
-                    theme.primaryColor.withOpacity(0.4),
+                    theme.primaryColor.withValues(alpha: 0.6),
+                    theme.primaryColor.withValues(alpha: 0.4),
                   ]
-                : [theme.primaryColor, theme.primaryColor.withOpacity(0.8)],
+                : [theme.primaryColor, theme.primaryColor.withValues(alpha: 0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: theme.primaryColor.withOpacity(0.4),
+              color: theme.primaryColor.withValues(alpha: 0.4),
               blurRadius: 15,
               offset: const Offset(0, 8),
               spreadRadius: -2,
             ),
             BoxShadow(
-              color: theme.primaryColor.withOpacity(0.2),
+              color: theme.primaryColor.withValues(alpha: 0.2),
               blurRadius: 25,
               offset: const Offset(0, 15),
               spreadRadius: -5,
@@ -260,15 +260,15 @@ class PremiumBottomNavBar extends StatelessWidget {
                     ? BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            theme.primaryColor.withOpacity(0.2),
-                            theme.primaryColor.withOpacity(0.1),
+                            theme.primaryColor.withValues(alpha: 0.2),
+                            theme.primaryColor.withValues(alpha: 0.1),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: theme.primaryColor.withOpacity(0.3),
+                          color: theme.primaryColor.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       )

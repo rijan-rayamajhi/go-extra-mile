@@ -177,6 +177,8 @@ class DatePickerUtils {
     );
     if (date == null) return null;
 
+    if (!context.mounted) return null;
+    
     final time = await pickTime(
       context,
       initialTime: TimeOfDay.fromDateTime(initial),

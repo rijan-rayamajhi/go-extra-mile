@@ -5,7 +5,6 @@ import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_detail
 import '../../ride/presentation/bloc/ride_bloc.dart';
 import '../../ride/presentation/bloc/ride_event.dart';
 import '../../ride/domain/entities/ride_entity.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../../common/widgets/ride_card_widget.dart';
 
 class HomeRecentRide extends StatelessWidget {

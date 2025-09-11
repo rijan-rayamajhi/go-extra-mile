@@ -233,7 +233,9 @@ class _LocationPickerDemoState extends State<LocationPickerDemo> {
         _selectedAddress = 'Location selected at ${result.latitude.toStringAsFixed(4)}, ${result.longitude.toStringAsFixed(4)}';
       });
       
-      AppSnackBar.success(context, 'Location selected: ${result.latitude.toStringAsFixed(6)}, ${result.longitude.toStringAsFixed(6)}');
+      if (mounted) {
+        AppSnackBar.success(context, 'Location selected: ${result.latitude.toStringAsFixed(6)}, ${result.longitude.toStringAsFixed(6)}');
+      }
     }
   }
 

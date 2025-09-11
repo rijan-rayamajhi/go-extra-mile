@@ -19,7 +19,7 @@ class VehicleModelScreen extends StatefulWidget {
 
 class _VehicleModelScreenState extends State<VehicleModelScreen> {
   String? selectedModel;
-  List<Map<String, dynamic>> _requestedModels = [];
+  final List<Map<String, dynamic>> _requestedModels = [];
   final TextEditingController _searchController = TextEditingController();
   List<String> _filteredModels = [];
   bool _isSearching = false;
@@ -130,13 +130,13 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isSelected
-                                    ? Colors.black.withOpacity(0.1)
-                                    : Colors.grey.withOpacity(0.1),
+                                    ? Colors.black.withValues(alpha: 0.1)
+                                    : Colors.grey.withValues(alpha: 0.1),
                                 width: isSelected ? 2 : 1,
                               ),
                               color: isSelected
-                                  ? Colors.black.withOpacity(0.1)
-                                  : Colors.grey.withOpacity(0.1),
+                                  ? Colors.black.withValues(alpha: 0.1)
+                                  : Colors.grey.withValues(alpha: 0.1),
                             ),
                             child: Text(
                               model,
@@ -327,10 +327,10 @@ class _RequestedModelCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: _getStatusColor().withOpacity(0.1),
+              color: _getStatusColor().withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: _getStatusColor().withOpacity(0.3),
+                color: _getStatusColor().withValues(alpha: 0.3),
                 width: 1,
               ),
             ),

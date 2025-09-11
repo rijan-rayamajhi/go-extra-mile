@@ -104,8 +104,8 @@ class ResponsiveUtils {
     return MediaQuery.of(context).size.width < 768;
   }
 
-  /// Get responsive spacing based on screen size
-  static double spacing(BuildContext context, double baseSpacing) {
+  /// Get responsive baseSpacing based on screen size
+  static double baseSpacing(BuildContext context, double baseSpacing) {
     final screenWidth = MediaQuery.of(context).size.width;
     final scaleFactor = screenWidth < 360 ? 0.8 : screenWidth < 414 ? 0.9 : 1.0;
     return baseSpacing * scaleFactor;
@@ -211,8 +211,8 @@ extension ResponsiveExtension on BuildContext {
   /// Check if mobile
   bool get isMobile => ResponsiveUtils.isMobile(this);
 
-  /// Get responsive spacing
-  double spacing(double baseSpacing) => ResponsiveUtils.spacing(this, baseSpacing);
+  /// Get responsive baseSpacing
+  double baseSpacing(double baseSpacing) => ResponsiveUtils.baseSpacing(this, baseSpacing);
 
   /// Get responsive icon size
   double iconSize(double baseIconSize) => ResponsiveUtils.iconSize(this, baseIconSize);

@@ -103,12 +103,12 @@ class _MyVehicleDetailsVehicleRcImageWidgetState
     final originalImageUrl = isFront ? widget.frontImageUrl : widget.backImageUrl;
 
     // Upload image if it's local
-    if (localImageUrl != null && _isLocalFile(localImageUrl!)) {
+    if (localImageUrl != null && _isLocalFile(localImageUrl)) {
       context.read<VehicleBloc>().add(
         UploadVehicleImage(
           widget.vehicleId,
           widget.userId,
-          File(localImageUrl!),
+          File(localImageUrl),
           fieldName,
         ),
       );
@@ -122,7 +122,7 @@ class _MyVehicleDetailsVehicleRcImageWidgetState
           widget.vehicleId,
           widget.userId,
           fieldName,
-          originalImageUrl!,
+          originalImageUrl,
         ),
       );
     }
@@ -131,7 +131,7 @@ class _MyVehicleDetailsVehicleRcImageWidgetState
   bool _showUpdateButton(String imageType) {
     final localImageUrl = imageType == 'front' ? _localFrontImageUrl : _localBackImageUrl;
     return localImageUrl != null && 
-           _isLocalFile(localImageUrl!) && 
+           _isLocalFile(localImageUrl) && 
            _updatingImageType != imageType;
   }
 
@@ -188,8 +188,8 @@ class _MyVehicleDetailsVehicleRcImageWidgetState
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
             colors: [
-              Colors.white.withOpacity(0.95),
-              Colors.grey.shade100.withOpacity(0.9),
+              Colors.white.withValues(alpha: 0.95),
+              Colors.grey.shade100.withValues(alpha: 0.9),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

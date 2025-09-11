@@ -92,7 +92,7 @@ class MarkerUtils {
         );
       }
 
-      return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
+      return BitmapDescriptor.bytes(byteData.buffer.asUint8List());
     } catch (_) {
       // Network, decoding, or drawing failed; return a safe default marker.
       return await _createMyLocationFallback(
@@ -182,7 +182,7 @@ class MarkerUtils {
     final ui.Image finalImage = await picture.toImage(size, size);
     final ByteData? byteData =
         await finalImage.toByteData(format: ui.ImageByteFormat.png);
-    return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
+    return BitmapDescriptor.bytes(byteData!.buffer.asUint8List());
   }
 
   /// Creates a rectangular marker from an image URL.
@@ -269,7 +269,7 @@ class MarkerUtils {
       final ByteData? byteData =
           await finalImage.toByteData(format: ui.ImageByteFormat.png);
 
-      return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
+      return BitmapDescriptor.bytes(byteData!.buffer.asUint8List());
     } catch (_) {
       return await _createFallback(
         width: width,
@@ -329,7 +329,7 @@ class MarkerUtils {
     final ui.Image finalImage = await picture.toImage(width, height);
     final ByteData? byteData =
         await finalImage.toByteData(format: ui.ImageByteFormat.png);
-    return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
+    return BitmapDescriptor.bytes(byteData!.buffer.asUint8List());
   }
 }
 

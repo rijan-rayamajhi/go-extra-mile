@@ -61,7 +61,9 @@ class _GoogleMapsCurrentLocationPickerState
       });
 
       // Get address for current location using LocationService
-      await _getAddressFromLatLng(_currentLocation!, context);
+      if (mounted) {
+        await _getAddressFromLatLng(_currentLocation!, context);
+      }
 
       // Animate camera to current location
       _animateToLocation(_currentLocation!);
@@ -85,7 +87,9 @@ class _GoogleMapsCurrentLocationPickerState
         });
       }
     } catch (e) {
-      AppSnackBar.error(context, e.toString());
+      if (mounted) {
+        AppSnackBar.error(context, e.toString());
+      }
     }
   }
 

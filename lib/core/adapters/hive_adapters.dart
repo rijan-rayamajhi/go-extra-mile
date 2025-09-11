@@ -1,5 +1,4 @@
 import 'package:hive/hive.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'geo_point_adapter.dart';
 import 'date_time_adapter.dart';
 import '../../features/ride/domain/entities/ride_entity.dart';

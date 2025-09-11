@@ -11,7 +11,7 @@ class AuthTermsCondition extends StatelessWidget {
                     child: RichText(
                       text: TextSpan(
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onBackground,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         children: [
                           TextSpan(
@@ -20,7 +20,7 @@ class AuthTermsCondition extends StatelessWidget {
                                 ?.copyWith(
                                   color: Theme.of(
                                     context,
-                                  ).colorScheme.onBackground,
+                                  ).colorScheme.onSurface,
                                 ),
                           ),
                           TextSpan(

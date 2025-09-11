@@ -50,7 +50,7 @@ class VerifyAndEarnScreen extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(screenPadding),
+        padding: const EdgeInsets.all(baseScreenPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -193,8 +193,8 @@ class VerifyAndEarnScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: [
-            Colors.white.withOpacity(0.95),
-            Colors.grey.shade100.withOpacity(0.9),
+            Colors.white.withValues(alpha: 0.95),
+            Colors.grey.shade100.withValues(alpha: 0.9),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -202,7 +202,7 @@ class VerifyAndEarnScreen extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(screenPadding),
+        padding: const EdgeInsets.all(baseScreenPadding),
         child: IntrinsicHeight(
           child: Row(
             mainAxisSize: MainAxisSize.max,

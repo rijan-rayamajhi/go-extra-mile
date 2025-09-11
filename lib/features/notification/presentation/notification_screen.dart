@@ -67,7 +67,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           gradient: LinearGradient(
             colors: [
               theme.colorScheme.surface,
-              theme.colorScheme.surface.withOpacity(0.95),
+              theme.colorScheme.surface.withValues(alpha: 0.95),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -103,7 +103,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     Text(
                       state.message,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -134,20 +134,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       Icon(
                         Icons.notifications_none_outlined,
                         size: 64,
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No notifications yet',
                         style: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'We\'ll notify you when something important happens',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -157,9 +157,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
               }
               
               return ListView.separated(
-                padding: const EdgeInsets.fromLTRB(screenPadding, 0, screenPadding, screenPadding),
+                padding: const EdgeInsets.fromLTRB(baseScreenPadding, 0, baseScreenPadding, baseScreenPadding),
                 itemCount: state.notifications.length,
-                separatorBuilder: (_, __) => const SizedBox(height: spacing),
+                separatorBuilder: (_, __) => const SizedBox(height: baseSpacing),
                 itemBuilder: (context, index) {
                   final notification = state.notifications[index];
 
@@ -209,27 +209,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
   /// Glassy card
   Widget _buildNotificationCard(NotificationEntity notification) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(buttonRadius),
+      borderRadius: BorderRadius.circular(baseButtonRadius),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
-          padding: const EdgeInsets.all(screenPadding),
+          padding: const EdgeInsets.all(baseScreenPadding),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(buttonRadius),
+            borderRadius: BorderRadius.circular(baseButtonRadius),
             border: Border.all(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
             ),
             gradient: LinearGradient(
               colors: [
-                Theme.of(context).colorScheme.surface.withOpacity(0.9),
-                Theme.of(context).colorScheme.surface.withOpacity(0.7),
+                Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
+                Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -241,8 +241,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: notification.isRead 
-                    ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
-                    : Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1)
+                    : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -267,13 +267,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
             subtitle: Text(
               notification.message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             trailing: Text(
               DateFormat('MMM d, h:mm a').format(notification.createdAt),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -293,8 +293,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
       alignment: alignment,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(buttonRadius),
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(baseButtonRadius),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

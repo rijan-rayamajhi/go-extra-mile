@@ -33,8 +33,8 @@ class RideGoogleMapState extends State<RideGoogleMap> {
   final LocationService _locationService = LocationService();
   LatLng? _currentLocation;
   bool _isLocationLoaded = false;
-  Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {}; // Add polylines for route
+  final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {}; // Add polylines for route
   List<LatLng> _currentRoutePoints = []; // Store current route points
 
   @override

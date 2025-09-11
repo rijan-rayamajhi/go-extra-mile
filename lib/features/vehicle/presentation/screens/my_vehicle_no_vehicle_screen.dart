@@ -35,7 +35,7 @@ class MyVehicleNoVehicleScreen extends StatelessWidget {
             Text(
               'Register your vehicle to complete your ride, earn reward, and join exciting events.',
               style: textTheme.bodyMedium?.copyWith(
-                color: textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),

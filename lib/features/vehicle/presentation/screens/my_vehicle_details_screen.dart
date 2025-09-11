@@ -374,7 +374,7 @@ class _MyVehicleDetailsScreenState extends State<MyVehicleDetailsScreen> {
                       ),
                     ],
                   ),
-                )).toList(),
+                )),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -529,7 +529,7 @@ class _MyVehicleDetailsScreenState extends State<MyVehicleDetailsScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 24),
@@ -589,8 +589,9 @@ class _MyVehicleDetailsScreenState extends State<MyVehicleDetailsScreen> {
             onPressed: () {
               Navigator.pop(context);
               final uid = FirebaseAuth.instance.currentUser?.uid;
-              if (uid != null)
+              if (uid != null) {
                 context.read<VehicleBloc>().add(DeleteVehicle(vehicle.id, uid));
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),

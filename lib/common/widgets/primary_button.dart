@@ -62,7 +62,7 @@ class PrimaryButton extends StatelessWidget {
                   width: context.iconSize(baseMediumIconSize),
                   height: context.iconSize(baseMediumIconSize),
                 ),
-                SizedBox(width: context.spacing(baseSmallSpacing)),
+                SizedBox(width: context.baseSpacing(baseSmallSpacing)),
                 Text(text),
               ],
             )
@@ -71,7 +71,7 @@ class PrimaryButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(icon, size: context.iconSize(baseMediumIconSize)),
-                  SizedBox(width: context.spacing(baseSmallSpacing)),
+                  SizedBox(width: context.baseSpacing(baseSmallSpacing)),
                   Text(text),
                 ],
               )

@@ -64,7 +64,9 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
         });
       }
     } catch (e) {
-      AppSnackBar.error(context, 'Error: ${e.toString()}');
+      if (mounted) {
+        AppSnackBar.error(context, 'Error: ${e.toString()}');
+      }
     }
   }
 
@@ -283,8 +285,8 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
     padding: const EdgeInsets.all(16),
     margin: const EdgeInsets.symmetric(vertical: 12),
     decoration: BoxDecoration(
-      color: color.withOpacity(.1),
-      border: Border.all(color: color.withOpacity(.3)),
+      color: color.withValues(alpha: .1),
+      border: Border.all(color: color.withValues(alpha: .3)),
       borderRadius: BorderRadius.circular(12),
     ),
     child: Row(
@@ -348,7 +350,7 @@ class _MyDrivingLicenseScreenState extends State<MyDrivingLicenseScreen> {
         return Scaffold(
           appBar: AppBar(title: const Text("Driving License")),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(screenPadding),
+            padding: const EdgeInsets.all(baseScreenPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -87,6 +87,7 @@ class NotificationModel extends NotificationEntity {
   Map<String, dynamic> toJson() => toMap();
 
   /// Copy with updated values
+  @override
   NotificationModel copyWith({
     String? id,
     String? title,

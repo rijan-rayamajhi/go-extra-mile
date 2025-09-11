@@ -256,7 +256,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
       },
       child: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) {
+        onPopInvokedWithResult: (didPop, result) {
           if (!didPop) {
             _showUnsavedRideDialog();
           }
@@ -271,7 +271,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
           ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(screenPadding),
+            padding: const EdgeInsets.all(baseScreenPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -625,7 +625,7 @@ class _RideMemoryRoadState extends State<RideMemoryRoad> {
               : Alignment.centerLeft,
           colors: [
             Colors.white,
-            Colors.white.withOpacity(0.0),
+            Colors.white.withValues(alpha: 0.0),
           ],
         ),
       ),

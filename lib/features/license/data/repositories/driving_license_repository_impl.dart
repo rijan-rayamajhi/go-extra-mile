@@ -68,7 +68,7 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
           // It's a local file path, upload it
           final frontFile = File(license.frontImagePath);
           if (await frontFile.exists()) {
-            final frontPath = 'driving_licenses/${_uid}/front_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final frontPath = 'driving_licenses/$_uid/front_${DateTime.now().millisecondsSinceEpoch}.jpg';
             frontImageUrl = await storageService.uploadFile(
               file: frontFile,
               path: frontPath,
@@ -89,7 +89,7 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
           // It's a local file path, upload it
           final backFile = File(license.backImagePath);
           if (await backFile.exists()) {
-            final backPath = 'driving_licenses/${_uid}/back_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final backPath = 'driving_licenses/$_uid/back_${DateTime.now().millisecondsSinceEpoch}.jpg';
             backImageUrl = await storageService.uploadFile(
               file: backFile,
               path: backPath,

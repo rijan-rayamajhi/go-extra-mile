@@ -33,7 +33,7 @@ class RideStatsWidget extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: context.spacing(baseSmallSpacing)),
+        SizedBox(height: context.baseSpacing(baseSmallSpacing)),
         Text(
           value,
           overflow: TextOverflow.ellipsis,
@@ -44,7 +44,7 @@ class RideStatsWidget extends StatelessWidget {
             height: 1.1,
           ),
         ),
-        SizedBox(height: context.spacing(6)),
+        SizedBox(height: context.baseSpacing(6)),
         Text(
           label,
           textAlign: TextAlign.center,

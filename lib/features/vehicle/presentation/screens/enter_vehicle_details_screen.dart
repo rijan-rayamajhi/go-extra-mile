@@ -179,7 +179,7 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
                                 'e.g., ABC123456',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: Colors.grey.withOpacity(0.7),
+                                      color: Colors.grey.withValues(alpha: 0.7),
                                     ),
                               ),
                               if (_registrationValidationError != null)
@@ -303,7 +303,7 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
                 Text(
                   '${brand['name']} • ${widget.selectedVehicleType}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.withOpacity(0.7),
+                    color: Colors.grey.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -330,7 +330,7 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
     border: Border.all(color: Colors.grey),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.05),
+        color: Colors.black.withValues(alpha: 0.05),
         offset: const Offset(0, 2),
         blurRadius: 4,
       ),
@@ -353,7 +353,7 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
               child: Container(
                 height: 56,
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.black.withOpacity(0.1) : null,
+                  color: isSelected ? Colors.black.withValues(alpha: 0.1) : null,
                   borderRadius: BorderRadius.horizontal(
                     left: type == 'Tube'
                         ? const Radius.circular(12)
@@ -568,7 +568,7 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: Colors.black, size: 24),
@@ -588,7 +588,7 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(color: Colors.grey.withOpacity(0.7)),
+                  style: TextStyle(color: Colors.grey.withValues(alpha: 0.7)),
                 ),
               ],
             ),

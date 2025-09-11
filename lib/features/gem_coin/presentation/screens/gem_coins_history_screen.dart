@@ -352,7 +352,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, -2),
                     ),
@@ -512,7 +512,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Image.asset(
@@ -557,7 +557,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         Expanded(
                           child: _buildSummaryCard(
                             title: 'Credit',
-                            amount: '+${creditTotal}',
+                            amount: '+$creditTotal',
                             icon: Icons.trending_up,
                             color: Colors.green,
                           ),
@@ -566,7 +566,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         Expanded(
                           child: _buildSummaryCard(
                             title: 'Debit',
-                            amount: '-${debitTotal}',
+                            amount: '-$debitTotal',
                             icon: Icons.trending_down,
                             color: Colors.red,
                           ),
@@ -608,7 +608,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                               date: formatDate(transaction.date),
                               iconColor: iconData['color'],
                             );
-                          }).toList(),
+                          }),
                       ],
                     ),
                   ),
@@ -632,7 +632,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Image.asset(
@@ -726,7 +726,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -737,7 +737,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -786,7 +786,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -797,7 +797,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -860,7 +860,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -894,7 +894,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -924,6 +924,6 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
       return 'No filters applied';
     }
     
-    return '${activeFilters.join(' • ')}';
+    return activeFilters.join(' • ');
   }
 }

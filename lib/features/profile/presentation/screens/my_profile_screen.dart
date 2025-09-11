@@ -225,7 +225,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(screenPadding),
+          padding: EdgeInsets.all(baseScreenPadding),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,

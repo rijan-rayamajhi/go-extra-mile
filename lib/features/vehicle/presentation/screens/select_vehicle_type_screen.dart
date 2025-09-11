@@ -117,7 +117,7 @@ class _SelectVehicleTypeScreenState extends State<SelectVehicleTypeScreen> {
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.primaryColor.withOpacity(0.1)
+              ? theme.primaryColor.withValues(alpha: 0.1)
               : Colors.grey[50],
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -127,7 +127,7 @@ class _SelectVehicleTypeScreenState extends State<SelectVehicleTypeScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: theme.primaryColor.withOpacity(0.2),
+                    color: theme.primaryColor.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -146,7 +146,7 @@ class _SelectVehicleTypeScreenState extends State<SelectVehicleTypeScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isSelected
-                        ? theme.primaryColor.withOpacity(0.1)
+                        ? theme.primaryColor.withValues(alpha: 0.1)
                         : Colors.grey[100],
                   ),
                   child: Icon(
@@ -167,7 +167,7 @@ class _SelectVehicleTypeScreenState extends State<SelectVehicleTypeScreen> {
                         border: Border.all(color: Colors.white, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),

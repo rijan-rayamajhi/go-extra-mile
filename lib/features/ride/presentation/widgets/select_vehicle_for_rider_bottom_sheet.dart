@@ -1,11 +1,11 @@
-import 'dart:io';
+// import 'dart:io'; // Unused import
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:uuid/uuid.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart'; // Unused import
 
 import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
@@ -39,8 +39,8 @@ class _SelectVehicleForRiderBottomSheetState
   int _currentIndex = 0;
   final LocationService _locationService = LocationService();
   bool _isLoading = false;
-  File? _odometerPicture;
-  final ImagePicker _imagePicker = ImagePicker();
+  // File? _odometerPicture; // Unused field
+  // final ImagePicker _imagePicker = ImagePicker(); // Unused field
 
   @override
   void initState() {
@@ -69,26 +69,26 @@ class _SelectVehicleForRiderBottomSheetState
     }
   }
 
-  Future<void> _captureOdometerImage() async {
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 80,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
-      
-      if (image != null) {
-        setState(() {
-          _odometerPicture = File(image.path);
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        AppSnackBar.error(context, 'Failed to capture image: $e');
-      }
-    }
-  }
+  // Future<void> _captureOdometerImage() async { // Unused method
+  //   try {
+  //     final XFile? image = await _imagePicker.pickImage(
+  //       source: ImageSource.camera,
+  //       imageQuality: 80,
+  //       maxWidth: 1920,
+  //       maxHeight: 1080,
+  //     );
+  //     
+  //     if (image != null) {
+  //       setState(() {
+  //         _odometerPicture = File(image.path);
+  //       });
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       AppSnackBar.error(context, 'Failed to capture image: $e');
+  //     }
+  //   }
+  // }
 
 
 
@@ -240,7 +240,7 @@ class _SelectVehicleForRiderBottomSheetState
               'Please try again later',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -278,7 +278,7 @@ class _SelectVehicleForRiderBottomSheetState
               'Please add a vehicle to start riding',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -391,7 +391,7 @@ class _SelectVehicleForRiderBottomSheetState
                           final Color textColor = Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(0.7 + 0.3 * normalized);
+                              .withValues(alpha: 0.7 + 0.3 * normalized);
 
                           return GestureDetector(
                             onTap: () {

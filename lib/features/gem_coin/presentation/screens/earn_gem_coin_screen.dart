@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
-import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/features/others/find_and_earn_screen.dart';
 import 'package:go_extra_mile_new/features/others/insure_and_earn_screen.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/screens/refer_and_earn_screen.dart';
@@ -89,7 +88,7 @@ class _EarnGemCoinScreenState extends State<EarnGemCoinScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(screenPadding),
+          padding: EdgeInsets.all(baseScreenPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

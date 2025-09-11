@@ -198,8 +198,8 @@ class HomeLeaderboardWidget extends StatelessWidget {
 
         // gradient: LinearGradient(
         //   colors: [
-        //     Colors.white.withOpacity(0.95),
-        //     Colors.grey.shade100.withOpacity(0.9),
+        //     Colors.white.withValues(alpha: 0.95),
+        //     Colors.grey.shade100.withValues(alpha: 0.9),
         //   ],
         //   begin: Alignment.topLeft,
         //   end: Alignment.bottomRight,

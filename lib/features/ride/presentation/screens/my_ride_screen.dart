@@ -397,7 +397,7 @@ class _MyRideScreenState extends State<MyRideScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 3,
               offset: const Offset(0, 1),
@@ -427,7 +427,7 @@ class _MyRideScreenState extends State<MyRideScreen> {
                 height: 24,
                 margin: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.white.withOpacity(0.2) : Colors.grey.shade300,
+                  color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(

@@ -11,9 +11,7 @@ import 'package:go_extra_mile_new/core/service/location_service.dart'
     hide LatLng;
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_entity.dart';
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_memory_entity.dart';
-import 'package:go_extra_mile_new/features/ride/data/models/ride_memory_model.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_bloc.dart';
-import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_event.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_state.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/ride_google_map.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/ride_capture_memory_button.dart';
@@ -238,7 +236,9 @@ class _RideScreenState extends State<RideScreen> {
     try {
       final position = await LocationService().getCurrentPosition();
       if (position == null) {
-        AppSnackBar.show(context, message: 'Unable to get current location');
+        if (mounted) {
+          AppSnackBar.show(context, message: 'Unable to get current location');
+        }
         return;
       }
 
@@ -275,17 +275,21 @@ class _RideScreenState extends State<RideScreen> {
         isPublic: widget.rideEntity.isPublic ?? true, // Default to public if not set
       );
 
-      Navigator.push(
-        context,
+      if (mounted) {
+        Navigator.push(
+          context,
         MaterialPageRoute(
           builder: (_) => SaveRideScreen(
             rideEntity: ride,
             selectedVehicle: widget.selectedVechile,
           ),
         ),
-      );
+        );
+      }
     } catch (e) {
-      AppSnackBar.show(context, message: 'Error: $e');
+      if (mounted) {
+        AppSnackBar.show(context, message: 'Error: $e');
+      }
     } finally {
       setState(() => _isEndingRide = false);
     }
@@ -320,7 +324,7 @@ class _RideScreenState extends State<RideScreen> {
       builder: (context, state) {
         return PopScope(
           canPop: false,
-          onPopInvoked: (didPop) => !didPop ? _showExitRideDialog() : null,
+          onPopInvokedWithResult: (didPop, result) => !didPop ? _showExitRideDialog() : null,
           child: Scaffold(
             body: Stack(
               children: [
@@ -366,7 +370,7 @@ class _RideScreenState extends State<RideScreen> {
 
   Widget _buildLoadingOverlay() => Positioned.fill(
     child: Container(
-      color: Colors.black.withOpacity(0.3),
+      color: Colors.black.withValues(alpha: 0.3),
       child: const Center(child: CircularProgressIndicator()),
     ),
   );
@@ -386,7 +390,7 @@ class _RideScreenState extends State<RideScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 4),
                 ),
@@ -480,7 +484,7 @@ class _RideScreenState extends State<RideScreen> {
   );
 
   Widget _divider() =>
-      Container(height: 40, width: 1, color: Colors.grey.withOpacity(0.3));
+      Container(height: 40, width: 1, color: Colors.grey.withValues(alpha: 0.3));
 
   Widget _buildVehicleImage() => Positioned(
     bottom: 200,

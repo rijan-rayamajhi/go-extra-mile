@@ -377,7 +377,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     FocusScope.of(context).unfocus();
                   },
                   child: Padding(
-                    padding: const EdgeInsets.all(screenPadding),
+                    padding: const EdgeInsets.all(baseScreenPadding),
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,

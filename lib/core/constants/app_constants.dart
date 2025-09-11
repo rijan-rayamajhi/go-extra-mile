@@ -25,7 +25,7 @@ const double baseButtonHeight = 48.0;
 const double baseButtonWidth = double.infinity;
 const double baseIconButtonSize = 40.0;
 
-// Base spacing values (will be scaled responsively)
+// Base baseSpacing values (will be scaled responsively)
 const double baseSpacing = 16.0;
 const double baseSmallSpacing = 8.0;
 const double baseLargeSpacing = 24.0;
@@ -44,16 +44,10 @@ const double baseLargeIconSize = 32.0;
 const double baseXLargeIconSize = 48.0;
 
 // Legacy constants for backward compatibility (deprecated - use ResponsiveUtils instead)
-@deprecated
-const double screenPadding = 16.0;
-@deprecated
-const double buttonRadius = 16;
-@deprecated
+@Deprecated('Use baseButtonHeight with ResponsiveUtils instead')
 const double buttonHeight = 48;
-@deprecated
+@Deprecated('Use baseButtonWidth with ResponsiveUtils instead')
 const double buttonWidth = double.infinity;
-@deprecated
-const double spacing = 16;
 
 // Memory marker colors for ride feature
 const List<Color> memoryMarkerColors = [
