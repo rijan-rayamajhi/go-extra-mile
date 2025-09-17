@@ -8,6 +8,8 @@ import 'package:go_extra_mile_new/features/auth/domain/usecases/sign_in_with_app
 import 'package:go_extra_mile_new/features/auth/domain/usecases/sign_out.dart';
 import 'package:go_extra_mile_new/features/auth/domain/usecases/delete_account.dart';
 import 'package:go_extra_mile_new/features/auth/domain/usecases/restore_account.dart';
+import 'package:go_extra_mile_new/features/auth/domain/usecases/update_fcm_token.dart';
+import 'package:go_extra_mile_new/features/auth/domain/usecases/clear_fcm_token.dart';
 import 'package:go_extra_mile_new/features/auth/domain/entities/account_deletion_info.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_event.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_state.dart';
@@ -21,6 +23,8 @@ class KAuthBloc extends Bloc<KAuthEvent, KAuthState> {
   final SignOut signOut;
   final DeleteAccount deleteAccount;
   final RestoreAccount restoreAccount;
+  final UpdateFCMToken updateFCMToken;
+  final ClearFCMToken clearFCMToken;
   KAuthBloc({
     required this.signInWithGoogle,
     required this.signInWithApple,
@@ -30,6 +34,8 @@ class KAuthBloc extends Bloc<KAuthEvent, KAuthState> {
     required this.signOut,
     required this.deleteAccount,
     required this.restoreAccount,
+    required this.updateFCMToken,
+    required this.clearFCMToken,
   }) : super(KAuthInitial()) {
     on<KSignInWithGoogleEvent>(_onSignInWithGoogle);
     on<KSignInWithAppleEvent>(_onSignInWithApple);
@@ -60,6 +66,12 @@ class KAuthBloc extends Bloc<KAuthEvent, KAuthState> {
         if (accountDeletedInfo != null) {
           emit(KAuthDeletedUser(accountDeletedInfo));
         } else {
+          // Update FCM token for existing user
+          try {
+            await updateFCMToken(user.uid);
+          } catch (e) {
+            // Continue even if FCM token update fails
+          }
           emit(KAuthAuthenticated());
         }
       } else {
@@ -92,6 +104,12 @@ class KAuthBloc extends Bloc<KAuthEvent, KAuthState> {
         if (accountDeletedInfo != null) {
           emit(KAuthDeletedUser(accountDeletedInfo));
         } else {
+          // Update FCM token for existing user
+          try {
+            await updateFCMToken(user.uid);
+          } catch (e) {
+            // Continue even if FCM token update fails
+          }
           emit(KAuthAuthenticated());
         }
       } else {
@@ -106,6 +124,19 @@ class KAuthBloc extends Bloc<KAuthEvent, KAuthState> {
   Future<void> _onSignOut(KSignOutEvent event, Emitter<KAuthState> emit) async {
     emit(KAuthLoading());
     try {
+      // Get current user UID before signing out
+      final currentUser = FirebaseAuth.instance.currentUser;
+      final uid = currentUser?.uid;
+      
+      // Clear FCM token before signing out
+      if (uid != null) {
+        try {
+          await clearFCMToken(uid);
+        } catch (e) {
+          // Continue with logout even if FCM token clearing fails
+        }
+      }
+      
       await signOut();
       emit(KAuthInitial());
     } catch (e) {
@@ -167,6 +198,12 @@ class KAuthBloc extends Bloc<KAuthEvent, KAuthState> {
           if (accountDeletedInfo != null) {
             emit(KAuthDeletedUser(accountDeletedInfo));
           } else {
+            // Update FCM token for existing authenticated user
+            try {
+              await updateFCMToken(user.uid);
+            } catch (e) {
+              // Continue even if FCM token update fails
+            }
             emit(KAuthAuthenticated());
           }
         }

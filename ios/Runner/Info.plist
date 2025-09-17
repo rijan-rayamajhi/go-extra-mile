@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>dev.flutter.background.refresh</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -43,26 +47,34 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
 	<key>GIDClientID</key>
 	<string>780810782870-2foaeqg6fb5j2s16p7ffhqas6iov9rf3.apps.googleusercontent.com</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>This app may access Apple Music to enhance your ride experience with background music and audio features.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to camera to capture ride memories and take photos during your journey.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>This app may access contacts to help you share ride experiences with friends.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs access to location to show your current position on the map and provide location-based services.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to location to show your current position on the map and provide location-based services.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs access to microphone for potential voice features during rides.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>This app uses motion data to enhance your ride tracking experience.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app needs access to save captured ride memories to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to photo library to select existing photos for ride memories and profile pictures.</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>This app needs to send notifications about ride progress and important updates.</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>This app may access Apple Music to enhance your ride experience with background music and audio features.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -87,13 +99,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<true/>
-	<key>NSContactsUsageDescription</key>
-	<string>This app may access contacts to help you share ride experiences with friends.</string>
-	<key>NSMotionUsageDescription</key>
-	<string>This app uses motion data to enhance your ride tracking experience.</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 </dict>
 </plist>

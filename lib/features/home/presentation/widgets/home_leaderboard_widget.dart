@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/common/widgets/custome_divider.dart';
 import 'package:go_extra_mile_new/common/widgets/user_profile_bottom_sheet.dart';
-import 'package:go_extra_mile_new/features/leaderboard/fourwheeler_riderboard_screen.dart';
-import 'package:go_extra_mile_new/features/leaderboard/twowheeler_riderboard_screen.dart';
-import 'package:go_extra_mile_new/features/leaderboard/referalboard_screen.dart';
+import 'package:go_extra_mile_new/features/leaderboard/presentation/fourwheeler_riderboard_screen.dart';
+import 'package:go_extra_mile_new/features/leaderboard/presentation/twowheeler_riderboard_screen.dart';
+import 'package:go_extra_mile_new/features/leaderboard/presentation/referalboard_screen.dart';
 
 // User data model for leaderboard
 class LeaderboardUser {

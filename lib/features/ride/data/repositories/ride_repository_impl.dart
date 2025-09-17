@@ -36,6 +36,7 @@ class RideRepositoryImpl implements RideRepository {
         averageSpeed: rideEntity.averageSpeed,
         routePoints: rideEntity.routePoints,
         isPublic: rideEntity.isPublic,
+        odometer: rideEntity.odometer,
       );
 
       // Upload to Firestore using the injected datasource

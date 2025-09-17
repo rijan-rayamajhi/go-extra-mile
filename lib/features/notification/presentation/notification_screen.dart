@@ -11,7 +11,9 @@ import 'package:go_extra_mile_new/features/notification/presentation/bloc/notifi
 import 'package:intl/intl.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  final String? initialNotificationId;
+  
+  const NotificationScreen({super.key, this.initialNotificationId});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();

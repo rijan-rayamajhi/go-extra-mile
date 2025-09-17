@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/rect_image.dart';
-import 'package:go_extra_mile_new/features/home/widgets/home_footer_widget.dart';
-import 'package:go_extra_mile_new/features/home/widgets/home_grid_view.dart';
-import 'package:go_extra_mile_new/features/home/widgets/home_leaderboard_widget.dart';
-import 'package:go_extra_mile_new/features/home/widgets/home_profile_image.dart';
-import 'package:go_extra_mile_new/features/home/widgets/home_recent_ride.dart';
-import 'package:go_extra_mile_new/features/home/widgets/home_screen_shimmer.dart';
+import 'package:go_extra_mile_new/features/home/presentation/widgets/home_footer_widget.dart';
+import 'package:go_extra_mile_new/features/home/presentation/widgets/home_grid_view.dart';
+import 'package:go_extra_mile_new/features/home/presentation/widgets/home_leaderboard_widget.dart';
+import 'package:go_extra_mile_new/features/home/presentation/widgets/home_profile_image.dart';
+import 'package:go_extra_mile_new/features/home/presentation/widgets/home_recent_ride.dart';
+import 'package:go_extra_mile_new/features/home/presentation/widgets/home_screen_shimmer.dart';
 import 'package:go_extra_mile_new/features/notification/presentation/notification_screen.dart';
 import 'package:go_extra_mile_new/features/home/presentation/bloc/home_bloc.dart';
 import 'package:go_extra_mile_new/features/home/presentation/bloc/home_event.dart';
@@ -154,26 +154,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                 null &&
                             int.parse(state.unreadNotificationCount) > 0)
                           Positioned(
-                            right: 8,
-                            top: 8,
+                            right: 6,
+                            top: 6,
                             child: Container(
-                              padding: const EdgeInsets.all(4),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: Colors.red,
-                                borderRadius: BorderRadius.circular(10),
+                                shape: BoxShape.circle,
                               ),
                               constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
+                                minWidth: 18,
+                                minHeight: 18,
                               ),
-                              child: Text(
-                                state.unreadNotificationCount,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                              child: Center(
+                                child: Text(
+                                  state.unreadNotificationCount,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
@@ -205,7 +206,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 16),
 
-          HomeFooterWidget(),
+          HomeFooterWidget(
+            totalGemCoins: state.totalGemCoins,
+            totalDistance: state.totalDistance,
+            totalRides: state.totalRides,
+            referralCode: state.referralCode,
+          ),
           const SizedBox(height: 120),
         ],
       ),

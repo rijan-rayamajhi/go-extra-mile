@@ -7,7 +7,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 
 class HomeFooterWidget extends StatefulWidget {
-  const HomeFooterWidget({super.key});
+  final int totalGemCoins;
+  final double totalDistance;
+  final int totalRides;
+  final String referralCode;
+
+  const HomeFooterWidget({
+    super.key,
+    required this.totalGemCoins,
+    required this.totalDistance,
+    required this.totalRides,
+    required this.referralCode,
+  });
 
   @override
   State<HomeFooterWidget> createState() => _HomeFooterWidgetState();
@@ -17,110 +28,7 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
   bool copied = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Future to get referral code from Firebase
-  Future<String> _getReferralCode() async {
-    try {
-      // Get current user
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
 
-      // Fetch user document from Firestore
-      final userDoc = await _firestore
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-
-      if (!userDoc.exists) {
-        throw Exception('User profile not found');
-      }
-
-      final userData = userDoc.data()!;
-      final referralCode = userData['referralCode'] as String?;
-
-      if (referralCode == null || referralCode.isEmpty) {
-        // Fallback: generate referral code from UID if not exists
-        return currentUser.uid.substring(0, 7).toUpperCase();
-      }
-
-      return referralCode;
-    } catch (e) {
-      // Log error for debugging
-      
-      // Fallback: try to generate from current user UID
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        return currentUser.uid.substring(0, 7).toUpperCase();
-      }
-      
-      // Final fallback
-      throw Exception('Failed to fetch referral code: $e');
-    }
-  }
-
-  // Future to get total GEM coins from all users
-  Future<String> _getTotalGemCoins() async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('users')
-          .where('totalGemCoins', isGreaterThan: 0)
-          .get();
-
-      double total = 0;
-      for (final doc in querySnapshot.docs) {
-        final data = doc.data();
-        final gemCoins = (data['totalGemCoins'] as num?)?.toDouble() ?? 0;
-        total += gemCoins;
-      }
-
-      return _formatNumber(total.toInt());
-    } catch (e) {
-      return '0';
-    }
-  }
-
-  // Future to get total distance from all users
-  Future<String> _getTotalDistance() async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('users')
-          .where('totalDistance', isGreaterThan: 0)
-          .get();
-
-      double total = 0;
-      for (final doc in querySnapshot.docs) {
-        final data = doc.data();
-        final distance = (data['totalDistance'] as num?)?.toDouble() ?? 0;
-        total += distance;
-      }
-
-      return _formatNumber(total.toInt());
-    } catch (e) {
-      return '0';
-    }
-  }
-
-  // Future to get total rides from all users
-  Future<String> _getTotalRides() async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('users')
-          .where('totalRide', isGreaterThan: 0)
-          .get();
-
-      int total = 0;
-      for (final doc in querySnapshot.docs) {
-        final data = doc.data();
-        final rides = (data['totalRide'] as num?)?.toInt() ?? 0;
-        total += rides;
-      }
-
-      return _formatNumber(total);
-    } catch (e) {
-      return '0';
-    }
-  }
 
   // Helper method to format numbers with commas
   String _formatNumber(int number) {
@@ -189,8 +97,7 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
   }
 
   void _shareReferralLink() async {
-    final referralCode = await _getReferralCode();
-    final shareText = _getShareText(referralCode);
+    final shareText = _getShareText(widget.referralCode);
     SharePlus.instance.share(
       ShareParams(
         text: shareText,
@@ -200,16 +107,47 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
   }
 
   void _shareViaWhatsApp() async {
-    final referralCode = await _getReferralCode();
-    final shareText = _getShareText(referralCode);
-    final whatsappUrl =
-        'whatsapp://send?text=${Uri.encodeComponent(shareText)}';
+    final shareText = _getShareText(widget.referralCode);
 
     try {
-      if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
-        await launchUrl(Uri.parse(whatsappUrl));
-      } else {
-        _showErrorSnackBar('WhatsApp not installed');
+      // Try different WhatsApp URL schemes
+      final whatsappUrls = [
+        'whatsapp://send?text=${Uri.encodeComponent(shareText)}',
+        'https://wa.me/?text=${Uri.encodeComponent(shareText)}',
+        'whatsapp://send?phone=&text=${Uri.encodeComponent(shareText)}',
+      ];
+
+      bool launched = false;
+      for (final url in whatsappUrls) {
+        try {
+          if (await canLaunchUrl(Uri.parse(url))) {
+            await launchUrl(
+              Uri.parse(url),
+              mode: LaunchMode.externalApplication,
+            );
+            launched = true;
+            break;
+          }
+        } catch (e) {
+          // Continue to next URL scheme
+          continue;
+        }
+      }
+
+      if (!launched) {
+        // Fallback: try to open WhatsApp without text
+        try {
+          if (await canLaunchUrl(Uri.parse('whatsapp://'))) {
+            await launchUrl(
+              Uri.parse('whatsapp://'),
+              mode: LaunchMode.externalApplication,
+            );
+          } else {
+            _showErrorSnackBar('WhatsApp not installed');
+          }
+        } catch (e) {
+          _showErrorSnackBar('WhatsApp not installed');
+        }
       }
     } catch (e) {
       _showErrorSnackBar('Failed to open WhatsApp');
@@ -217,8 +155,7 @@ class _HomeFooterWidgetState extends State<HomeFooterWidget> {
   }
 
   void _copyReferralLink() async {
-    final referralCode = await _getReferralCode();
-    final shareText = _getShareText(referralCode);
+    final shareText = _getShareText(widget.referralCode);
     Clipboard.setData(ClipboardData(text: shareText));
     _showSuccessSnackBar('Referral link copied to clipboard!');
   }
@@ -267,88 +204,36 @@ Download GEM app and earn up to 100 GEM Coins when you sign up!
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    FutureBuilder<String>(
-                      future: _getTotalGemCoins(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return _StatBlock(
-                            label: 'GEM Coins',
-                            value: '...',
-                            subLabel: 'EARNED',
-                            labelColor: Colors.blue,
-                            subLabelColor: Color(0xFFBDBDBD),
-                            valueFontSize: 24,
-                            labelFontSize: 16,
-                            subLabelFontSize: 12,
-                            valueFontWeight: FontWeight.w700,
-                          );
-                        }
-                        return _StatBlock(
-                          label: 'GEM Coins',
-                          value: snapshot.data ?? '0',
-                          subLabel: 'EARNED',
-                          labelColor: Colors.blue,
-                          subLabelColor: Color(0xFFBDBDBD),
-                          valueFontSize: 24,
-                          labelFontSize: 16,
-                          subLabelFontSize: 12,
-                          valueFontWeight: FontWeight.w700,
-                        );
-                      },
+                    _StatBlock(
+                      label: 'GEM Coins',
+                      value: _formatNumber(widget.totalGemCoins),
+                      subLabel: 'EARNED',
+                      labelColor: Colors.blue,
+                      subLabelColor: Color(0xFFBDBDBD),
+                      valueFontSize: 24,
+                      labelFontSize: 16,
+                      subLabelFontSize: 12,
+                      valueFontWeight: FontWeight.w700,
                     ),
-                    FutureBuilder<String>(
-                      future: _getTotalDistance(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return _StatBlock(
-                            label: 'Distance',
-                            value: '...',
-                            subLabel: 'KMs',
-                            labelColor: Colors.blue,
-                            subLabelColor: Color(0xFFBDBDBD),
-                            valueFontSize: 24,
-                            labelFontSize: 16,
-                            subLabelFontSize: 12,
-                            valueFontWeight: FontWeight.w700,
-                          );
-                        }
-                        return _StatBlock(
-                          label: 'Distance',
-                          value: snapshot.data ?? '0',
-                          subLabel: 'KMs',
-                          labelColor: Colors.blue,
-                          subLabelColor: Color(0xFFBDBDBD),
-                          valueFontSize: 24,
-                          labelFontSize: 16,
-                          subLabelFontSize: 12,
-                          valueFontWeight: FontWeight.w700,
-                        );
-                      },
+                    _StatBlock(
+                      label: 'Distance',
+                      value: _formatNumber(widget.totalDistance.toInt()),
+                      subLabel: 'KMs',
+                      labelColor: Colors.blue,
+                      subLabelColor: Color(0xFFBDBDBD),
+                      valueFontSize: 24,
+                      labelFontSize: 16,
+                      subLabelFontSize: 12,
+                      valueFontWeight: FontWeight.w700,
                     ),
-                    FutureBuilder<String>(
-                      future: _getTotalRides(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return _StatBlock(
-                            label: 'Rides',
-                            value: '...',
-                            subLabel: 'COMPLETED',
-                            labelColor: Colors.blue,
-                            valueFontSize: 24,
-                            labelFontSize: 16,
-                            valueFontWeight: FontWeight.w700,
-                          );
-                        }
-                        return _StatBlock(
-                          label: 'Rides',
-                          value: snapshot.data ?? '0',
-                          subLabel: 'COMPLETED',
-                          labelColor: Colors.blue,
-                          valueFontSize: 24,
-                          labelFontSize: 16,
-                          valueFontWeight: FontWeight.w700,
-                        );
-                      },
+                    _StatBlock(
+                      label: 'Rides',
+                      value: _formatNumber(widget.totalRides),
+                      subLabel: 'COMPLETED',
+                      labelColor: Colors.blue,
+                      valueFontSize: 24,
+                      labelFontSize: 16,
+                      valueFontWeight: FontWeight.w700,
                     ),
                   ],
                 ),
@@ -394,103 +279,47 @@ Download GEM app and earn up to 100 GEM Coins when you sign up!
                 ),
               ),
               const SizedBox(height: 28),
-              // Referral Code Row with FutureBuilder
-              FutureBuilder<String>(
-                future: _getReferralCode(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Row(
-                      children: [
-                        const Text(
-                          'Referral Code:',
-                          style: TextStyle(
-                            color: Color(0xFFBDBDBD),
-                            fontSize: 16,
-                            fontFamily: 'Gilroy',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  
-                  if (snapshot.hasError) {
-                    return Row(
-                      children: [
-                        const Text(
-                          'Referral Code:',
-                          style: TextStyle(
-                            color: Color(0xFFBDBDBD),
-                            fontSize: 16,
-                            fontFamily: 'Gilroy',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Error loading',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.red,
-                            fontFamily: 'Gilroy',
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  
-                  final referralCode = snapshot.data ?? 'N/A';
-                  return Row(
-                    children: [
-                      const Text(
-                        'Referral Code:',
-                        style: TextStyle(
-                          color: Color(0xFFBDBDBD),
-                          fontSize: 16,
-                          fontFamily: 'Gilroy',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        referralCode,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.blue,
-                          fontFamily: 'Gilroy',
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () async {
-                          await Clipboard.setData(
-                            ClipboardData(text: referralCode),
-                          );
-                          setState(() {
-                            copied = true;
-                          });
-                          Future.delayed(const Duration(seconds: 1), () {
-                            if (mounted) setState(() => copied = false);
-                          });
-                        },
-                        child: Icon(
-                          copied ? Icons.check : Icons.copy,
-                          color: copied ? Colors.green : Colors.blue,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  );
-                },
+              // Referral Code Row
+              Row(
+                children: [
+                  const Text(
+                    'Referral Code:',
+                    style: TextStyle(
+                      color: Color(0xFFBDBDBD),
+                      fontSize: 16,
+                      fontFamily: 'Gilroy',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.referralCode,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.blue,
+                      fontFamily: 'Gilroy',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: widget.referralCode),
+                      );
+                      setState(() {
+                        copied = true;
+                      });
+                      Future.delayed(const Duration(seconds: 1), () {
+                        if (mounted) setState(() => copied = false);
+                      });
+                    },
+                    child: Icon(
+                      copied ? Icons.check : Icons.copy,
+                      color: copied ? Colors.green : Colors.blue,
+                      size: 20,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               //Outline Button
@@ -503,7 +332,7 @@ Download GEM app and earn up to 100 GEM Coins when you sign up!
                   ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
-                    vertical: 16,
+                    vertical: 8,
                   ),
                 ),
                 child: const Text(
@@ -529,7 +358,7 @@ Download GEM app and earn up to 100 GEM Coins when you sign up!
               ),
               Center(
                 child: Text(
-                  'App Version v0.0.4',
+                  'App Version v0.0.7',
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 13,

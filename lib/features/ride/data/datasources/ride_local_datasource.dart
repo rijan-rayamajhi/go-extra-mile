@@ -47,6 +47,7 @@ class RideLocalDatasource {
         averageSpeed: rideEntity.averageSpeed,
         routePoints: rideEntity.routePoints,
         isPublic: rideEntity.isPublic,
+        odometer: rideEntity.odometer,
       );
 
       // Store ride with ride ID as key

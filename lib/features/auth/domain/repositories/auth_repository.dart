@@ -10,4 +10,6 @@ abstract class AuthRepository {
   Future<void> signOut();
   Future<void> deleteAccount(String uid , String reason);
   Future<void> restoreAccount(String uid);
+  Future<void> updateFCMToken(String uid);
+  Future<void> clearFCMToken(String uid);
 }

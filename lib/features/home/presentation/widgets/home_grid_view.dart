@@ -24,9 +24,9 @@ class HomeGridView extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        childAspectRatio: 0.75,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        childAspectRatio: 0.9,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
       ),
       itemBuilder: (context, index) {
         return _buildGridItem(context, index);
@@ -124,41 +124,42 @@ class HomeGridView extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: item.color.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: item.color.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        item.icon,
+                        color: item.color,
+                        size: 18,
+                      ),
                     ),
-                    child: Icon(
-                      item.icon,
-                      color: item.color,
-                      size: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Flexible(
-                    child: Text(
+                    const SizedBox(height: 6),
+                    Text(
                       item.label,
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.onSurface,
                         height: 1.1,
-                        letterSpacing: 0.2,
+                        letterSpacing: 0.0,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             // Show badge if there's a count
@@ -167,26 +168,27 @@ class HomeGridView extends StatelessWidget {
                 int.tryParse(item.badgeCount!) != null && 
                 int.parse(item.badgeCount!) > 0)
               Positioned(
-                right: 6,
-                top: 6,
+                right: 4,
+                top: 4,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.red,
-                    borderRadius: BorderRadius.circular(8),
+                    shape: BoxShape.circle,
                   ),
                   constraints: const BoxConstraints(
                     minWidth: 16,
                     minHeight: 16,
                   ),
-                  child: Text(
-                    item.badgeCount!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
+                  child: Center(
+                    child: Text(
+                      item.badgeCount!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ),

@@ -1,8 +1,9 @@
-import Flutter
 import UIKit
-import GoogleMaps
-import Firebase
+import Flutter
+import FirebaseCore
 import FirebaseMessaging
+import GoogleMaps
+import flutter_background_service_ios
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,23 +11,16 @@ import FirebaseMessaging
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    FirebaseApp.configure()
+    
     GMSServices.provideAPIKey("AIzaSyALJWrVRZxhO9KfKlG4uHXOOQiSk_o2sh0")
+    
+    // Configure Flutter Background Service
+    SwiftFlutterBackgroundServicePlugin.taskIdentifier = "dev.flutter.background.refresh"
+    
     GeneratedPluginRegistrant.register(with: self)
     
-    // Configure Firebase Messaging
-    if #available(iOS 10.0, *) {
-      UNUserNotificationCenter.current().delegate = self
-      let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-      UNUserNotificationCenter.current().requestAuthorization(
-        options: authOptions,
-        completionHandler: { _, _ in }
-      )
-    } else {
-      let settings: UIUserNotificationSettings =
-        UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-      application.registerUserNotificationSettings(settings)
-    }
-    
+    UNUserNotificationCenter.current().delegate = self
     application.registerForRemoteNotifications()
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

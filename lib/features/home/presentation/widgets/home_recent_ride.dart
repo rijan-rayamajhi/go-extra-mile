@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/custome_divider.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_details_screen.dart';
-import '../../ride/presentation/bloc/ride_bloc.dart';
-import '../../ride/presentation/bloc/ride_event.dart';
-import '../../ride/domain/entities/ride_entity.dart';
-import '../../../common/widgets/ride_card_widget.dart';
+import '../../../ride/presentation/bloc/ride_bloc.dart';
+import '../../../ride/presentation/bloc/ride_event.dart';
+import '../../../ride/domain/entities/ride_entity.dart';
+import '../../../../common/widgets/ride_card_widget.dart';
 
 class HomeRecentRide extends StatelessWidget {
   final List<RideEntity> remoteRides;

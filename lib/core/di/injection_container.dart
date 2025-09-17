@@ -17,6 +17,8 @@ import '../../features/auth/domain/usecases/create_new_user.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/delete_account.dart';
 import '../../features/auth/domain/usecases/restore_account.dart';
+import '../../features/auth/domain/usecases/update_fcm_token.dart';
+import '../../features/auth/domain/usecases/clear_fcm_token.dart';
 import '../../features/auth/presentation/bloc/kauth_bloc.dart';
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
@@ -84,6 +86,8 @@ import '../../features/home/domain/usecases/get_user_profile_image.dart';
 import '../../features/home/domain/usecases/get_unread_notification.dart';
 import '../../features/home/domain/usecases/get_unverified_vehicle.dart';
 import '../../features/home/domain/usecases/get_recent_rides.dart';
+import '../../features/home/domain/usecases/get_statistics.dart';
+import '../../features/home/domain/usecases/get_referral_code.dart';
 import '../../features/home/presentation/bloc/home_bloc.dart';
 import '../../features/profile/data/datasources/profile_data_source.dart';
 import '../../features/reward/data/repositories/daily_reward_repository_impl.dart';
@@ -156,6 +160,8 @@ Future<void> init() async {
       sl<VehicleFirestoreDataSource>(),
       sl<RideFirestoreDataSource>(),
       sl<RideLocalDatasource>(),
+      sl<ReferalRepository>(),
+      sl<FirebaseFirestore>(),
     ),
   );
 
@@ -168,6 +174,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SignOut(sl()));
   sl.registerLazySingleton(() => DeleteAccount(sl()));
   sl.registerLazySingleton(() => RestoreAccount(sl()));
+  sl.registerLazySingleton(() => UpdateFCMToken(sl()));
+  sl.registerLazySingleton(() => ClearFCMToken(sl()));
 
   sl.registerLazySingleton(() => SubmitReferralCode(sl()));
   sl.registerLazySingleton(() => GetMyReferralData(sl()));
@@ -191,6 +199,8 @@ Future<void> init() async {
       signOut: sl(),
       deleteAccount: sl(),
       restoreAccount: sl(),
+      updateFCMToken: sl(),
+      clearFCMToken: sl(),
     ),
   );
 
@@ -333,6 +343,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetUnreadNotification(sl()));
   sl.registerLazySingleton(() => GetUnverifiedVehicle(sl()));
   sl.registerLazySingleton(() => GetRecentRidesUseCase(sl()));
+  sl.registerLazySingleton(() => GetStatisticsUseCase(sl()));
+  sl.registerLazySingleton(() => GetReferralCodeUseCase(sl()));
 
   sl.registerFactory(
     () => HomeBloc(
@@ -340,6 +352,8 @@ Future<void> init() async {
       getUnreadNotification: sl(),
       getUnverifiedVehicle: sl(),
       getRecentRides: sl(),
+      getStatistics: sl(),
+      getReferralCode: sl(),
     ),
   );
 

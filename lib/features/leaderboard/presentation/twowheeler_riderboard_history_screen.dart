@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:go_extra_mile_new/features/leaderboard/widgets/leaderboard_history_widget.dart';
+import 'package:go_extra_mile_new/features/leaderboard/presentation/widgets/leaderboard_history_widget.dart';
 
-class FourWheelerRiderboardHistoryScreen extends StatefulWidget {
-  const FourWheelerRiderboardHistoryScreen({super.key});
+class TwoWhellerRiderboardHistoryScreen extends StatefulWidget {
+  const TwoWhellerRiderboardHistoryScreen({super.key});
 
   @override
-  State<FourWheelerRiderboardHistoryScreen> createState() => _FourWheelerRiderboardHistoryScreenState();
+  State<TwoWhellerRiderboardHistoryScreen> createState() => _TwoWhellerRiderboardHistoryScreenState();
 }
 
-class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboardHistoryScreen> {
+class _TwoWhellerRiderboardHistoryScreenState extends State<TwoWhellerRiderboardHistoryScreen> {
   int _selectedFilter = 0; // Track selected filter
 
   final List<String> _filters = const [
@@ -20,21 +20,21 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   // Dummy data for ride leaderboard - Rider of the Week (Sep 1-7)
   final List<Map<String, String>> _topRideUsersWeek = const [
     {
-      "name": "Marcus Johnson",
-      "address": "Los Angeles",
-      "rides": "25",
+      "name": "Alex Chen",
+      "address": "Tokyo",
+      "rides": "22",
       "image": "https://i.pravatar.cc/150?img=1",
     },
     {
-      "name": "Sophie Chen",
-      "address": "Toronto",
-      "rides": "22",
+      "name": "Sarah Wilson",
+      "address": "Berlin",
+      "rides": "19",
       "image": "https://i.pravatar.cc/150?img=2",
     },
     {
-      "name": "Ahmed Hassan",
-      "address": "Dubai",
-      "rides": "19",
+      "name": "David Kim",
+      "address": "Seoul",
+      "rides": "16",
       "image": "https://i.pravatar.cc/150?img=3",
     },
   ];
@@ -42,28 +42,28 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideWeek = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "12",
+    "rides": "8",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
   // Dummy data for ride leaderboard - Rider of the Month (September)
   final List<Map<String, String>> _topRideUsersMonth = const [
     {
-      "name": "Isabella Rodriguez",
-      "address": "Mexico City",
-      "rides": "105",
+      "name": "Emma Rodriguez",
+      "address": "Madrid",
+      "rides": "95",
       "image": "https://i.pravatar.cc/150?img=4",
     },
     {
-      "name": "James Wilson",
-      "address": "Chicago",
-      "rides": "98",
+      "name": "James Thompson",
+      "address": "Melbourne",
+      "rides": "87",
       "image": "https://i.pravatar.cc/150?img=5",
     },
     {
-      "name": "Yuki Tanaka",
-      "address": "Osaka",
-      "rides": "92",
+      "name": "Lisa Park",
+      "address": "Seoul",
+      "rides": "82",
       "image": "https://i.pravatar.cc/150?img=6",
     },
   ];
@@ -71,28 +71,28 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideMonth = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "58",
+    "rides": "45",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
   // Dummy data for ride leaderboard - Rider of the Year (2025)
   final List<Map<String, String>> _topRideUsersYear = const [
     {
-      "name": "Alexander Petrov",
-      "address": "Moscow",
-      "rides": "165",
+      "name": "Michael Johnson",
+      "address": "New York",
+      "rides": "145",
       "image": "https://i.pravatar.cc/150?img=7",
     },
     {
-      "name": "Emma Thompson",
-      "address": "Sydney",
-      "rides": "152",
+      "name": "Sophie Anderson",
+      "address": "London",
+      "rides": "132",
       "image": "https://i.pravatar.cc/150?img=8",
     },
     {
       "name": "Carlos Mendez",
-      "address": "São Paulo",
-      "rides": "138",
+      "address": "Barcelona",
+      "rides": "118",
       "image": "https://i.pravatar.cc/150?img=9",
     },
   ];
@@ -100,7 +100,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideYear = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "89",
+    "rides": "67",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -109,19 +109,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Oliver Brown",
       "address": "Amsterdam",
-      "distance": "320 km",
+      "distance": "285 km",
       "image": "https://i.pravatar.cc/150?img=10",
     },
     {
-      "name": "Maria Garcia",
-      "address": "Madrid",
-      "distance": "295 km",
+      "name": "Yuki Tanaka",
+      "address": "Osaka",
+      "distance": "268 km",
       "image": "https://i.pravatar.cc/150?img=12",
     },
     {
-      "name": "David Kim",
-      "address": "Seoul",
-      "distance": "275 km",
+      "name": "Maria Garcia",
+      "address": "Mexico City",
+      "distance": "245 km",
       "image": "https://i.pravatar.cc/150?img=13",
     },
   ];
@@ -129,7 +129,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceWeek = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "145 km",
+    "distance": "125 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -138,19 +138,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Thomas Mueller",
       "address": "Munich",
-      "distance": "1,280 km",
+      "distance": "1,150 km",
       "image": "https://i.pravatar.cc/150?img=14",
     },
     {
       "name": "Anna Kowalski",
       "address": "Warsaw",
-      "distance": "1,195 km",
+      "distance": "1,085 km",
       "image": "https://i.pravatar.cc/150?img=15",
     },
     {
       "name": "Raj Patel",
       "address": "Delhi",
-      "distance": "1,125 km",
+      "distance": "1,020 km",
       "image": "https://i.pravatar.cc/150?img=16",
     },
   ];
@@ -158,7 +158,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceMonth = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "680 km",
+    "distance": "580 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -167,19 +167,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Lucas Silva",
       "address": "São Paulo",
-      "distance": "3,850 km",
+      "distance": "3,250 km",
       "image": "https://i.pravatar.cc/150?img=17",
     },
     {
       "name": "Isabella Rossi",
       "address": "Rome",
-      "distance": "3,580 km",
+      "distance": "2,980 km",
       "image": "https://i.pravatar.cc/150?img=18",
     },
     {
       "name": "Ahmed Hassan",
       "address": "Cairo",
-      "distance": "3,250 km",
+      "distance": "2,750 km",
       "image": "https://i.pravatar.cc/150?img=19",
     },
   ];
@@ -187,7 +187,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceYear = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "1,450 km",
+    "distance": "1,120 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -196,19 +196,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Hiroshi Nakamura",
       "address": "Kyoto",
-      "rides": "23",
+      "rides": "20",
       "image": "https://i.pravatar.cc/150?img=20",
     },
     {
       "name": "Elena Volkov",
       "address": "Moscow",
-      "rides": "20",
+      "rides": "17",
       "image": "https://i.pravatar.cc/150?img=21",
     },
     {
       "name": "Diego Santos",
       "address": "Lisbon",
-      "rides": "17",
+      "rides": "14",
       "image": "https://i.pravatar.cc/150?img=22",
     },
   ];
@@ -216,7 +216,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideWeek2 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "11",
+    "rides": "7",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -224,19 +224,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Klaus Weber",
       "address": "Hamburg",
-      "distance": "315 km",
+      "distance": "275 km",
       "image": "https://i.pravatar.cc/150?img=23",
     },
     {
       "name": "Priya Sharma",
       "address": "Bangalore",
-      "distance": "298 km",
+      "distance": "258 km",
       "image": "https://i.pravatar.cc/150?img=24",
     },
     {
       "name": "Marcus Johnson",
       "address": "Stockholm",
-      "distance": "275 km",
+      "distance": "235 km",
       "image": "https://i.pravatar.cc/150?img=25",
     },
   ];
@@ -244,7 +244,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceWeek2 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "138 km",
+    "distance": "118 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -253,19 +253,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Chen Wei",
       "address": "Shanghai",
-      "rides": "21",
+      "rides": "19",
       "image": "https://i.pravatar.cc/150?img=26",
     },
     {
       "name": "Amelia Clarke",
       "address": "Dublin",
-      "rides": "18",
+      "rides": "16",
       "image": "https://i.pravatar.cc/150?img=27",
     },
     {
       "name": "Rafael Silva",
       "address": "Rio de Janeiro",
-      "rides": "15",
+      "rides": "13",
       "image": "https://i.pravatar.cc/150?img=28",
     },
   ];
@@ -273,7 +273,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideWeek3 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "9",
+    "rides": "6",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -281,19 +281,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Pierre Dubois",
       "address": "Paris",
-      "distance": "305 km",
+      "distance": "265 km",
       "image": "https://i.pravatar.cc/150?img=29",
     },
     {
       "name": "Aisha Ibrahim",
       "address": "Lagos",
-      "distance": "288 km",
+      "distance": "248 km",
       "image": "https://i.pravatar.cc/150?img=30",
     },
     {
       "name": "Liam O'Connor",
       "address": "Cork",
-      "distance": "265 km",
+      "distance": "225 km",
       "image": "https://i.pravatar.cc/150?img=31",
     },
   ];
@@ -301,7 +301,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceWeek3 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "130 km",
+    "distance": "110 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -310,19 +310,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Giuseppe Romano",
       "address": "Milan",
-      "rides": "102",
+      "rides": "92",
       "image": "https://i.pravatar.cc/150?img=32",
     },
     {
       "name": "Nina Petrov",
       "address": "St. Petersburg",
-      "rides": "95",
+      "rides": "85",
       "image": "https://i.pravatar.cc/150?img=33",
     },
     {
       "name": "Kenji Yamamoto",
       "address": "Kyoto",
-      "rides": "88",
+      "rides": "78",
       "image": "https://i.pravatar.cc/150?img=34",
     },
   ];
@@ -330,7 +330,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideMonth2 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "52",
+    "rides": "42",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -338,19 +338,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Fernando Costa",
       "address": "Porto",
-      "distance": "1,225 km",
+      "distance": "1,125 km",
       "image": "https://i.pravatar.cc/150?img=35",
     },
     {
       "name": "Ingrid Bergman",
       "address": "Copenhagen",
-      "distance": "1,165 km",
+      "distance": "1,065 km",
       "image": "https://i.pravatar.cc/150?img=36",
     },
     {
       "name": "Viktor Petrov",
       "address": "Prague",
-      "distance": "1,105 km",
+      "distance": "1,005 km",
       "image": "https://i.pravatar.cc/150?img=37",
     },
   ];
@@ -358,7 +358,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceMonth2 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "665 km",
+    "distance": "565 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -367,19 +367,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Antonio Martinez",
       "address": "Valencia",
-      "rides": "98",
+      "rides": "88",
       "image": "https://i.pravatar.cc/150?img=38",
     },
     {
       "name": "Zoe Williams",
       "address": "Manchester",
-      "rides": "92",
+      "rides": "82",
       "image": "https://i.pravatar.cc/150?img=39",
     },
     {
       "name": "Sven Andersson",
       "address": "Gothenburg",
-      "rides": "85",
+      "rides": "75",
       "image": "https://i.pravatar.cc/150?img=40",
     },
   ];
@@ -387,7 +387,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideMonth3 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "48",
+    "rides": "38",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -395,19 +395,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Mikhail Volkov",
       "address": "Kiev",
-      "distance": "1,195 km",
+      "distance": "1,095 km",
       "image": "https://i.pravatar.cc/150?img=41",
     },
     {
       "name": "Claire Dubois",
       "address": "Lyon",
-      "distance": "1,135 km",
+      "distance": "1,035 km",
       "image": "https://i.pravatar.cc/150?img=42",
     },
     {
       "name": "Hassan Al-Rashid",
       "address": "Dubai",
-      "distance": "1,075 km",
+      "distance": "975 km",
       "image": "https://i.pravatar.cc/150?img=43",
     },
   ];
@@ -415,7 +415,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceMonth3 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "620 km",
+    "distance": "520 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -424,19 +424,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Roberto Ferrari",
       "address": "Florence",
-      "rides": "158",
+      "rides": "138",
       "image": "https://i.pravatar.cc/150?img=44",
     },
     {
       "name": "Katarina Novak",
       "address": "Vienna",
-      "rides": "145",
+      "rides": "125",
       "image": "https://i.pravatar.cc/150?img=45",
     },
     {
       "name": "Javier Morales",
       "address": "Buenos Aires",
-      "rides": "132",
+      "rides": "112",
       "image": "https://i.pravatar.cc/150?img=46",
     },
   ];
@@ -444,7 +444,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideYear2 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "78",
+    "rides": "58",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -452,19 +452,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Nikolai Petrov",
       "address": "Moscow",
-      "distance": "3,750 km",
+      "distance": "3,150 km",
       "image": "https://i.pravatar.cc/150?img=47",
     },
     {
       "name": "Elena Rodriguez",
       "address": "Barcelona",
-      "distance": "3,480 km",
+      "distance": "2,880 km",
       "image": "https://i.pravatar.cc/150?img=48",
     },
     {
       "name": "Takeshi Suzuki",
       "address": "Tokyo",
-      "distance": "3,250 km",
+      "distance": "2,650 km",
       "image": "https://i.pravatar.cc/150?img=49",
     },
   ];
@@ -472,7 +472,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceYear2 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "1,280 km",
+    "distance": "980 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -481,19 +481,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Wolfgang Mueller",
       "address": "Frankfurt",
-      "rides": "148",
+      "rides": "128",
       "image": "https://i.pravatar.cc/150?img=50",
     },
     {
       "name": "Fatima Al-Zahra",
       "address": "Cairo",
-      "rides": "135",
+      "rides": "115",
       "image": "https://i.pravatar.cc/150?img=51",
     },
     {
       "name": "Pavel Novak",
       "address": "Brno",
-      "rides": "122",
+      "rides": "102",
       "image": "https://i.pravatar.cc/150?img=52",
     },
   ];
@@ -501,7 +501,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfRideYear3 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "68",
+    "rides": "48",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -509,19 +509,19 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
     {
       "name": "Hans Mueller",
       "address": "Zurich",
-      "distance": "3,550 km",
+      "distance": "2,950 km",
       "image": "https://i.pravatar.cc/150?img=53",
     },
     {
       "name": "Maria Santos",
       "address": "São Paulo",
-      "distance": "3,280 km",
+      "distance": "2,780 km",
       "image": "https://i.pravatar.cc/150?img=54",
     },
     {
       "name": "Alexander Petrov",
       "address": "Minsk",
-      "distance": "3,050 km",
+      "distance": "2,550 km",
       "image": "https://i.pravatar.cc/150?img=55",
     },
   ];
@@ -529,7 +529,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
   final Map<String, String> _myselfDistanceYear3 = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "1,150 km",
+    "distance": "850 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -677,7 +677,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
-                  Icon(Icons.car_crash, color: Colors.white, size: 22),
+                  Icon(Icons.motorcycle, color: Colors.white, size: 22),
                   SizedBox(width: 6),
                   Text(
                     'Riderboard History',
@@ -692,7 +692,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
               ),
               const SizedBox(height: 2),
               const Text(
-                'Four Wheeler',
+                'Two Whiller',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
@@ -716,7 +716,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
           children: [
             //for ride
             LeaderboardHistoryWidget(
-              key: ValueKey('fourwheeler_history_ride_$_selectedFilter'),
+              key: ValueKey('history_ride_$_selectedFilter'),
               allTopUsers: _allTopRideUsers,
               allMyselfData: _allMyselfRideData,
               allPeriodHeadings: _allPeriodHeadings,
@@ -731,7 +731,7 @@ class _FourWheelerRiderboardHistoryScreenState extends State<FourWheelerRiderboa
             ),
 
             LeaderboardHistoryWidget(
-              key: ValueKey('fourwheeler_history_distance_$_selectedFilter'),
+              key: ValueKey('history_distance_$_selectedFilter'),
               allTopUsers: _allTopDistanceUsers,
               allMyselfData: _allMyselfDistanceData,
               allPeriodHeadings: _allPeriodHeadings,

@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 import '../../domain/entities/ride_entity.dart';
 import '../../domain/entities/ride_memory_entity.dart';
+import '../../domain/entities/odometer_entity.dart';
 import 'ride_memory_model.dart';
+import 'odometer_model.dart';
 
 part 'ride_model.g.dart';
 
@@ -27,6 +29,7 @@ class RideModel extends RideEntity {
     @HiveField(15) super.averageSpeed,
     @HiveField(16) super.routePoints,
     @HiveField(17) super.isPublic,
+    @HiveField(18) super.odometer,
   });
 
   /// 🔹 copyWith
@@ -49,6 +52,7 @@ class RideModel extends RideEntity {
     double? averageSpeed,
     List<GeoPoint>? routePoints,
     bool? isPublic,
+    OdometerEntity? odometer,
   }) {
     return RideModel(
       id: id ?? this.id,
@@ -69,6 +73,7 @@ class RideModel extends RideEntity {
       averageSpeed: averageSpeed ?? this.averageSpeed,
       routePoints: routePoints ?? this.routePoints,
       isPublic: isPublic ?? this.isPublic,
+      odometer: odometer ?? this.odometer,
     );
   }
 
@@ -102,6 +107,9 @@ class RideModel extends RideEntity {
               .toList()
           : null,
       isPublic: data['isPublic'] as bool?,
+      odometer: data['odometer'] != null 
+          ? OdometerModel.fromFirestore(data['odometer'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -130,6 +138,7 @@ class RideModel extends RideEntity {
       'averageSpeed': averageSpeed,
       'routePoints': routePoints,
       'isPublic': isPublic,
+      'odometer': _odometerToFirestore(),
     };
   }
 
@@ -173,6 +182,9 @@ class RideModel extends RideEntity {
               .toList()
           : null,
       isPublic: json['isPublic'] as bool?,
+      odometer: json['odometer'] != null 
+          ? OdometerModel.fromJson(json['odometer'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -207,6 +219,7 @@ class RideModel extends RideEntity {
         'longitude': point.longitude,
       }).toList(),
       'isPublic': isPublic,
+      'odometer': _odometerToJson(),
     };
   }
 
@@ -252,6 +265,9 @@ class RideModel extends RideEntity {
               .toList()
           : null,
       isPublic: hiveData['isPublic'] as bool?,
+      odometer: hiveData['odometer'] != null 
+          ? OdometerModel.fromHive(hiveData['odometer'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -286,6 +302,35 @@ class RideModel extends RideEntity {
         'longitude': point.longitude,
       }).toList(),
       'isPublic': isPublic,
+      'odometer': _odometerToHive(),
     };
+  }
+
+  /// Helper methods for odometer serialization
+  Map<String, dynamic>? _odometerToFirestore() {
+    if (odometer == null) return null;
+    if (odometer is OdometerModel) {
+      return (odometer! as OdometerModel).toFirestore();
+    } else {
+      return OdometerModel.fromEntity(odometer!).toFirestore();
+    }
+  }
+
+  Map<String, dynamic>? _odometerToJson() {
+    if (odometer == null) return null;
+    if (odometer is OdometerModel) {
+      return (odometer! as OdometerModel).toJson();
+    } else {
+      return OdometerModel.fromEntity(odometer!).toJson();
+    }
+  }
+
+  Map<String, dynamic>? _odometerToHive() {
+    if (odometer == null) return null;
+    if (odometer is OdometerModel) {
+      return (odometer! as OdometerModel).toHive();
+    } else {
+      return OdometerModel.fromEntity(odometer!).toHive();
+    }
   }
 }

@@ -44,7 +44,12 @@ class _MyVehicleDetailsInsuranceImageWidgetState
 
   Future<void> _pickImageFromGallery() async {
     final file = await _picker.pickImage(source: ImageSource.gallery);
-    if (file != null) setState(() => _localImageUrl = file.path);
+    if (file != null) {
+      setState(() => _localImageUrl = file.path);
+      
+      // Auto-upload the selected image
+      _autoUploadImage(file);
+    }
   }
 
   void _deleteCurrentImage() {
@@ -65,22 +70,32 @@ class _MyVehicleDetailsInsuranceImageWidgetState
     }
   }
 
-  void _commitChanges() {
-    if (_localImageUrl == null || !_isLocalFile(_localImageUrl!)) return;
-
+  void _autoUploadImage(XFile file) {
     setState(() => _isUpdating = true);
+
+    // Delete the original image if it exists
+    if (widget.imageUrl != null) {
+      context.read<VehicleBloc>().add(
+        DeleteVehicleImage(
+          widget.vehicleId,
+          widget.userId,
+          widget.fieldName,
+          widget.imageUrl!,
+        ),
+      );
+    }
+
+    // Upload the new image
     context.read<VehicleBloc>().add(
       UploadVehicleImage(
         widget.vehicleId,
         widget.userId,
-        File(_localImageUrl!),
+        File(file.path),
         widget.fieldName,
       ),
     );
   }
 
-  bool get _showUpdateButton =>
-      _localImageUrl != null && _isLocalFile(_localImageUrl!) && !_isUpdating;
 
   Widget _overlayLabel(String text) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -221,39 +236,6 @@ class _MyVehicleDetailsInsuranceImageWidgetState
                   ),
               ],
 
-              if (_showUpdateButton)
-                Positioned(
-                  bottom: 12,
-                  right: 12,
-                  child: GestureDetector(
-                    onTap: _commitChanges,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade700.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.save, size: 16, color: Colors.white),
-                          SizedBox(width: 4),
-                          Text(
-                            "Update",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
 
               if (_isUpdating)
                 Positioned(

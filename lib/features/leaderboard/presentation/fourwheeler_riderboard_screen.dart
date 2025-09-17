@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:go_extra_mile_new/features/leaderboard/twowheeler_riderboard_history_screen.dart';
+import 'package:go_extra_mile_new/features/leaderboard/presentation/fourwheeler_riderboard_history_screen.dart';
 import 'widgets/leaderboard_widget.dart';
 
-class TwoWhellerRiderboardScreen extends StatefulWidget {
-  const TwoWhellerRiderboardScreen({super.key});
+class FourWheelerRiderboardScreen extends StatefulWidget {
+  const FourWheelerRiderboardScreen({super.key});
 
   @override
-  State<TwoWhellerRiderboardScreen> createState() =>
-      _TwoWhellerRiderboardScreenState();
+  State<FourWheelerRiderboardScreen> createState() => _FourWheelerRiderboardScreenState();
 }
 
-class _TwoWhellerRiderboardScreenState
-    extends State<TwoWhellerRiderboardScreen> {
+class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScreen> {
   int _selectedFilter = 0; // Track selected filter
 
   final List<String> _filters = const [
@@ -25,19 +23,19 @@ class _TwoWhellerRiderboardScreenState
     {
       "name": "John Doe",
       "address": "New York",
-      "rides": "15",
+      "rides": "12",
       "image": "https://i.pravatar.cc/150?img=1",
     },
     {
       "name": "Jane Smith",
       "address": "London",
-      "rides": "12",
+      "rides": "10",
       "image": "https://i.pravatar.cc/150?img=2",
     },
     {
       "name": "Mike",
       "address": "Sydney",
-      "rides": "10",
+      "rides": "8",
       "image": "https://i.pravatar.cc/150?img=3",
     },
   ];
@@ -47,7 +45,7 @@ class _TwoWhellerRiderboardScreenState
     (i) => {
       "name": "User ${i + 4}",
       "address": "City ${i + 4}",
-      "rides": "${8 - (i % 5)}",
+      "rides": "${6 - (i % 4)}",
       "image": "https://i.pravatar.cc/150?img=${(i % 20) + 4}",
     },
   );
@@ -55,7 +53,7 @@ class _TwoWhellerRiderboardScreenState
   final Map<String, String> _myselfRide7Days = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "5",
+    "rides": "3",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -64,19 +62,19 @@ class _TwoWhellerRiderboardScreenState
     {
       "name": "John Doe",
       "address": "New York",
-      "rides": "65",
+      "rides": "55",
       "image": "https://i.pravatar.cc/150?img=1",
     },
     {
       "name": "Jane Smith",
       "address": "London",
-      "rides": "58",
+      "rides": "48",
       "image": "https://i.pravatar.cc/150?img=2",
     },
     {
       "name": "Mike",
       "address": "Sydney",
-      "rides": "52",
+      "rides": "42",
       "image": "https://i.pravatar.cc/150?img=3",
     },
   ];
@@ -86,7 +84,7 @@ class _TwoWhellerRiderboardScreenState
     (i) => {
       "name": "User ${i + 4}",
       "address": "City ${i + 4}",
-      "rides": "${45 - (i % 20)}",
+      "rides": "${35 - (i % 20)}",
       "image": "https://i.pravatar.cc/150?img=${(i % 20) + 4}",
     },
   );
@@ -94,7 +92,7 @@ class _TwoWhellerRiderboardScreenState
   final Map<String, String> _myselfRideMonth = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "28",
+    "rides": "22",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -142,19 +140,19 @@ class _TwoWhellerRiderboardScreenState
     {
       "name": "Alex Chen",
       "address": "Tokyo",
-      "distance": "180 km",
+      "distance": "150 km",
       "image": "https://i.pravatar.cc/150?img=5",
     },
     {
       "name": "Sarah Wilson",
       "address": "Berlin",
-      "distance": "165 km",
+      "distance": "135 km",
       "image": "https://i.pravatar.cc/150?img=6",
     },
     {
       "name": "David Kim",
       "address": "Seoul",
-      "distance": "150 km",
+      "distance": "120 km",
       "image": "https://i.pravatar.cc/150?img=7",
     },
   ];
@@ -164,7 +162,7 @@ class _TwoWhellerRiderboardScreenState
     (i) => {
       "name": "Rider ${i + 4}",
       "address": "Metro ${i + 4}",
-      "distance": "${120 - (i % 15) * 5} km",
+      "distance": "${100 - (i % 15) * 4} km",
       "image": "https://i.pravatar.cc/150?img=${(i % 20) + 8}",
     },
   );
@@ -172,7 +170,7 @@ class _TwoWhellerRiderboardScreenState
   final Map<String, String> _myselfDistance7Days = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "45 km",
+    "distance": "35 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -181,19 +179,19 @@ class _TwoWhellerRiderboardScreenState
     {
       "name": "Alex Chen",
       "address": "Tokyo",
-      "distance": "850 km",
+      "distance": "750 km",
       "image": "https://i.pravatar.cc/150?img=5",
     },
     {
       "name": "Sarah Wilson",
       "address": "Berlin",
-      "distance": "780 km",
+      "distance": "680 km",
       "image": "https://i.pravatar.cc/150?img=6",
     },
     {
       "name": "David Kim",
       "address": "Seoul",
-      "distance": "720 km",
+      "distance": "620 km",
       "image": "https://i.pravatar.cc/150?img=7",
     },
   ];
@@ -203,7 +201,7 @@ class _TwoWhellerRiderboardScreenState
     (i) => {
       "name": "Rider ${i + 4}",
       "address": "Metro ${i + 4}",
-      "distance": "${650 - (i % 20) * 15} km",
+      "distance": "${550 - (i % 20) * 12} km",
       "image": "https://i.pravatar.cc/150?img=${(i % 20) + 8}",
     },
   );
@@ -211,7 +209,7 @@ class _TwoWhellerRiderboardScreenState
   final Map<String, String> _myselfDistanceMonth = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "280 km",
+    "distance": "240 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -331,7 +329,7 @@ class _TwoWhellerRiderboardScreenState
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
-                  Icon(Icons.motorcycle, color: Colors.white, size: 22),
+                  Icon(Icons.car_crash, color: Colors.white, size: 22),
                   SizedBox(width: 6),
                   Text(
                     'Riderboard',
@@ -346,7 +344,7 @@ class _TwoWhellerRiderboardScreenState
               ),
               const SizedBox(height: 2),
               const Text(
-                'Two Whiller',
+                'Four Wheeler',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
@@ -361,7 +359,7 @@ class _TwoWhellerRiderboardScreenState
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TwoWhellerRiderboardHistoryScreen(),
+                    builder: (context) => const FourWheelerRiderboardHistoryScreen(),
                   ),
                 );
               },
@@ -384,7 +382,7 @@ class _TwoWhellerRiderboardScreenState
           children: [
             //for ride
             LeaderboardWidget(
-              key: ValueKey('ride_$_selectedFilter'),
+              key: ValueKey('fourwheeler_ride_$_selectedFilter'),
               topUsers: _currentTopRideUsers,
               allOtherUsers: _currentAllOtherRideUsers,
               myself: _currentMyselfRide,
@@ -399,7 +397,7 @@ class _TwoWhellerRiderboardScreenState
             ),
 
             LeaderboardWidget(
-              key: ValueKey('distance_$_selectedFilter'),
+              key: ValueKey('fourwheeler_distance_$_selectedFilter'),
               topUsers: _currentTopDistanceUsers,
               allOtherUsers: _currentAllOtherDistanceUsers,
               myself: _currentMyselfDistance,

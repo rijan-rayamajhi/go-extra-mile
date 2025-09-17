@@ -23,6 +23,10 @@ class HomeLoaded extends HomeState {
   final List<RideEntity> remoteRides;
   final List<RideEntity> localRides;
   final bool isRefreshing;
+  final int totalGemCoins;
+  final double totalDistance;
+  final int totalRides;
+  final String referralCode;
 
   const HomeLoaded({
     this.userProfileImage,
@@ -31,6 +35,10 @@ class HomeLoaded extends HomeState {
     this.remoteRides = const [],
     this.localRides = const [],
     this.isRefreshing = false,
+    this.totalGemCoins = 0,
+    this.totalDistance = 0.0,
+    this.totalRides = 0,
+    this.referralCode = '',
   });
 
   @override
@@ -41,6 +49,10 @@ class HomeLoaded extends HomeState {
         remoteRides,
         localRides,
         isRefreshing,
+        totalGemCoins,
+        totalDistance,
+        totalRides,
+        referralCode,
       ];
 
   HomeLoaded copyWith({
@@ -50,6 +62,10 @@ class HomeLoaded extends HomeState {
     List<RideEntity>? remoteRides,
     List<RideEntity>? localRides,
     bool? isRefreshing,
+    int? totalGemCoins,
+    double? totalDistance,
+    int? totalRides,
+    String? referralCode,
   }) {
     return HomeLoaded(
       userProfileImage: userProfileImage ?? this.userProfileImage,
@@ -58,6 +74,10 @@ class HomeLoaded extends HomeState {
       remoteRides: remoteRides ?? this.remoteRides,
       localRides: localRides ?? this.localRides,
       isRefreshing: isRefreshing ?? this.isRefreshing,
+      totalGemCoins: totalGemCoins ?? this.totalGemCoins,
+      totalDistance: totalDistance ?? this.totalDistance,
+      totalRides: totalRides ?? this.totalRides,
+      referralCode: referralCode ?? this.referralCode,
     );
   }
 }

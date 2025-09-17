@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:go_extra_mile_new/features/leaderboard/fourwheeler_riderboard_history_screen.dart';
+import 'package:go_extra_mile_new/features/leaderboard/presentation/twowheeler_riderboard_history_screen.dart';
 import 'widgets/leaderboard_widget.dart';
 
-class FourWheelerRiderboardScreen extends StatefulWidget {
-  const FourWheelerRiderboardScreen({super.key});
+class TwoWhellerRiderboardScreen extends StatefulWidget {
+  const TwoWhellerRiderboardScreen({super.key});
 
   @override
-  State<FourWheelerRiderboardScreen> createState() => _FourWheelerRiderboardScreenState();
+  State<TwoWhellerRiderboardScreen> createState() =>
+      _TwoWhellerRiderboardScreenState();
 }
 
-class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScreen> {
+class _TwoWhellerRiderboardScreenState
+    extends State<TwoWhellerRiderboardScreen> {
   int _selectedFilter = 0; // Track selected filter
 
   final List<String> _filters = const [
@@ -23,19 +25,19 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
     {
       "name": "John Doe",
       "address": "New York",
-      "rides": "12",
+      "rides": "15",
       "image": "https://i.pravatar.cc/150?img=1",
     },
     {
       "name": "Jane Smith",
       "address": "London",
-      "rides": "10",
+      "rides": "12",
       "image": "https://i.pravatar.cc/150?img=2",
     },
     {
       "name": "Mike",
       "address": "Sydney",
-      "rides": "8",
+      "rides": "10",
       "image": "https://i.pravatar.cc/150?img=3",
     },
   ];
@@ -45,7 +47,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
     (i) => {
       "name": "User ${i + 4}",
       "address": "City ${i + 4}",
-      "rides": "${6 - (i % 4)}",
+      "rides": "${8 - (i % 5)}",
       "image": "https://i.pravatar.cc/150?img=${(i % 20) + 4}",
     },
   );
@@ -53,7 +55,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
   final Map<String, String> _myselfRide7Days = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "3",
+    "rides": "5",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -62,19 +64,19 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
     {
       "name": "John Doe",
       "address": "New York",
-      "rides": "55",
+      "rides": "65",
       "image": "https://i.pravatar.cc/150?img=1",
     },
     {
       "name": "Jane Smith",
       "address": "London",
-      "rides": "48",
+      "rides": "58",
       "image": "https://i.pravatar.cc/150?img=2",
     },
     {
       "name": "Mike",
       "address": "Sydney",
-      "rides": "42",
+      "rides": "52",
       "image": "https://i.pravatar.cc/150?img=3",
     },
   ];
@@ -84,7 +86,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
     (i) => {
       "name": "User ${i + 4}",
       "address": "City ${i + 4}",
-      "rides": "${35 - (i % 20)}",
+      "rides": "${45 - (i % 20)}",
       "image": "https://i.pravatar.cc/150?img=${(i % 20) + 4}",
     },
   );
@@ -92,7 +94,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
   final Map<String, String> _myselfRideMonth = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "rides": "22",
+    "rides": "28",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -140,19 +142,19 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
     {
       "name": "Alex Chen",
       "address": "Tokyo",
-      "distance": "150 km",
+      "distance": "180 km",
       "image": "https://i.pravatar.cc/150?img=5",
     },
     {
       "name": "Sarah Wilson",
       "address": "Berlin",
-      "distance": "135 km",
+      "distance": "165 km",
       "image": "https://i.pravatar.cc/150?img=6",
     },
     {
       "name": "David Kim",
       "address": "Seoul",
-      "distance": "120 km",
+      "distance": "150 km",
       "image": "https://i.pravatar.cc/150?img=7",
     },
   ];
@@ -162,7 +164,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
     (i) => {
       "name": "Rider ${i + 4}",
       "address": "Metro ${i + 4}",
-      "distance": "${100 - (i % 15) * 4} km",
+      "distance": "${120 - (i % 15) * 5} km",
       "image": "https://i.pravatar.cc/150?img=${(i % 20) + 8}",
     },
   );
@@ -170,7 +172,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
   final Map<String, String> _myselfDistance7Days = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "35 km",
+    "distance": "45 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -179,19 +181,19 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
     {
       "name": "Alex Chen",
       "address": "Tokyo",
-      "distance": "750 km",
+      "distance": "850 km",
       "image": "https://i.pravatar.cc/150?img=5",
     },
     {
       "name": "Sarah Wilson",
       "address": "Berlin",
-      "distance": "680 km",
+      "distance": "780 km",
       "image": "https://i.pravatar.cc/150?img=6",
     },
     {
       "name": "David Kim",
       "address": "Seoul",
-      "distance": "620 km",
+      "distance": "720 km",
       "image": "https://i.pravatar.cc/150?img=7",
     },
   ];
@@ -201,7 +203,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
     (i) => {
       "name": "Rider ${i + 4}",
       "address": "Metro ${i + 4}",
-      "distance": "${550 - (i % 20) * 12} km",
+      "distance": "${650 - (i % 20) * 15} km",
       "image": "https://i.pravatar.cc/150?img=${(i % 20) + 8}",
     },
   );
@@ -209,7 +211,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
   final Map<String, String> _myselfDistanceMonth = const {
     "name": "Rijan",
     "address": "Mumbai",
-    "distance": "240 km",
+    "distance": "280 km",
     "image": "https://i.pravatar.cc/150?img=11",
   };
 
@@ -329,7 +331,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
-                  Icon(Icons.car_crash, color: Colors.white, size: 22),
+                  Icon(Icons.motorcycle, color: Colors.white, size: 22),
                   SizedBox(width: 6),
                   Text(
                     'Riderboard',
@@ -344,7 +346,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
               ),
               const SizedBox(height: 2),
               const Text(
-                'Four Wheeler',
+                'Two Whiller',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
@@ -359,7 +361,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const FourWheelerRiderboardHistoryScreen(),
+                    builder: (context) => TwoWhellerRiderboardHistoryScreen(),
                   ),
                 );
               },
@@ -382,7 +384,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
           children: [
             //for ride
             LeaderboardWidget(
-              key: ValueKey('fourwheeler_ride_$_selectedFilter'),
+              key: ValueKey('ride_$_selectedFilter'),
               topUsers: _currentTopRideUsers,
               allOtherUsers: _currentAllOtherRideUsers,
               myself: _currentMyselfRide,
@@ -397,7 +399,7 @@ class _FourWheelerRiderboardScreenState extends State<FourWheelerRiderboardScree
             ),
 
             LeaderboardWidget(
-              key: ValueKey('fourwheeler_distance_$_selectedFilter'),
+              key: ValueKey('distance_$_selectedFilter'),
               topUsers: _currentTopDistanceUsers,
               allOtherUsers: _currentAllOtherDistanceUsers,
               myself: _currentMyselfDistance,

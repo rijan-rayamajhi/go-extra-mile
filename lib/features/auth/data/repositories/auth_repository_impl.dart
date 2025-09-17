@@ -55,4 +55,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> restoreAccount(String uid) {
     return userFirestoreDataSource.restoreUserAccount(uid);
   }
+
+  @override
+  Future<void> updateFCMToken(String uid) {
+    return userFirestoreDataSource.updateFCMToken(uid);
+  }
+
+  @override
+  Future<void> clearFCMToken(String uid) {
+    return userFirestoreDataSource.clearFCMToken(uid);
+  }
 }

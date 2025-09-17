@@ -57,6 +57,9 @@ class _MyVehicleDetailsVehicleImageWidgetState
           _localBackImageUrl = file.path;
         }
       });
+      
+      // Auto-upload the selected image
+      _autoUploadImage(imageType, file);
     }
   }
 
@@ -91,32 +94,17 @@ class _MyVehicleDetailsVehicleImageWidgetState
     }
   }
 
-  void _commitChanges(String imageType) {
+  void _autoUploadImage(String imageType, XFile file) {
     setState(() {
       _isUpdating = true;
       _updatingImageType = imageType;
     });
 
-    final isFront = imageType == 'front';
-    final localImageUrl = isFront ? _localFrontImageUrl : _localBackImageUrl;
-    final fieldName = isFront ? 'vehicleFrontImage' : 'vehicleBackImage';
-    final originalImageUrl = isFront ? widget.frontImageUrl : widget.backImageUrl;
+    final fieldName = imageType == 'front' ? 'vehicleFrontImage' : 'vehicleBackImage';
+    final originalImageUrl = imageType == 'front' ? widget.frontImageUrl : widget.backImageUrl;
 
-    // Upload image if it's local
-    if (localImageUrl != null && _isLocalFile(localImageUrl)) {
-      context.read<VehicleBloc>().add(
-        UploadVehicleImage(
-          widget.vehicleId,
-          widget.userId,
-          File(localImageUrl),
-          fieldName,
-        ),
-      );
-    }
-
-    // Delete removed image
-    if (originalImageUrl != null && 
-        (localImageUrl == null || localImageUrl != originalImageUrl)) {
+    // Delete the original image if it exists
+    if (originalImageUrl != null) {
       context.read<VehicleBloc>().add(
         DeleteVehicleImage(
           widget.vehicleId,
@@ -126,14 +114,18 @@ class _MyVehicleDetailsVehicleImageWidgetState
         ),
       );
     }
+
+    // Upload the new image
+    context.read<VehicleBloc>().add(
+      UploadVehicleImage(
+        widget.vehicleId,
+        widget.userId,
+        File(file.path),
+        fieldName,
+      ),
+    );
   }
 
-  bool _showUpdateButton(String imageType) {
-    final localImageUrl = imageType == 'front' ? _localFrontImageUrl : _localBackImageUrl;
-    return localImageUrl != null && 
-           _isLocalFile(localImageUrl) && 
-           _updatingImageType != imageType;
-  }
 
   bool _isImageUpdating(String imageType) {
     return _isUpdating && _updatingImageType == imageType;
@@ -270,34 +262,23 @@ class _MyVehicleDetailsVehicleImageWidgetState
                     ),
                   ),
                 ),
-              if (_showUpdateButton(imageType) || _isImageUpdating(imageType))
+              if (_isImageUpdating(imageType))
                 Positioned(
                   bottom: 8,
                   right: 8,
-                  child: GestureDetector(
-                    onTap: _isImageUpdating(imageType) ? null : () => _commitChanges(imageType),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: _isImageUpdating(imageType) 
-                            ? Colors.grey.shade600 
-                            : Colors.blue.shade700,
-                        borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade700,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(Colors.white),
                       ),
-                      child: _isImageUpdating(imageType)
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation(Colors.white),
-                              ),
-                            )
-                          : const Icon(
-                              Icons.save,
-                              size: 16,
-                              color: Colors.white,
-                            ),
                     ),
                   ),
                 ),

@@ -131,6 +131,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
         averageSpeed: widget.rideEntity.averageSpeed,
         routePoints: widget.rideEntity.routePoints,
         isPublic: _isPublic,
+        odometer: widget.rideEntity.odometer,
       );
 
     //  print(updatedRideEntity.id);
@@ -211,6 +212,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
         averageSpeed: widget.rideEntity.averageSpeed,
         routePoints: widget.rideEntity.routePoints,
         isPublic: _isPublic,
+        odometer: widget.rideEntity.odometer,
       );
 
       context.read<RideBloc>().add(
@@ -239,6 +241,69 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
         _endAddress = endAddress ?? "Unknown location";
       });
     }
+  }
+
+  Widget _buildOdometerImage(String imageUrl, String label) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            CachedNetworkImage(
+              imageUrl: imageUrl,
+              width: double.infinity,
+              height: 180,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                height: 180,
+                color: Colors.grey.shade200,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                height: 180,
+                color: Colors.grey.shade200,
+                child: const Center(
+                  child: Icon(
+                    Icons.error_outline,
+                    color: Colors.grey,
+                    size: 48,
+                  ),
+                ),
+              ),
+            ),
+            // Overlay with label
+            Positioned(
+              top: 8,
+              left: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -424,6 +489,36 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                   ],
                 ),
 
+                // Odometer Images Section
+                if ((widget.rideEntity.odometer?.beforeRideOdometerImage != null && widget.rideEntity.odometer!.beforeRideOdometerImage!.isNotEmpty) ||
+                    (widget.rideEntity.odometer?.afterRideOdometerImage != null && widget.rideEntity.odometer!.afterRideOdometerImage!.isNotEmpty))
+                  SaveRideSection(
+                    title: "Odometer Reading",
+                    gradient: [Colors.white, Colors.grey.shade50],
+                    children: [
+                      Row(
+                        children: [
+                          if (widget.rideEntity.odometer?.beforeRideOdometerImage != null && widget.rideEntity.odometer!.beforeRideOdometerImage!.isNotEmpty)
+                            Expanded(
+                              child: _buildOdometerImage(
+                                widget.rideEntity.odometer!.beforeRideOdometerImage!,
+                                "Before Ride",
+                              ),
+                            ),
+                          if (widget.rideEntity.odometer?.beforeRideOdometerImage != null && widget.rideEntity.odometer!.beforeRideOdometerImage!.isNotEmpty &&
+                              widget.rideEntity.odometer?.afterRideOdometerImage != null && widget.rideEntity.odometer!.afterRideOdometerImage!.isNotEmpty)
+                            const SizedBox(width: 16),
+                          if (widget.rideEntity.odometer?.afterRideOdometerImage != null && widget.rideEntity.odometer!.afterRideOdometerImage!.isNotEmpty)
+                            Expanded(
+                              child: _buildOdometerImage(
+                                widget.rideEntity.odometer!.afterRideOdometerImage!,
+                                "After Ride",
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
 
                if(widget.rideEntity.rideMemories != null && widget.rideEntity.rideMemories!.isNotEmpty)...[
                 

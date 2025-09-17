@@ -3,6 +3,7 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/entities/account_deletion_info.dart';
 import '../models/account_deletion_info_model.dart';
 import '../../../../core/service/firebase_firestore_service.dart';
+import '../../../../core/service/fcm_notification_service.dart';
 
 /// DataSource for managing user data in Firestore after authentication
 class UserFirestoreDataSource {
@@ -19,6 +20,15 @@ class UserFirestoreDataSource {
     // Extract username from email (part before @ symbol)
     final userName = user.email?.split('@').first ?? 'user';
 
+    // Get FCM token for push notifications
+    String? fcmToken;
+    try {
+      fcmToken = await FCMNotificationService.getToken();
+    } catch (e) {
+      // If FCM token retrieval fails, continue without it
+      // The token can be updated later when the user opens the app
+      fcmToken = null;
+    }
 
     final userData = {
       'uid': user.uid,
@@ -38,7 +48,7 @@ class UserFirestoreDataSource {
           .substring(0, 7)
           .toUpperCase(), // Simple referral code using first 6 chars of UID, all capital
       },
-      'fcmToken': 'soon',
+      'fcmToken': fcmToken,
       ...?additionalData,
     };
     await _firestoreService.setDocument(
@@ -97,5 +107,31 @@ class UserFirestoreDataSource {
   await _firestoreService.deleteDocument(
     docPath: 'accounts_deletion_requests/$uid',
   );
+ }
+
+ /// Updates FCM token for a user
+ Future<void> updateFCMToken(String uid) async {
+   try {
+     final fcmToken = await FCMNotificationService.getToken();
+     await _firestoreService.updateDocument(
+       docPath: 'users/$uid',
+       data: {'fcmToken': fcmToken},
+     );
+   } catch (e) {
+     // If FCM token update fails, continue silently
+     // The token can be updated later
+   }
+ }
+
+ /// Clears FCM token for a user (used during logout)
+ Future<void> clearFCMToken(String uid) async {
+   try {
+     await _firestoreService.updateDocument(
+       docPath: 'users/$uid',
+       data: {'fcmToken': null},
+     );
+   } catch (e) {
+     // If FCM token clearing fails, continue silently
+   }
  }
 }

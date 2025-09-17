@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_extra_mile_new/features/leaderboard/widgets/leaderboard_history_widget.dart';
+import 'package:go_extra_mile_new/features/leaderboard/presentation/widgets/leaderboard_history_widget.dart';
 
 class ReferalboardHistoryScreen extends StatefulWidget {
   const ReferalboardHistoryScreen({super.key});

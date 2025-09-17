@@ -35,13 +35,14 @@ class RideModelAdapter extends TypeAdapter<RideModel> {
       averageSpeed: fields[15] as double?,
       routePoints: (fields[16] as List?)?.cast<GeoPoint>(),
       isPublic: fields[17] as bool?,
+      odometer: fields[18] as OdometerEntity?,
     );
   }
 
   @override
   void write(BinaryWriter writer, RideModel obj) {
     writer
-      ..writeByte(18)
+      ..writeByte(19)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -77,7 +78,9 @@ class RideModelAdapter extends TypeAdapter<RideModel> {
       ..writeByte(16)
       ..write(obj.routePoints)
       ..writeByte(17)
-      ..write(obj.isPublic);
+      ..write(obj.isPublic)
+      ..writeByte(18)
+      ..write(obj.odometer);
   }
 
   @override

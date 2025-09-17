@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 import 'package:go_extra_mile_new/features/ride/domain/entities/ride_memory_entity.dart';
+import 'package:go_extra_mile_new/features/ride/domain/entities/odometer_entity.dart';
 
 part 'ride_entity.g.dart';
 
@@ -46,6 +47,12 @@ class RideEntity extends Equatable {
   final List<GeoPoint>? routePoints;
   @HiveField(17)
   final bool? isPublic;
+  
+  // 🔹 Odometer
+  @HiveField(18)
+  final OdometerEntity? odometer;
+
+  // ride / docid
 
   const RideEntity({
     required this.id,
@@ -66,6 +73,7 @@ class RideEntity extends Equatable {
     this.averageSpeed,
     this.routePoints,
     this.isPublic,
+    this.odometer,
   });
 
   @override
@@ -88,5 +96,6 @@ class RideEntity extends Equatable {
         averageSpeed,
         routePoints,
         isPublic,
+        odometer,
       ];
 }
