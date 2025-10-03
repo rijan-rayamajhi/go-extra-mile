@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_extra_mile_new/features/main_screen.dart';
+import 'package:go_extra_mile_new/features/main/main_screen.dart';
 import 'package:uuid/uuid.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
@@ -103,19 +103,32 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
     }
   }
 
+  bool _hasNavigated = false;
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<VehicleBloc, VehicleState>(
+      listenWhen: (previous, current) {
+        // Only listen when transitioning from loading to loaded/error
+        return previous is VehicleLoading && 
+               (current is VehicleLoaded || current is VehicleError);
+      },
       listener: (context, state) {
         if (state is VehicleError) {
           AppSnackBar.error(context, state.message);
-        } else if (state is VehicleLoaded) {
+        } else if (state is VehicleLoaded && !_hasNavigated) {
+          _hasNavigated = true;
           AppSnackBar.success(context, 'Vehicle added successfully!');
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const MainScreen()),
-            (route) => false,
-          );
+          // Use a short delay to ensure snackbar shows before navigation
+          Future.microtask(() {
+            if (mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const MainScreen()),
+                (route) => false,
+              );
+            }
+          });
         }
       },
       child: BlocBuilder<VehicleBloc, VehicleState>(
@@ -125,7 +138,12 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
           if (isLoading) return _loadingView();
 
           return Scaffold(
-            appBar: AppBar(),
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              ),
+            ),
             body: GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               child: Form(
@@ -353,7 +371,9 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
               child: Container(
                 height: 56,
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.black.withValues(alpha: 0.1) : null,
+                  color: isSelected
+                      ? Colors.black.withValues(alpha: 0.1)
+                      : null,
                   borderRadius: BorderRadius.horizontal(
                     left: type == 'Tube'
                         ? const Radius.circular(12)
@@ -504,12 +524,11 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
               'Currently: ${widget.selectedVehicleType}',
               () {
                 Navigator.pop(context);
-                Navigator.pushAndRemoveUntil(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => const SelectVehicleTypeScreen(),
                   ),
-                  (route) => false,
                 );
               },
             ),
@@ -519,7 +538,7 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
               'Currently: ${widget.selectedBrand['name']}',
               () {
                 Navigator.pop(context);
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => VehicleBrandScreen(
@@ -535,7 +554,7 @@ class _EnterVehicleDetailsScreenState extends State<EnterVehicleDetailsScreen> {
               'Currently: ${widget.selectedModel}',
               () {
                 Navigator.pop(context);
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => VehicleModelScreen(

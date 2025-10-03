@@ -31,36 +31,16 @@ class _RedeemScreenState extends State<RedeemScreen> {
           },
         ),
       )
-      ..loadRequest(Uri.parse('https://www.flipkart.com/'));
+      ..loadRequest(Uri.parse('https://gem-ecommerce-kappa.vercel.app/'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Redeem'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              _controller.reload();
-            },
-          ),
-        ],
-      ),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );

@@ -17,11 +17,11 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     FirebaseStorageService? storageService,
-  })  : firestore = firestore ?? FirebaseFirestore.instance,
-        auth = auth ?? FirebaseAuth.instance,
-        storageService = storageService ?? FirebaseStorageService();
+  }) : firestore = firestore ?? FirebaseFirestore.instance,
+       auth = auth ?? FirebaseAuth.instance,
+       storageService = storageService ?? FirebaseStorageService();
 
-  final String fieldName = "drivingLicenses"; // Field name within user document
+  final String fieldName = "drivingLicense"; // Field name within user document
 
   /// Helper to get current UID
   String get _uid {
@@ -54,13 +54,14 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
 
   @override
   Future<Either<Failure, DrivingLicenseEntity>> submitDrivingLicense(
-      DrivingLicenseEntity license) async {
+    DrivingLicenseEntity license,
+  ) async {
     try {
       // Handle front image - upload if it's a local file, keep URL if it's already a network image
       String frontImageUrl = '';
       if (license.frontImagePath.isNotEmpty) {
         // Check if it's a local file path or network URL
-        if (license.frontImagePath.startsWith('http://') || 
+        if (license.frontImagePath.startsWith('http://') ||
             license.frontImagePath.startsWith('https://')) {
           // It's already a network image URL, keep it as is
           frontImageUrl = license.frontImagePath;
@@ -68,7 +69,8 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
           // It's a local file path, upload it
           final frontFile = File(license.frontImagePath);
           if (await frontFile.exists()) {
-            final frontPath = 'driving_licenses/$_uid/front_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final frontPath =
+                'driving_licenses/$_uid/front_${DateTime.now().millisecondsSinceEpoch}.jpg';
             frontImageUrl = await storageService.uploadFile(
               file: frontFile,
               path: frontPath,
@@ -81,7 +83,7 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
       String backImageUrl = '';
       if (license.backImagePath.isNotEmpty) {
         // Check if it's a local file path or network URL
-        if (license.backImagePath.startsWith('http://') || 
+        if (license.backImagePath.startsWith('http://') ||
             license.backImagePath.startsWith('https://')) {
           // It's already a network image URL, keep it as is
           backImageUrl = license.backImagePath;
@@ -89,7 +91,8 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
           // It's a local file path, upload it
           final backFile = File(license.backImagePath);
           if (await backFile.exists()) {
-            final backPath = 'driving_licenses/$_uid/back_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final backPath =
+                'driving_licenses/$_uid/back_${DateTime.now().millisecondsSinceEpoch}.jpg';
             backImageUrl = await storageService.uploadFile(
               file: backFile,
               path: backPath,
@@ -102,15 +105,14 @@ class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
       final model = DrivingLicenseModel(
         licenseType: license.licenseType,
         frontImagePath: frontImageUrl, // Now contains the download URL
-        backImagePath: backImageUrl,   // Now contains the download URL
+        backImagePath: backImageUrl, // Now contains the download URL
         dob: license.dob,
         verificationStatus: license.verificationStatus,
       );
 
-      await firestore
-          .collection('users')
-          .doc(_uid)
-          .update({fieldName: model.toMap()});
+      await firestore.collection('users').doc(_uid).update({
+        fieldName: model.toMap(),
+      });
 
       return Right(model);
     } catch (e) {

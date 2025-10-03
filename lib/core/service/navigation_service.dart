@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:go_extra_mile_new/features/main_screen.dart';
+import 'package:go_extra_mile_new/features/main/main_screen.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/screens/my_profile_screen.dart';
-import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_vehicle_screen.dart';
 import 'package:go_extra_mile_new/features/gem_coin/presentation/screens/earn_gem_coin_screen.dart';
 import 'package:go_extra_mile_new/features/redeem/redeem_screen.dart';
 import 'package:go_extra_mile_new/features/notification/presentation/notification_screen.dart';
 
 class NavigationService {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 
   /// Navigate to a specific screen based on notification data
-  static Future<void> handleNotificationNavigation(Map<String, dynamic> data) async {
+  static Future<void> handleNotificationNavigation(
+    Map<String, dynamic> data,
+  ) async {
     final context = navigatorKey.currentContext;
     if (context == null) return;
 
@@ -25,14 +27,17 @@ class NavigationService {
     // Check if user is authenticated
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      debugPrint('NavigationService: User not authenticated, staying on auth screen');
+      debugPrint(
+        'NavigationService: User not authenticated, staying on auth screen',
+      );
       return;
     }
 
     // Navigate based on notification type or screen parameter
     switch (type?.toLowerCase()) {
       case 'ride':
-        _navigateToRide(context);
+        // ride navigation removed
+        _navigateToHome(context);
         break;
       case 'profile':
         _navigateToProfile(context);
@@ -56,13 +61,7 @@ class NavigationService {
     }
   }
 
-  /// Navigate to ride screen
-  static void _navigateToRide(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const RideVehicleScreen()),
-    );
-  }
+  /// Navigate to ride screen removed
 
   /// Navigate to profile screen
   static void _navigateToProfile(BuildContext context) {
@@ -89,13 +88,15 @@ class NavigationService {
   }
 
   /// Navigate to notifications screen
-  static void _navigateToNotifications(BuildContext context, String? notificationId) {
+  static void _navigateToNotifications(
+    BuildContext context,
+    String? notificationId,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => NotificationScreen(
-          initialNotificationId: notificationId,
-        ),
+        builder: (context) =>
+            NotificationScreen(initialNotificationId: notificationId),
       ),
     );
   }
@@ -111,10 +112,14 @@ class NavigationService {
   }
 
   /// Navigate based on screen parameter
-  static void _navigateByScreen(BuildContext context, String? screen, String? id) {
+  static void _navigateByScreen(
+    BuildContext context,
+    String? screen,
+    String? id,
+  ) {
     switch (screen?.toLowerCase()) {
       case 'ride':
-        _navigateToRide(context);
+        _navigateToHome(context);
         break;
       case 'profile':
         _navigateToProfile(context);
@@ -139,10 +144,12 @@ class NavigationService {
   }
 
   /// Handle notification click when app is terminated
-  static Future<void> handleTerminatedAppNotification(Map<String, dynamic> data) async {
+  static Future<void> handleTerminatedAppNotification(
+    Map<String, dynamic> data,
+  ) async {
     debugPrint('NavigationService: Handling terminated app notification');
     debugPrint('Data: $data');
-    
+
     // Store the notification data to be handled when app starts
     // This will be processed in the main app initialization
     _pendingNotificationData = data;
@@ -150,7 +157,7 @@ class NavigationService {
 
   /// Get pending notification data (for terminated app notifications)
   static Map<String, dynamic>? _pendingNotificationData;
-  
+
   static Map<String, dynamic>? getPendingNotificationData() {
     final data = _pendingNotificationData;
     _pendingNotificationData = null; // Clear after reading

@@ -1,25 +1,15 @@
-import '../entities/ride_entity.dart';
-import '../entities/ride_memory_entity.dart';
+import 'package:go_extra_mile_new/features/ride/domain/entities/ride_entity.dart';
 
 abstract class RideRepository {
-  Future<void> uploadRide(RideEntity rideEntity);
-  
-  /// 🔹 Get all rides for a specific user
-  Future<List<RideEntity>> getAllRidesByUserId(String userId);
-  
-  /// 🔹 Get recent rides for a specific user with optional limit
-  Future<List<RideEntity>> getRecentRidesByUserId(String userId, {int limit = 1});
-  
+  /// Fetches all rides
+  Future<List<RideEntity>> getAllFirebaseRides();
+  Future<List<RideEntity>> getAllHiveRides();
 
-  /// 🔹 Get recent ride memories for a specific user with optional limit
-  Future<List<RideMemoryEntity>> getRecentRideMemoriesByUserId(String userId, {int limit = 10});
+  Future<RideEntity?> getRecentRide();
 
+  /// Fetches a single ride by its ID
+  Future<RideEntity?> getRideById(String id);
 
-  ///save ride locally 
-  Future<void> saveRideLocally(RideEntity rideEntity);
-
-  ///get rides locally for a user
-  Future<List<RideEntity>> getRideLocally(String userId);
-
-
-} 
+  /// Uploads a new ride
+  Future<void> uploadRide(RideEntity ride);
+}

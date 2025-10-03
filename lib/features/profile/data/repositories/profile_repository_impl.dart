@@ -15,12 +15,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<ProfileEntity?> getCurrentUserProfile() async {
+    return await dataSource.getCurrentUserProfile();
+  }
+
+  @override
   Future<String?> getUserProfileImage(String uid) async {
     return await dataSource.getUserProfileImage(uid);
   }
 
   @override
-  Future<void> updateProfile(ProfileEntity profile, File? profilePhotoImageFile) async {
+  Future<void> updateProfile(
+    ProfileEntity profile,
+    File? profilePhotoImageFile,
+  ) async {
     return await dataSource.updateProfile(profile, profilePhotoImageFile);
   }
 

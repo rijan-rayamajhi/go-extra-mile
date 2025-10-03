@@ -13,12 +13,12 @@ class PrimaryButton extends StatelessWidget {
   final String? iconImage;
 
   const PrimaryButton({
-    super.key, 
-    required this.text, 
-    required this.onPressed, 
-    this.isLoading = false, 
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
     this.backgroundColor,
-    this.icon, 
+    this.icon,
     this.iconImage,
   });
 
@@ -35,25 +35,30 @@ class PrimaryButton extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         elevation: 0,
-        backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.primary,
+        backgroundColor:
+            backgroundColor ?? Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
           fontSize: context.fontSize(baseXLargeFontSize),
           fontWeight: FontWeight.w600,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(context.borderRadius(baseButtonRadius)),
+          borderRadius: BorderRadius.circular(
+            context.borderRadius(baseButtonRadius),
+          ),
         ),
-        minimumSize: Size(baseButtonWidth, context.buttonHeight(baseButtonHeight)),
+        minimumSize: Size(
+          baseButtonWidth,
+          context.buttonHeight(baseButtonHeight),
+        ),
       ),
       onPressed: _handlePress,
-      child: isLoading 
-        ?  CircularProgressIndicator(
-            color: Theme.of(context).colorScheme.onPrimary,
-            strokeWidth: 2, 
-            
-        ) 
-        : iconImage != null 
+      child: isLoading
+          ? CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.onPrimary,
+              strokeWidth: 2,
+            )
+          : iconImage != null
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -66,16 +71,16 @@ class PrimaryButton extends StatelessWidget {
                 Text(text),
               ],
             )
-          : icon != null 
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: context.iconSize(baseMediumIconSize)),
-                  SizedBox(width: context.baseSpacing(baseSmallSpacing)),
-                  Text(text),
-                ],
-              )
-            : Text(text),
+          : icon != null
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: context.iconSize(baseMediumIconSize)),
+                SizedBox(width: context.baseSpacing(baseSmallSpacing)),
+                Text(text),
+              ],
+            )
+          : Text(text),
     );
   }
 }

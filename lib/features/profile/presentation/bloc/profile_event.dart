@@ -11,12 +11,10 @@ abstract class ProfileEvent extends Equatable {
 }
 
 class GetProfileEvent extends ProfileEvent {
-  final String uid;
-
-  const GetProfileEvent(this.uid);
+  const GetProfileEvent();
 
   @override
-  List<Object?> get props => [uid];
+  List<Object?> get props => [];
 }
 
 class UpdateProfileEvent extends ProfileEvent {
@@ -43,9 +41,9 @@ class RefreshProfileEvent extends ProfileEvent {
 class ToggleProfilePrivacyEvent extends ProfileEvent {
   final String uid;
   final bool isPrivate;
-  
+
   const ToggleProfilePrivacyEvent(this.uid, this.isPrivate);
-  
+
   @override
   List<Object?> get props => [uid, isPrivate];
 }
@@ -57,4 +55,4 @@ class CheckUsernameAvailabilityEvent extends ProfileEvent {
 
   @override
   List<Object?> get props => [username];
-} 
+}

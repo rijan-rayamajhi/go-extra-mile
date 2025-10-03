@@ -16,12 +16,12 @@ import 'package:go_extra_mile_new/features/profile/data/model/profile_model.dart
 import 'package:go_extra_mile_new/features/profile/domain/entities/profile_entity.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/common/widgets/customer_care_bottom_sheet.dart';
-import 'package:go_extra_mile_new/features/profile/presentation/widgets/profile_ride_memory_gridview.dart';
 import 'package:go_extra_mile_new/features/profile/presentation/widgets/profile_ride_stats.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_bloc.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_state.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_event.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/screens/auth_wrapper.dart';
+import 'package:go_extra_mile_new/features/ride/presentation/widgets/ride_memory_grid_view.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -33,30 +33,19 @@ class MyProfileScreen extends StatefulWidget {
 }
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
-  ProfileState? _lastValidProfileState;
-
   @override
   void initState() {
     super.initState();
     // Load profile when screen initializes
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      context.read<ProfileBloc>().add(GetProfileEvent(currentUser.uid));
-    }
+    context.read<ProfileBloc>().add(const GetProfileEvent());
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
-        if (state is ProfileUpdated) {
+        if (state is ProfileLoaded && state.justUpdated) {
           AppSnackBar.success(context, 'Profile updated successfully');
-        }
-        // Cache valid profile states
-        if (state is ProfileLoaded ||
-            state is ProfileUpdated ||
-            state is ProfileUpdating) {
-          _lastValidProfileState = state;
         }
       },
       child: BlocBuilder<ProfileBloc, ProfileState>(
@@ -65,34 +54,17 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             return ProfileShimmerLoading();
           }
           if (state is ProfileError) {
-            return Center(child: Text(state.toString()));
+            // If error has profile data, show it with error message
+            if (state.profile != null) {
+              return _buildProfileScaffold(
+                state.profile!,
+                ProfileLoaded(state.profile!),
+              );
+            }
+            return Center(child: Text(state.message));
           }
           if (state is ProfileLoaded) {
             return _buildProfileScaffold(state.profile, state);
-          }
-          if (state is ProfileUpdated) {
-            return _buildProfileScaffold(state.profile, state);
-          }
-          if (state is ProfileUpdating) {
-            // Show the profile with updating state
-            return _buildProfileScaffold(state.profile, state);
-          }
-          if (state is UsernameAvailabilityResult) {
-            // Use cached profile state to maintain display during username availability checks
-            if (_lastValidProfileState != null) {
-              if (_lastValidProfileState is ProfileLoaded) {
-                final cachedState = _lastValidProfileState as ProfileLoaded;
-                return _buildProfileScaffold(cachedState.profile, cachedState);
-              } else if (_lastValidProfileState is ProfileUpdated) {
-                final cachedState = _lastValidProfileState as ProfileUpdated;
-                return _buildProfileScaffold(cachedState.profile, cachedState);
-              } else if (_lastValidProfileState is ProfileUpdating) {
-                final cachedState = _lastValidProfileState as ProfileUpdating;
-                return _buildProfileScaffold(cachedState.profile, cachedState);
-              }
-            }
-            // Fallback to loading if no cached state
-            return ProfileShimmerLoading();
           }
           return Scaffold(
             body: Center(
@@ -112,7 +84,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   Scaffold _buildProfileScaffold(
     ProfileEntity profile,
-    ProfileState currentState,
+    ProfileLoaded currentState,
   ) {
     return Scaffold(
       appBar: AppBar(
@@ -157,7 +129,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (currentState is ProfileUpdating)
+                  if (currentState.isUpdating)
                     Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: SizedBox(
@@ -180,7 +152,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           ? Theme.of(context).colorScheme.error
                           : Theme.of(context).colorScheme.primary,
                     ),
-                    onPressed: currentState is ProfileUpdating
+                    onPressed: currentState.isUpdating
                         ? null
                         : () {
                             _showPrivacyConfirmation(context, profile);
@@ -200,13 +172,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               color: Theme.of(context).colorScheme.onSurface,
             ),
             onPressed: () {
-              CustomerCareBottomSheet.show(
-                context,
-                whatsappNumber: '+916360896102',
-                emailAddress: 'support@goextramile.com',
-                phoneNumber: '+916360896102',
-                companyName: 'Go Extra Mile',
-              );
+              CustomerCareBottomSheet.show(context);
             },
             tooltip: 'Customer Care & Support',
           ),
@@ -254,123 +220,137 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                        Text(
-                          profile.displayName,
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
+                          Text(
+                            profile.displayName,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
 
-                        //address
-                        Row(
-                          children: [
-                            Icon(
-                              FontAwesomeIcons.locationDot,
-                              color: Theme.of(context).colorScheme.primary,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              (profile.address != null &&
-                                      profile.address!.length > 25)
-                                  ? '${profile.address!.substring(0, 25)}..'
-                                  : profile.address ?? 'India',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
+                          //address
+                          Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.locationDot,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                (profile.address != null &&
+                                        profile.address!.length > 25)
+                                    ? '${profile.address!.substring(0, 25)}..'
+                                    : profile.address ?? 'India',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
+                              ),
+                            ],
+                          ),
+
+                          ///three icons in row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              //instagram
+                              if (profile.instagramLink != null &&
+                                  (profile.showInstagram ?? true)) ...[
+                                IconButton(
+                                  onPressed: () {
+                                    launchUrl(
+                                      Uri.parse(profile.instagramLink!),
+                                    );
+                                  },
+                                  icon: Icon(
+                                    FontAwesomeIcons.instagram,
                                     color: Theme.of(
                                       context,
-                                    ).colorScheme.onSurface,
+                                    ).colorScheme.primary,
+                                    size: 24,
                                   ),
-                            ),
-                          ],
-                        ),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ] else ...[
+                                SizedBox.shrink(),
+                              ],
 
-                        ///three icons in row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            //instagram
-                            if (profile.instagramLink != null && (profile.showInstagram ?? true)) ...[
-                              IconButton(
-                                onPressed: () {
-                                  launchUrl(Uri.parse(profile.instagramLink!));
-                                },
-                                icon: Icon(
-                                  FontAwesomeIcons.instagram,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 24,
-                                ),
-                                style: IconButton.styleFrom(
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.surface,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                              if (profile.youtubeLink != null &&
+                                  (profile.showYoutube ?? true)) ...[
+                                IconButton(
+                                  onPressed: () {
+                                    launchUrl(Uri.parse(profile.youtubeLink!));
+                                  },
+                                  icon: Icon(
+                                    FontAwesomeIcons.youtube,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    size: 24,
+                                  ),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ] else ...[
-                              SizedBox.shrink(),
-                            ],
+                              ] else ...[
+                                SizedBox.shrink(),
+                              ],
+                              //youtube
 
-                            if (profile.youtubeLink != null && (profile.showYoutube ?? true)) ...[
-                              IconButton(
-                                onPressed: () {
-                                  launchUrl(Uri.parse(profile.youtubeLink!));
-                                },
-                                icon: Icon(
-                                  FontAwesomeIcons.youtube,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 24,
-                                ),
-                                style: IconButton.styleFrom(
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.surface,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                              //whatsapp
+                              if (profile.whatsappLink != null &&
+                                  (profile.showWhatsapp ?? true)) ...[
+                                IconButton(
+                                  onPressed: () {
+                                    // Create WhatsApp URL from phone number
+                                    final phoneNumber = profile.whatsappLink!;
+                                    final whatsappUrl =
+                                        'https://wa.me/$phoneNumber';
+                                    launchUrl(Uri.parse(whatsappUrl));
+                                  },
+                                  icon: Icon(
+                                    FontAwesomeIcons.whatsapp,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    size: 24,
+                                  ),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ] else ...[
-                              SizedBox.shrink(),
+                              ] else ...[
+                                SizedBox.shrink(),
+                              ],
                             ],
-                            //youtube
-
-                            //whatsapp
-                            if (profile.whatsappLink != null && (profile.showWhatsapp ?? true)) ...[
-                              IconButton(
-                                onPressed: () {
-                                  // Create WhatsApp URL from phone number
-                                  final phoneNumber = profile.whatsappLink!;
-                                  final whatsappUrl = 'https://wa.me/$phoneNumber';
-                                  launchUrl(Uri.parse(whatsappUrl));
-                                },
-                                icon: Icon(
-                                  FontAwesomeIcons.whatsapp,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 24,
-                                ),
-                                style: IconButton.styleFrom(
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.surface,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              ),
-                            ] else ...[
-                              SizedBox.shrink(),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -457,7 +437,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     ),
                     Flexible(
                       child: RideStatsWidget(
-                        value: profile.totalDistance != null 
+                        value: profile.totalDistance != null
                             ? '${(profile.totalDistance! / 1000).toStringAsFixed(2)} km'
                             : '0.00 km',
                         label: 'Total Distance',
@@ -484,8 +464,15 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
               const SizedBox(height: 16),
 
-              //profile memory
-              ProfileRideMemoryGridview(),
+              // //profile memory
+              SizedBox(
+                height: 400, // Fixed height for grid view
+                child: RideMemoryGridView(
+                  onRideTap: (ride) {
+                    // Handle ride tap
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -559,7 +546,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       subtitle: 'Permanently delete your account',
                       color: theme.colorScheme.error,
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const DeleteAccountScreen()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DeleteAccountScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -706,7 +698,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   void _showPrivacyConfirmation(BuildContext context, ProfileEntity profile) {
     final currentPrivacy = profile.privateProfile ?? false;
     final newPrivacyValue = !currentPrivacy;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -728,9 +720,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               Navigator.pop(context);
               _updateProfilePrivacy(profile, newPrivacyValue);
             },
-            child: Text(
-              currentPrivacy ? 'Make Public' : 'Make Private',
-            ),
+            child: Text(currentPrivacy ? 'Make Public' : 'Make Private'),
           ),
         ],
       ),
@@ -740,20 +730,16 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   void _updateProfilePrivacy(ProfileEntity profile, bool newPrivacyValue) {
     try {
       // Create updated profile with new privacy setting
-      final updatedProfile = (profile as ProfileModel)
-          .copyWith(privateProfile: newPrivacyValue);
+      final updatedProfile = (profile as ProfileModel).copyWith(
+        privateProfile: newPrivacyValue,
+      );
 
       // Log the change for debugging
 
-      context.read<ProfileBloc>().add(
-        UpdateProfileEvent(updatedProfile),
-      );
+      context.read<ProfileBloc>().add(UpdateProfileEvent(updatedProfile));
     } catch (e) {
       // Show error message if update fails
-      AppSnackBar.error(
-        context,
-        'Failed to update privacy setting',
-      );
+      AppSnackBar.error(context, 'Failed to update privacy setting');
     }
   }
 
@@ -761,7 +747,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     try {
       // Use the auth bloc to handle logout
       context.read<KAuthBloc>().add(KSignOutEvent());
-      
+
       // Navigate to auth screen immediately after logout
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(

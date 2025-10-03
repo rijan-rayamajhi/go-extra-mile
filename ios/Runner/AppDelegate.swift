@@ -4,6 +4,12 @@ import FirebaseCore
 import FirebaseMessaging
 import GoogleMaps
 import flutter_background_service_ios
+import flutter_foreground_task
+
+// Function to register plugins for flutter_foreground_task
+func registerPlugins(registry: FlutterPluginRegistry) {
+  GeneratedPluginRegistrant.register(with: registry)
+}
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -18,9 +24,14 @@ import flutter_background_service_ios
     // Configure Flutter Background Service
     SwiftFlutterBackgroundServicePlugin.taskIdentifier = "dev.flutter.background.refresh"
     
+    // Configure Flutter Foreground Task
+    SwiftFlutterForegroundTaskPlugin.setPluginRegistrantCallback(registerPlugins)
+    
     GeneratedPluginRegistrant.register(with: self)
     
-    UNUserNotificationCenter.current().delegate = self
+    if #available(iOS 10.0, *) {
+      UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+    }
     application.registerForRemoteNotifications()
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

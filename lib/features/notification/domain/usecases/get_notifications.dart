@@ -9,7 +9,7 @@ class GetNotifications {
 
   GetNotifications(this.repository);
 
-  Future<Either<Failure, List<NotificationEntity>>> call(String userId) {
-    return repository.getNotifications(userId);
+  Future<Either<Failure, List<NotificationEntity>>> call() {
+    return repository.getNotifications();
   }
 }

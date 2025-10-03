@@ -43,10 +43,10 @@ class UserFirestoreDataSource {
       'totalGemCoins': 0,
       'totalRide': 0,
       'totalDistance': 0,
-      'referral' : {
-      'referralCode': user.uid
-          .substring(0, 7)
-          .toUpperCase(), // Simple referral code using first 6 chars of UID, all capital
+      'referral': {
+        'referralCode': user.uid
+            .substring(0, 7)
+            .toUpperCase(), // Simple referral code using first 6 chars of UID, all capital
       },
       'fcmToken': fcmToken,
       ...?additionalData,
@@ -75,11 +75,11 @@ class UserFirestoreDataSource {
       final docSnapshot = await _firestoreService.getDocument(
         docPath: 'accounts_deletion_requests/$uid',
       );
-      
+
       if (!docSnapshot.exists) {
         return null;
       }
-      
+
       final data = docSnapshot.data() as Map<String, dynamic>;
       return AccountDeletionInfoModel.fromFirestore(data);
     } catch (e) {
@@ -87,51 +87,84 @@ class UserFirestoreDataSource {
     }
   }
 
- /// Deletes a user account from the users collection
- Future<void> deleteUserAccount(String uid , String reason) async {
-  //create `deleted_users` collection
-  final deletionInfo = AccountDeletionInfoModel(
-    uid: uid,
-    reason: reason,
-    createdAt: DateTime.now(),
-  );
-  
-  await _firestoreService.setDocument(
-    docPath: 'accounts_deletion_requests/$uid',
-    data: deletionInfo.toFirestore(),
-  );
- }
+  /// Deletes a user account from the users collection
+  Future<void> deleteUserAccount(String uid, String reason) async {
+    //create `deleted_users` collection
+    final deletionInfo = AccountDeletionInfoModel(
+      uid: uid,
+      reason: reason,
+      createdAt: DateTime.now(),
+    );
 
- /// Restores a user account from the deleted accounts collection
- Future<void> restoreUserAccount(String uid) async {
-  await _firestoreService.deleteDocument(
-    docPath: 'accounts_deletion_requests/$uid',
-  );
- }
+    await _firestoreService.setDocument(
+      docPath: 'accounts_deletion_requests/$uid',
+      data: deletionInfo.toFirestore(),
+    );
+  }
 
- /// Updates FCM token for a user
- Future<void> updateFCMToken(String uid) async {
-   try {
-     final fcmToken = await FCMNotificationService.getToken();
-     await _firestoreService.updateDocument(
-       docPath: 'users/$uid',
-       data: {'fcmToken': fcmToken},
-     );
-   } catch (e) {
-     // If FCM token update fails, continue silently
-     // The token can be updated later
-   }
- }
+  /// Restores a user account from the deleted accounts collection
+  Future<void> restoreUserAccount(String uid) async {
+    await _firestoreService.deleteDocument(
+      docPath: 'accounts_deletion_requests/$uid',
+    );
+  }
 
- /// Clears FCM token for a user (used during logout)
- Future<void> clearFCMToken(String uid) async {
-   try {
-     await _firestoreService.updateDocument(
-       docPath: 'users/$uid',
-       data: {'fcmToken': null},
-     );
-   } catch (e) {
-     // If FCM token clearing fails, continue silently
-   }
- }
+  /// Updates FCM token for a user
+  Future<void> updateFCMToken(String uid) async {
+    try {
+      final fcmToken = await FCMNotificationService.getToken();
+      await _firestoreService.updateDocument(
+        docPath: 'users/$uid',
+        data: {'fcmToken': fcmToken},
+      );
+    } catch (e) {
+      // If FCM token update fails, continue silently
+      // The token can be updated later
+    }
+  }
+
+  /// Clears FCM token for a user (used during logout)
+  Future<void> clearFCMToken(String uid) async {
+    try {
+      await _firestoreService.updateDocument(
+        docPath: 'users/$uid',
+        data: {'fcmToken': null},
+      );
+    } catch (e) {
+      // If FCM token clearing fails, continue silently
+    }
+  }
+
+  /// Updates the monetization status for a user
+  Future<void> updateMonetizationStatus(String uid, bool isMonetized) async {
+    try {
+      await _firestoreService.updateDocument(
+        docPath: 'users/$uid',
+        data: {
+          'isMonetized': isMonetized,
+          'monetizedAt': isMonetized ? FieldValue.serverTimestamp() : null,
+        },
+      );
+    } catch (e) {
+      throw Exception('Failed to update monetization status: $e');
+    }
+  }
+
+  /// Gets the monetization status for a user
+  Future<bool> getMonetizationStatus(String uid) async {
+    try {
+      final docSnapshot = await _firestoreService.getDocument(
+        docPath: 'users/$uid',
+      );
+
+      if (!docSnapshot.exists) {
+        return false;
+      }
+
+      final data = docSnapshot.data() as Map<String, dynamic>;
+      return data['isMonetized'] as bool? ?? false;
+    } catch (e) {
+      throw Exception('Failed to get monetization status: $e');
+    }
+  }
 }

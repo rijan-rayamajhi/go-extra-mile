@@ -15,7 +15,6 @@ class MyVehicleScreen extends StatefulWidget {
 }
 
 class _MyVehicleScreenState extends State<MyVehicleScreen> {
-  
   @override
   void initState() {
     super.initState();
@@ -35,9 +34,7 @@ class _MyVehicleScreenState extends State<MyVehicleScreen> {
       builder: (context, state) {
         if (state is VehicleLoading) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         } else if (state is VehicleLoaded) {
           if (state.vehicles.isNotEmpty) {
@@ -47,6 +44,12 @@ class _MyVehicleScreenState extends State<MyVehicleScreen> {
           }
         } else if (state is VehicleError) {
           return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              ),
+            ),
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -68,9 +71,7 @@ class _MyVehicleScreenState extends State<MyVehicleScreen> {
         } else {
           // VehicleInitial state - show loading
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
       },

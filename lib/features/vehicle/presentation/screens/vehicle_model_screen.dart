@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/screens/enter_vehicle_details_screen.dart';
 
-
 class VehicleModelScreen extends StatefulWidget {
   final String selectedVehicleType;
   final Map<String, dynamic> selectedBrand;
@@ -39,14 +38,17 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
   void _filterModels(String query) {
     setState(() {
       _isSearching = query.isNotEmpty;
-      
+
       final allModels = widget.selectedBrand['models'] as List<String>;
-      
+
       if (query.isEmpty) {
         _filteredModels = allModels;
       } else {
         _filteredModels = allModels
-            .where((model) => model.toLowerCase().contains(query.toLowerCase().trim()))
+            .where(
+              (model) =>
+                  model.toLowerCase().contains(query.toLowerCase().trim()),
+            )
             .toList();
       }
     });
@@ -63,6 +65,10 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +76,7 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
             child: Text(
-              'Select your ${brand['name']} model', 
+              'Select your ${brand['name']} model',
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -102,6 +108,41 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
                         ),
                       ),
                     )
+                  else if (_filteredModels.isEmpty && !_isSearching)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.directions_car_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "No models available",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[600],
+                                fontFamily: 'Gilroy',
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Models for this brand will be loaded from the database.\nPlease check back later or contact support.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                                fontFamily: 'Gilroy',
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                   else
                     Wrap(
                       spacing: 12,
@@ -110,21 +151,24 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
                         final isSelected = selectedModel == model;
                         return GestureDetector(
                           onTap: () {
-                              setState(() => selectedModel = model);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EnterVehicleDetailsScreen(
-                                    selectedVehicleType: widget.selectedVehicleType,
-                                    selectedBrand: widget.selectedBrand,
-                                    selectedModel: model,
-                                  ),
+                            setState(() => selectedModel = model);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EnterVehicleDetailsScreen(
+                                  selectedVehicleType:
+                                      widget.selectedVehicleType,
+                                  selectedBrand: widget.selectedBrand,
+                                  selectedModel: model,
                                 ),
-                              );
+                              ),
+                            );
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
                             constraints: const BoxConstraints(minWidth: 120),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
@@ -145,9 +189,7 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
                                 fontWeight: isSelected
                                     ? FontWeight.w600
                                     : FontWeight.w500,
-                                color: isSelected
-                                    ? Colors.black
-                                    : Colors.grey,
+                                color: isSelected ? Colors.black : Colors.grey,
                               ),
                             ),
                           ),
@@ -165,7 +207,8 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
                   ],
 
                   // Can't Find Model Section
-                  if (!_isSearching) _buildCantFindModelSection(brand['logoUrl']),
+                  if (!_isSearching)
+                    _buildCantFindModelSection(brand['logoUrl']),
                 ],
               ),
             ),
@@ -220,7 +263,6 @@ class _VehicleModelScreenState extends State<VehicleModelScreen> {
   }
 
   Widget _buildRequestedModelsGrid() {
-
     return Wrap(
       spacing: 12,
       runSpacing: 12,

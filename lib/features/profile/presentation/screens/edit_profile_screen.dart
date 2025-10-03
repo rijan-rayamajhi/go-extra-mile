@@ -331,15 +331,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       uid: widget.profile.uid,
       displayName: _displayNameController.text.trim(),
       email: widget.profile.email,
-      photoUrl: widget.profile.photoUrl, // Keep the original photoUrl, it will be updated by the repository
+      photoUrl: widget
+          .profile
+          .photoUrl, // Keep the original photoUrl, it will be updated by the repository
       userName: _usernameController.text.trim(),
       gender: _selectedGender,
       dateOfBirth: _selectedDob,
-      bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
+      bio: _bioController.text.trim().isEmpty
+          ? null
+          : _bioController.text.trim(),
       address: _selectedAddress,
-      instagramLink: _instagramController.text.trim().isEmpty ? null : _instagramController.text.trim(),
-      youtubeLink: _youtubeController.text.trim().isEmpty ? null : _youtubeController.text.trim(),
-      whatsappLink: _whatsappController.text.trim().isEmpty ? null : _whatsappController.text.trim(),
+      instagramLink: _instagramController.text.trim().isEmpty
+          ? null
+          : _instagramController.text.trim(),
+      youtubeLink: _youtubeController.text.trim().isEmpty
+          ? null
+          : _youtubeController.text.trim(),
+      whatsappLink: _whatsappController.text.trim().isEmpty
+          ? null
+          : _whatsappController.text.trim(),
       showInstagram: _showInstagram,
       showYoutube: _showYoutube,
       showWhatsapp: _showWhatsapp,
@@ -349,14 +359,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
 
     // Dispatch update event to bloc with the selected image file
-    context.read<ProfileBloc>().add(UpdateProfileEvent(updatedProfile, profilePhotoImageFile: _selectedImageFile));
+    context.read<ProfileBloc>().add(
+      UpdateProfileEvent(
+        updatedProfile,
+        profilePhotoImageFile: _selectedImageFile,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
-        if (state is ProfileUpdated) {
+        if (state is ProfileLoaded && state.justUpdated) {
           AppSnackBar.success(context, 'Profile updated successfully!');
           Navigator.pop(context, state.profile);
         } else if (state is ProfileError) {
@@ -365,8 +380,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       },
       child: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
-          final bool isUpdating = state is ProfileUpdating;
-          
+          final bool isUpdating = state is ProfileLoaded && state.isUpdating;
+
           return Stack(
             children: [
               Scaffold(
@@ -418,9 +433,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               if (isUpdating)
                 Container(
                   color: Colors.black54,
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  child: const Center(child: CircularProgressIndicator()),
                 ),
             ],
           );
@@ -443,10 +456,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildUsernameSection() {
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
-        if (state is UsernameAvailabilityResult) {
+        if (state is ProfileLoaded && state.usernameBeingChecked != null) {
           setState(() {
-            _isUsernameAvailable = state.isAvailable;
-            _isCheckingUsername = false;
+            _isUsernameAvailable = state.isUsernameAvailable ?? true;
+            _isCheckingUsername = state.isUsernameAvailable == null;
           });
         } else if (state is ProfileError) {
           setState(() {
@@ -703,16 +716,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildDobSection() {
     return EditProfileDob(
       onTap: () async {
-         //Nabigate to Add New DL Screen
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => MyDrivingLicenseScreen()));
-
+        //Nabigate to Add New DL Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MyDrivingLicenseScreen()),
+        );
       },
     );
   }
 
   Widget _buildInstagramSection() {
     final bool hasInstagramLink = _instagramController.text.trim().isNotEmpty;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -730,8 +745,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     _showInstagram ? 'Show' : 'Hide',
                     style: TextStyle(
                       fontSize: 14,
-                      color: _showInstagram 
-                          ? Theme.of(context).colorScheme.primary 
+                      color: _showInstagram
+                          ? Theme.of(context).colorScheme.primary
                           : Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
@@ -780,7 +795,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildYoutubeSection() {
     final bool hasYoutubeLink = _youtubeController.text.trim().isNotEmpty;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -798,8 +813,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     _showYoutube ? 'Show' : 'Hide',
                     style: TextStyle(
                       fontSize: 14,
-                      color: _showYoutube 
-                          ? Theme.of(context).colorScheme.primary 
+                      color: _showYoutube
+                          ? Theme.of(context).colorScheme.primary
                           : Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
@@ -848,7 +863,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildWhatsappSection() {
     final bool hasWhatsappLink = _whatsappController.text.trim().isNotEmpty;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -866,8 +881,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     _showWhatsapp ? 'Show' : 'Hide',
                     style: TextStyle(
                       fontSize: 14,
-                      color: _showWhatsapp 
-                          ? Theme.of(context).colorScheme.primary 
+                      color: _showWhatsapp
+                          ? Theme.of(context).colorScheme.primary
                           : Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),

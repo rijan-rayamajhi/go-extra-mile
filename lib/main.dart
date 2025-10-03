@@ -15,11 +15,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await di.init();
   await Hive.initFlutter();
+  await Hive.openBox('rides');
 
   // Register Hive type adapters
   HiveAdapters.registerAdapters();
@@ -28,7 +27,7 @@ void main() async {
   await LocalNotificationService.initialize();
   await FCMNotificationService.initialize();
 
-  runApp(const MyApp()); 
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -43,7 +42,7 @@ class MyApp extends StatelessWidget {
         title: 'GEM NEW',
         theme: AppTheme.lightTheme, // Follows system theme preference
         navigatorKey: NavigationService.navigatorKey,
-        home: const AuthWrapper(),
+        home: AuthWrapper(),
       ),
     );
   }

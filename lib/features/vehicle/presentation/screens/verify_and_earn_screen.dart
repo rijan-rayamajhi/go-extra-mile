@@ -22,17 +22,7 @@ class VerifyAndEarnScreen extends StatelessWidget {
 
     return BlocListener<VehicleBloc, VehicleState>(
       listener: (context, state) {
-        if (state is VehicleVerificationSubmitted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-          // Navigate back after successful verification
-          Navigator.pop(context);
-        } else if (state is VehicleError) {
+        if (state is VehicleError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
@@ -43,146 +33,146 @@ class VerifyAndEarnScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(baseScreenPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Verify and Earn',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-
-            // Vehicle card
-            _buildVehicleCard(context),
-
-            const SizedBox(height: 24),
-
-            // Vehicle images section
-            Text(
-              'Vehicle Images',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            MyVehicleDetailsVehicleImageWidget(
-              frontImageUrl: vehicle.vehicleFrontImage,
-              backImageUrl: vehicle.vehicleBackImage,
-              vehicleId: vehicle.id,
-              userId: uid,
-              hideDeleteButton: true,
-            ),
-
-            const SizedBox(height: 24),
-
-            // Insurance image section
-            Text(
-              'Insurance Document',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            MyVehicleDetailsInsuranceImageWidget(
-              imageUrl: vehicle.vehicleInsuranceImage,
-              vehicleId: vehicle.id,
-              userId: uid,
-              fieldName: 'vehicleInsuranceImage',
-              hideDeleteButton: true,
-            ),
-
-            const SizedBox(height: 24),
-
-            // RC images section
-            Text(
-              'RC Document',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            MyVehicleDetailsVehicleRcImageWidget(
-              frontImageUrl: vehicle.vehicleRCFrontImage,
-              backImageUrl: vehicle.vehicleRCBackImage,
-              vehicleId: vehicle.id,
-              userId: uid,
-              hideDeleteButton: true,
-            ),
-
-            const SizedBox(height: 32),
-
-            // Reward message
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.green.shade200),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(baseScreenPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Verify and Earn',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.card_giftcard,
-                    color: Colors.green.shade600,
-                    size: 32,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Earn Rewards!',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green.shade700,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Complete verification to receive GEM coins and unlock exclusive rewards.',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: Colors.green.shade600),
-                        ),
-                      ],
+              const SizedBox(height: 24),
+
+              // Vehicle card
+              _buildVehicleCard(context),
+
+              const SizedBox(height: 24),
+
+              // Vehicle images section
+              Text(
+                'Vehicle Images',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              MyVehicleDetailsVehicleImageWidget(
+                frontImageUrl: vehicle.vehicleFrontImage,
+                backImageUrl: vehicle.vehicleBackImage,
+                vehicleId: vehicle.id,
+                userId: uid,
+                hideDeleteButton: true,
+              ),
+
+              const SizedBox(height: 24),
+
+              // Insurance image section
+              Text(
+                'Insurance Document',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              MyVehicleDetailsInsuranceImageWidget(
+                imageUrl: vehicle.vehicleInsuranceImage,
+                vehicleId: vehicle.id,
+                userId: uid,
+                fieldName: 'vehicleInsuranceImage',
+                hideDeleteButton: true,
+              ),
+
+              const SizedBox(height: 24),
+
+              // RC images section
+              Text(
+                'RC Document',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              MyVehicleDetailsVehicleRcImageWidget(
+                frontImageUrl: vehicle.vehicleRCFrontImage,
+                backImageUrl: vehicle.vehicleRCBackImage,
+                vehicleId: vehicle.id,
+                userId: uid,
+                hideDeleteButton: true,
+              ),
+
+              const SizedBox(height: 32),
+
+              // Reward message
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.card_giftcard,
+                      color: Colors.green.shade600,
+                      size: 32,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Earn Rewards!',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade700,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Complete verification to receive GEM coins and unlock exclusive rewards.',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Colors.green.shade600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-            // Verify & Earn button
-            BlocBuilder<VehicleBloc, VehicleState>(
-              builder: (context, state) {
-                return PrimaryButton(
-                  text: 'Verify & Earn',
-                  isLoading: state is VehicleLoading,
-                  onPressed: () {
-                    context.read<VehicleBloc>().add(
-                      VerifyVehicleEvent(vehicle.id, uid),
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 32),
-          ],
+              // Verify & Earn button
+              BlocBuilder<VehicleBloc, VehicleState>(
+                builder: (context, state) {
+                  return PrimaryButton(
+                    text: 'Verify & Earn',
+                    isLoading: state is VehicleLoading,
+                    onPressed: () {
+                      context.read<VehicleBloc>().add(
+                        VerifyVehicleEvent(vehicle.id, uid),
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 

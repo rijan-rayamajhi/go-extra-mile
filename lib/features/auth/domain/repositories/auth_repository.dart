@@ -12,4 +12,6 @@ abstract class AuthRepository {
   Future<void> restoreAccount(String uid);
   Future<void> updateFCMToken(String uid);
   Future<void> clearFCMToken(String uid);
+  Future<void> updateMonetizationStatus(String uid, bool isMonetized);
+  Future<bool> getMonetizationStatus(String uid);
 }

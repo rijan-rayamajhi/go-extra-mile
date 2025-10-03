@@ -65,4 +65,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> clearFCMToken(String uid) {
     return userFirestoreDataSource.clearFCMToken(uid);
   }
+
+  @override
+  Future<void> updateMonetizationStatus(String uid, bool isMonetized) {
+    return userFirestoreDataSource.updateMonetizationStatus(uid, isMonetized);
+  }
+
+  @override
+  Future<bool> getMonetizationStatus(String uid) {
+    return userFirestoreDataSource.getMonetizationStatus(uid);
+  }
 }

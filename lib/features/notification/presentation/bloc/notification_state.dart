@@ -39,3 +39,12 @@ class NotificationError extends NotificationState {
   @override
   List<Object?> get props => [message];
 }
+
+class UnreadNotificationCountLoaded extends NotificationState {
+  final String count;
+
+  const UnreadNotificationCountLoaded(this.count);
+
+  @override
+  List<Object?> get props => [count];
+}

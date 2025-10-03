@@ -1,9 +1,13 @@
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_brand_entity.dart';
 import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entiry.dart';
 
 abstract class VehicleRepository {
+  /// Get all vehicle brands
+  Future<Either<Exception, List<VehicleBrandEntity>>> getAllVehicleBrands();
+
   /// Get all vehicles of a user
   Future<Either<Exception, List<VehicleEntity>>> getUserVehicles(String userId);
 

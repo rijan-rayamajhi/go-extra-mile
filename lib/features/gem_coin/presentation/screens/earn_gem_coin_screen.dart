@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
-import 'package:go_extra_mile_new/features/others/find_and_earn_screen.dart';
+import 'package:go_extra_mile_new/features/bugs/find_and_earn_screen.dart';
 import 'package:go_extra_mile_new/features/others/insure_and_earn_screen.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/screens/refer_and_earn_screen.dart';
 import 'package:go_extra_mile_new/features/reward/daily_reward.dart';
-import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_vehicle_screen.dart';
+import 'package:go_extra_mile_new/features/ride/presentation/screens/start_ride_screen.dart';
 
 class EarnGemCoinScreen extends StatefulWidget {
   const EarnGemCoinScreen({super.key});
@@ -33,7 +33,7 @@ class _EarnGemCoinScreenState extends State<EarnGemCoinScreen> {
   void _handleRideAndEarn() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const RideVehicleScreen()),
+      MaterialPageRoute(builder: (context) => const StartRideScreen()),
     );
   }
 

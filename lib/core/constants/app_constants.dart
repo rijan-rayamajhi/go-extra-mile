@@ -170,5 +170,9 @@ const List<Map<String, dynamic>> vehicleBrands = [
   },
 ];
 
+// GEM Coin Calculation
+// 1 meter = 0.001 GEM coins
+const double gemCoinsPerMeter = 0.001;
+
 
 

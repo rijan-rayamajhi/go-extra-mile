@@ -4,8 +4,8 @@ import 'package:go_extra_mile_new/features/notification/domain/entities/notifica
 
 /// Failure can be a sealed class or a simple error model you define
 abstract class NotificationRepository {
-  /// Get all notifications for a specific user
-  Future<Either<Failure, List<NotificationEntity>>> getNotifications(String userId);
+  /// Get all notifications for the current user
+  Future<Either<Failure, List<NotificationEntity>>> getNotifications();
 
   /// Get a single notification by ID
   Future<Either<Failure, NotificationEntity>> getNotificationById(String id);
@@ -13,9 +13,12 @@ abstract class NotificationRepository {
   /// Mark a notification as read
   Future<Either<Failure, void>> markAsRead(String id);
 
-  /// Mark all notifications as read for a specific user
-  Future<Either<Failure, void>> markAllAsRead(String userId);
+  /// Mark all notifications as read for the current user
+  Future<Either<Failure, void>> markAllAsRead();
 
   /// Delete a notification by ID
   Future<Either<Failure, void>> deleteNotification(String id);
+
+  /// Get unread notification count for the current user
+  Future<Either<Failure, String>> getUnreadNotification();
 }

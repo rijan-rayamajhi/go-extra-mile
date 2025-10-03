@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_extra_mile_new/common/widgets/app_bar_widget.dart';
 import 'package:go_extra_mile_new/features/notification/domain/entities/notification_entity.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
@@ -12,7 +11,7 @@ import 'package:intl/intl.dart';
 
 class NotificationScreen extends StatefulWidget {
   final String? initialNotificationId;
-  
+
   const NotificationScreen({super.key, this.initialNotificationId});
 
   @override
@@ -24,19 +23,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
     // Load notifications when screen initializes
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      debugPrint('Loading notifications for user: ${currentUser.uid}');
-      context.read<NotificationBloc>().add(LoadNotifications(currentUser.uid));
-    } else {
-      debugPrint('No current user found - cannot load notifications');
-    }
+    debugPrint('Loading notifications for current user');
+    context.read<NotificationBloc>().add(const LoadNotifications());
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBarWidget(
         title: 'Notifications',
@@ -44,16 +38,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
         actions: [
           BlocBuilder<NotificationBloc, NotificationState>(
             builder: (context, state) {
-              if (state is NotificationLoaded && state.notifications.isNotEmpty) {
+              if (state is NotificationLoaded &&
+                  state.notifications.isNotEmpty) {
                 return IconButton(
                   onPressed: () {
-                    final currentUser = FirebaseAuth.instance.currentUser;
-                    if (currentUser != null) {
-                      debugPrint('Marking all notifications as read for user: ${currentUser.uid}');
-                      context.read<NotificationBloc>().add(MarkAllNotificationsAsRead(currentUser.uid));
-                    } else {
-                      debugPrint('No current user found - cannot mark all as read');
-                    }
+                    debugPrint('Marking all notifications as read');
+                    context.read<NotificationBloc>().add(
+                      const MarkAllNotificationsAsRead(),
+                    );
                   },
                   icon: const Icon(Icons.done_all),
                   tooltip: 'Mark all as read',
@@ -78,15 +70,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
         child: BlocBuilder<NotificationBloc, NotificationState>(
           builder: (context, state) {
             if (state is NotificationLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const Center(child: CircularProgressIndicator());
             }
-            
+
             if (state is NotificationError) {
               // Print error for debugging
               debugPrint('Notification Error: ${state.message}');
-              
+
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -105,20 +95,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     Text(
                       state.message,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () {
-                        final currentUser = FirebaseAuth.instance.currentUser;
-                        if (currentUser != null) {
-                          debugPrint('Retrying to load notifications for user: ${currentUser.uid}');
-                          context.read<NotificationBloc>().add(LoadNotifications(currentUser.uid));
-                        } else {
-                          debugPrint('No current user found - cannot retry loading notifications');
-                        }
+                        debugPrint('Retrying to load notifications');
+                        context.read<NotificationBloc>().add(
+                          const LoadNotifications(),
+                        );
                       },
                       child: const Text('Retry'),
                     ),
@@ -126,7 +115,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ),
               );
             }
-            
+
             if (state is NotificationLoaded) {
               if (state.notifications.isEmpty) {
                 return Center(
@@ -136,20 +125,26 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       Icon(
                         Icons.notifications_none_outlined,
                         size: 64,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.5,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No notifications yet',
                         style: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'We\'ll notify you when something important happens',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.5,
+                          ),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -157,11 +152,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
                 );
               }
-              
+
               return ListView.separated(
-                padding: const EdgeInsets.fromLTRB(baseScreenPadding, 0, baseScreenPadding, baseScreenPadding),
+                padding: const EdgeInsets.fromLTRB(
+                  baseScreenPadding,
+                  0,
+                  baseScreenPadding,
+                  baseScreenPadding,
+                ),
                 itemCount: state.notifications.length,
-                separatorBuilder: (_, __) => const SizedBox(height: baseSpacing),
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: baseSpacing),
                 itemBuilder: (context, index) {
                   final notification = state.notifications[index];
 
@@ -183,15 +184,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     confirmDismiss: (direction) async {
                       if (direction == DismissDirection.startToEnd) {
                         // Slide right → mark as read
-                        debugPrint('Swipe right - Marking notification as read: ${notification.id}');
+                        debugPrint(
+                          'Swipe right - Marking notification as read: ${notification.id}',
+                        );
                         if (!notification.isRead) {
-                          context.read<NotificationBloc>().add(MarkNotificationAsRead(notification.id));
+                          context.read<NotificationBloc>().add(
+                            MarkNotificationAsRead(notification.id),
+                          );
                         }
                         return false; // don't remove, just update
                       } else {
                         // Slide left → delete notification
-                        debugPrint('Swipe left - Deleting notification: ${notification.id}');
-                        context.read<NotificationBloc>().add(DeleteNotification(notification.id));
+                        debugPrint(
+                          'Swipe left - Deleting notification: ${notification.id}',
+                        );
+                        context.read<NotificationBloc>().add(
+                          DeleteNotification(notification.id),
+                        );
                         return true; // remove from list
                       }
                     },
@@ -200,7 +209,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 },
               );
             }
-            
+
             return const SizedBox.shrink();
           },
         ),
@@ -219,7 +228,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(baseButtonRadius),
             border: Border.all(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.1),
             ),
             gradient: LinearGradient(
               colors: [
@@ -231,7 +242,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.05),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -242,16 +255,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
             leading: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: notification.isRead 
-                    ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1)
-                    : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: notification.isRead
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.secondary.withValues(alpha: 0.1)
+                    : Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 notification.isRead
                     ? Icons.notifications_none_outlined
                     : Icons.notifications_active_outlined,
-                color: notification.isRead 
+                color: notification.isRead
                     ? Theme.of(context).colorScheme.secondary
                     : Theme.of(context).colorScheme.primary,
                 size: 24,
@@ -269,13 +286,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
             subtitle: Text(
               notification.message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             trailing: Text(
               DateFormat('MMM d, h:mm a').format(notification.createdAt),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -307,7 +328,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             Text(
               text,
               style: TextStyle(
-                color: color, 
+                color: color,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
@@ -316,7 +337,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             Text(
               text,
               style: TextStyle(
-                color: color, 
+                color: color,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),

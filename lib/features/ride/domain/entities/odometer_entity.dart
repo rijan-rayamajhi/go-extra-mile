@@ -1,55 +1,61 @@
 import 'package:equatable/equatable.dart';
-import 'package:hive/hive.dart';
 
-part 'odometer_entity.g.dart';
+enum OdometerVerificationStatus { pending, rejected, verified }
 
-enum OdometerVerificationStatus {
-  pending,
-  rejected,
-  verified,
-}
-
-@HiveType(typeId: 3)
 class OdometerEntity extends Equatable {
-  @HiveField(0)
-  final String id;
-  
-  @HiveField(1)
+  final String? id;
   final String? beforeRideOdometerImage;
-  
-  @HiveField(2)
   final DateTime? beforeRideOdometerImageCaptureAt;
-  
-  @HiveField(3)
   final String? afterRideOdometerImage;
-  
-  @HiveField(4)
   final DateTime? afterRideOdometerImageCaptureAt;
-  
-  @HiveField(5)
-  final OdometerVerificationStatus verificationStatus;
-  
-  @HiveField(6)
+  final OdometerVerificationStatus? verificationStatus;
   final String? reasons;
 
   const OdometerEntity({
-    required this.id,
+    this.id,
     this.beforeRideOdometerImage,
     this.beforeRideOdometerImageCaptureAt,
     this.afterRideOdometerImage,
     this.afterRideOdometerImageCaptureAt,
-    this.verificationStatus = OdometerVerificationStatus.pending,
+    this.verificationStatus,
     this.reasons,
   });
 
+  /// 🔹 CopyWith
+  OdometerEntity copyWith({
+    String? id,
+    String? beforeRideOdometerImage,
+    DateTime? beforeRideOdometerImageCaptureAt,
+    String? afterRideOdometerImage,
+    DateTime? afterRideOdometerImageCaptureAt,
+    OdometerVerificationStatus? verificationStatus,
+    String? reasons,
+  }) {
+    return OdometerEntity(
+      id: id ?? this.id,
+      beforeRideOdometerImage:
+          beforeRideOdometerImage ?? this.beforeRideOdometerImage,
+      beforeRideOdometerImageCaptureAt:
+          beforeRideOdometerImageCaptureAt ??
+          this.beforeRideOdometerImageCaptureAt,
+      afterRideOdometerImage:
+          afterRideOdometerImage ?? this.afterRideOdometerImage,
+      afterRideOdometerImageCaptureAt:
+          afterRideOdometerImageCaptureAt ??
+          this.afterRideOdometerImageCaptureAt,
+      verificationStatus: verificationStatus ?? this.verificationStatus,
+      reasons: reasons ?? this.reasons,
+    );
+  }
+
   @override
   List<Object?> get props => [
-        id,
-        beforeRideOdometerImage,
-        beforeRideOdometerImageCaptureAt,
-        afterRideOdometerImage,
-        afterRideOdometerImageCaptureAt,
-        verificationStatus,
-        reasons,
-      ];
+    id,
+    beforeRideOdometerImage,
+    beforeRideOdometerImageCaptureAt,
+    afterRideOdometerImage,
+    afterRideOdometerImageCaptureAt,
+    verificationStatus,
+    reasons,
+  ];
 }

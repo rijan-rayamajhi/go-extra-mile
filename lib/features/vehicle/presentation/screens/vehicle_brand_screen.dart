@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
-import 'package:go_extra_mile_new/core/constants/app_constants.dart';
+import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_brand_entity.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_bloc.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_event.dart';
+import 'package:go_extra_mile_new/features/vehicle/presentation/bloc/vehicle_state.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/screens/vehicle_model_screen.dart';
 
 class VehicleBrandScreen extends StatefulWidget {
@@ -14,28 +18,25 @@ class VehicleBrandScreen extends StatefulWidget {
 
 class _VehicleBrandScreenState extends State<VehicleBrandScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> _filteredBrands = [];
+  List<VehicleBrandEntity> _filteredBrands = [];
   List<Map<String, dynamic>> _requestedBrands = [];
   bool _isSearching = false;
-
-  // 🔹 Using brands from app constants
-  List<Map<String, dynamic>> get _allBrands => vehicleBrands;
 
   final List<Map<String, dynamic>> _allRequestedBrands = [
     {
       "id": "r1",
-      "brandName": "Tesla",
+      "name": "Tesla",
       "vehicleType": "Car",
-      "imageUrl":
+      "logoUrl":
           "https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg",
       "status": "pending",
       "userId": "demo-user",
     },
     {
       "id": "r2",
-      "brandName": "Suzuki",
+      "name": "Suzuki",
       "vehicleType": "Bike",
-      "imageUrl":
+      "logoUrl":
           "https://upload.wikimedia.org/wikipedia/commons/6/62/Suzuki_logo_2.svg",
       "status": "approved",
       "userId": "demo-user",
@@ -48,7 +49,9 @@ class _VehicleBrandScreenState extends State<VehicleBrandScreen> {
     _requestedBrands = _allRequestedBrands
         .where((r) => r["vehicleType"] == widget.selectedVehicleType)
         .toList();
-    _filterBrands("");
+
+    // Load vehicle brands from database
+    // context.read<VehicleBloc>().add(const LoadVehicleBrands());
   }
 
   @override
@@ -57,34 +60,48 @@ class _VehicleBrandScreenState extends State<VehicleBrandScreen> {
     super.dispose();
   }
 
-  void _filterBrands(String query) {
+  void _filterBrands(String query, List<VehicleBrandEntity> allBrands) {
     setState(() {
       _isSearching = query.isNotEmpty;
 
-      final filtered = _allBrands
-          .where((b) => b["vehicleType"] == widget.selectedVehicleType)
-          .toList();
-
       if (query.isEmpty) {
-        _filteredBrands = filtered;
+        _filteredBrands = allBrands;
       } else {
-        _filteredBrands = filtered
+        _filteredBrands = allBrands
             .where(
-              (b) =>
-                  b["name"].toLowerCase().contains(query.toLowerCase().trim()),
+              (b) => b.name.toLowerCase().contains(query.toLowerCase().trim()),
             )
             .toList();
       }
     });
   }
 
-  void _onBrandTap(Map<String, dynamic> brand) {
+  String _getReadableVehicleType(String vehicleType) {
+    return vehicleType
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) {
+          return word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1);
+        })
+        .join(' ');
+  }
+
+  void _onBrandTap(VehicleBrandEntity brand) {
+    // Convert VehicleBrandEntity to Map for compatibility with existing VehicleModelScreen
+    final brandMap = {
+      'id': brand.id,
+      'name': brand.name,
+      'logoUrl': brand.logoUrl,
+      'vehicleType': widget.selectedVehicleType,
+      'models': brand.models, // Use models from the entity
+    };
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => VehicleModelScreen(
           selectedVehicleType: widget.selectedVehicleType,
-          selectedBrand: brand, // still a Map now
+          selectedBrand: brandMap,
         ),
       ),
     );
@@ -92,36 +109,106 @@ class _VehicleBrandScreenState extends State<VehicleBrandScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Select ${widget.selectedVehicleType} Brand',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+    return BlocBuilder<VehicleBloc, VehicleState>(
+      builder: (context, state) {
+        if (state is VehicleLoading) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              ),
             ),
-            const SizedBox(height: 16),
-            _buildSearchBar(),
-            const SizedBox(height: 16),
-            Expanded(child: _buildContent()),
-            const SizedBox(height: 16),
-            _buildCantFindBrandSection(),
-          ],
-        ),
-      ),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (state is VehicleError) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Error: ${state.message}',
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<VehicleBloc>().add(
+                        const LoadVehicleBrands(),
+                      );
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Get brands from bloc state and filter by vehicle type
+        List<VehicleBrandEntity> availableBrands = [];
+        if (state is VehicleLoaded) {
+          // Filter brands by selected vehicle type
+          availableBrands = state.vehicleBrands
+              .where(
+                (brand) =>
+                    brand.vehicleType.value == widget.selectedVehicleType,
+              )
+              .toList();
+        }
+
+        // Initialize filtered brands if not set or if available brands changed
+        if (_filteredBrands.isEmpty && availableBrands.isNotEmpty) {
+          _filteredBrands = availableBrands;
+        } else if (availableBrands.isNotEmpty && _filteredBrands.isNotEmpty) {
+          // Check if the filtered brands are still valid for current available brands
+          final currentBrandIds = availableBrands.map((b) => b.id).toSet();
+          final filteredBrandIds = _filteredBrands.map((b) => b.id).toSet();
+          if (!currentBrandIds.containsAll(filteredBrandIds)) {
+            // Reset filtered brands if they don't match current available brands
+            _filteredBrands = availableBrands;
+          }
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select ${_getReadableVehicleType(widget.selectedVehicleType)} Brand',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildSearchBar(availableBrands),
+                const SizedBox(height: 16),
+                Expanded(child: _buildContent()),
+                const SizedBox(height: 16),
+                _buildCantFindBrandSection(),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(List<VehicleBrandEntity> availableBrands) {
     return TextField(
       controller: _searchController,
-      onChanged: (query) => _filterBrands(query),
+      onChanged: (query) => _filterBrands(query, availableBrands),
       decoration: InputDecoration(
         hintText: 'Search brands...',
         prefixIcon: const Icon(Icons.search, color: Colors.grey),
@@ -130,7 +217,7 @@ class _VehicleBrandScreenState extends State<VehicleBrandScreen> {
                 icon: const Icon(Icons.clear),
                 onPressed: () {
                   _searchController.clear();
-                  _filterBrands("");
+                  _filterBrands("", availableBrands);
                 },
               )
             : null,
@@ -153,11 +240,55 @@ class _VehicleBrandScreenState extends State<VehicleBrandScreen> {
   }
 
   Widget _buildContent() {
+    // Handle empty brands case
+    if (_filteredBrands.isEmpty && !_isSearching) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.branding_watermark_outlined,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "No ${_getReadableVehicleType(widget.selectedVehicleType)} brands available",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+                fontFamily: 'Gilroy',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "No brands found for ${_getReadableVehicleType(widget.selectedVehicleType)}.\nPlease check your connection or contact support.",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+                fontFamily: 'Gilroy',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                context.read<VehicleBloc>().add(const LoadVehicleBrands());
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
     if (_filteredBrands.isEmpty && _isSearching) {
-      return const Center(
+      return Center(
         child: Text(
-          "No brands found",
-          style: TextStyle(
+          "No ${_getReadableVehicleType(widget.selectedVehicleType)} brands found",
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             fontFamily: 'Gilroy',
@@ -211,11 +342,17 @@ class _VehicleBrandScreenState extends State<VehicleBrandScreen> {
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundImage: NetworkImage(brand["logoUrl"]),
+                  backgroundImage: NetworkImage(brand.logoUrl),
+                  onBackgroundImageError: (exception, stackTrace) {
+                    // Handle image loading error
+                  },
+                  child: brand.logoUrl.isEmpty
+                      ? const Icon(Icons.branding_watermark, size: 32)
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  brand["name"],
+                  brand.name,
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
@@ -252,13 +389,10 @@ class _VehicleBrandScreenState extends State<VehicleBrandScreen> {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundImage: NetworkImage(req["imageUrl"]),
+                backgroundImage: NetworkImage(req["logoUrl"]),
               ),
               const SizedBox(height: 8),
-              Text(
-                req["brandName"],
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              Text(req["name"], style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 4),
               Text(
                 req["status"],

@@ -1,71 +1,44 @@
-import 'package:equatable/equatable.dart';
+import 'dart:io';
 
-import '../../domain/entities/ride_entity.dart';
+import 'package:geolocator/geolocator.dart';
 
-abstract class RideEvent extends Equatable {
-  @override 
-  List<Object?> get props => [];
+abstract class RideEvent {}
+
+//ui events
+class LoadInitialLocation extends RideEvent {}
+
+class MoveToCurrentLocation extends RideEvent {}
+
+class SelectVehicle extends RideEvent {
+  final Map<String, dynamic>? vehicle;
+  SelectVehicle(this.vehicle);
 }
 
+class StartTracking extends RideEvent {}
 
-// Fetches all rides for a specific user - used in MyRideScreen to display complete ride history
-class GetAllRidesByUserIdEvent extends RideEvent {
-  final String userId;
-  
-  GetAllRidesByUserIdEvent({
-    required this.userId,
-  });
-  
-  @override
-  List<Object?> get props => [userId];
+class SaveBeforeRideOdometerImage extends RideEvent {
+  final File image;
+  final DateTime capturedAt;
+
+  SaveBeforeRideOdometerImage(this.image, this.capturedAt);
 }
 
-// Fetches recent rides for a user with optional limit - used for displaying recent ride history on home screen
-class GetRecentRidesByUserIdEvent extends RideEvent {
-  final String userId;
-  final int limit;
-  
-  GetRecentRidesByUserIdEvent({
-    required this.userId,
-    this.limit = 10,
-  });
-  
-  @override
-  List<Object?> get props => [userId, limit];
+class SaveAfterRideOdometerImage extends RideEvent {
+  final File image;
+  final DateTime capturedAt;
+  SaveAfterRideOdometerImage(this.image, this.capturedAt);
 }
 
-// Saves a completed ride to the database - used in SaveRideScreen to persist ride data
-class UploadRideEvent extends RideEvent {
-  final RideEntity rideEntity;
-  
-  UploadRideEvent({
-    required this.rideEntity,
-  });
-  
-  @override
-  List<Object?> get props => [rideEntity];
+class SaveRideMemory extends RideEvent {
+  final Map<String, dynamic> memory;
+  SaveRideMemory(this.memory);
 }
 
-// Saves a ride locally for offline access - used for caching ride data before upload
-class SaveRideLocallyEvent extends RideEvent {
-  final RideEntity rideEntity;
-  
-  SaveRideLocallyEvent({
-    required this.rideEntity,
-  });
-  
-  @override
-  List<Object?> get props => [rideEntity];
-}
+class StopTracking extends RideEvent {}
 
-// Retrieves rides stored locally for a specific user - used for offline ride history
-class GetRideLocallyEvent extends RideEvent {
-  final String userId;
-  
-  GetRideLocallyEvent({
-    required this.userId,
-  });
-  
-  @override
-  List<Object?> get props => [userId];
+class ResetRide extends RideEvent {}
+
+class Tick extends RideEvent {
+  final Position? position;
+  Tick(this.position);
 }

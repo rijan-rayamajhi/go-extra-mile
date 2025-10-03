@@ -11,10 +11,11 @@ class AppException implements Exception {
 
 /// Exception thrown when a user account has been deleted
 class AccountDeletedException extends AppException {
-  AccountDeletedException() : super(
-    'Your account has been deleted. Please contact support for further assistance.',
-    code: 'ACCOUNT_DELETED',
-  );
+  AccountDeletedException()
+    : super(
+        'Your account has been deleted. Please contact support for further assistance.',
+        code: 'ACCOUNT_DELETED',
+      );
 }
 
 /// Exception thrown when authentication fails
@@ -35,4 +36,19 @@ class DataException extends AppException {
 /// Exception thrown when database operations fail
 class DatabaseException extends AppException {
   DatabaseException(super.message) : super(code: 'DATABASE_ERROR');
+}
+
+/// Exception thrown when cache operations fail
+class CacheException extends AppException {
+  CacheException(super.message) : super(code: 'CACHE_ERROR');
+}
+
+/// Exception thrown when server operations fail
+class ServerException extends AppException {
+  ServerException(super.message) : super(code: 'SERVER_ERROR');
+}
+
+/// Exception thrown when a resource is not found
+class NotFoundException extends AppException {
+  NotFoundException(super.message) : super(code: 'NOT_FOUND');
 }

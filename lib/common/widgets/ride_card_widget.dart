@@ -70,14 +70,14 @@ class _RideCardWidgetState extends State<RideCardWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.ride.rideTitle!,
+                        widget.ride.rideTitle ?? 'Untitled Ride',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
 
                       Text(
-                         widget.ride.rideDescription ?? 'Click you see ride details', 
+                         widget.ride.rideDescription ?? 'Click to see ride details', 
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.grey.shade600,
                         ),
@@ -86,14 +86,15 @@ class _RideCardWidgetState extends State<RideCardWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 16,),
+              const SizedBox(height: 16),
               // Ride date
-              Text(
-                "Started • ${DateFormat('dd MMM, hh:mm a').format(widget.ride.startedAt)}",
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade600,
+              if (widget.ride.startedAt != null)
+                Text(
+                  "Started • ${DateFormat('dd MMM, hh:mm a').format(widget.ride.startedAt!)}",
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
                 ),
-              ),
 
               if (widget.ride.endedAt != null)
                 Text(
@@ -108,137 +109,138 @@ class _RideCardWidgetState extends State<RideCardWidget> {
       ),
     );
   }
-
-  // Widget _rideStat(String label, String value) {
-  //   return Column(
-  //     children: [
-  //       Text(
-  //         value,
-  //         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-  //       ),
-  //       const SizedBox(height: 4),
-  //       Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-  //     ],
-  //   );
-  // }
-
-  // Widget _divider() {
-  //   return Container(height: 28, width: 1, color: Colors.grey.shade300);
-  // }
-
-  // Widget _buildAddresses() {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       // Start Point
-  //       Row(
-  //         children: [
-  //           Container(
-  //             width: 8,
-  //             height: 8,
-  //             decoration: BoxDecoration(
-  //               color: Colors.green,
-  //               shape: BoxShape.circle,
-  //             ),
-  //           ),
-  //           const SizedBox(width: 8),
-  //           Expanded(
-  //             child: Text(
-  //               _startAddress ?? 'Start location',
-  //               style: const TextStyle(
-  //                 fontSize: 12,
-  //                 fontWeight: FontWeight.w500,
-  //               ),
-  //               maxLines: 2,
-  //               overflow: TextOverflow.ellipsis,
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       const SizedBox(height: 8),
-
-  //       // End Point (if available)
-  //       if (widget.ride.endCoordinates != null) ...[
-  //         Row(
-  //           children: [
-  //             Container(
-  //               width: 8,
-  //               height: 8,
-  //               decoration: BoxDecoration(
-  //                 color: Colors.red,
-  //                 shape: BoxShape.circle,
-  //               ),
-  //             ),
-  //             const SizedBox(width: 8),
-  //             Expanded(
-  //               child: Text(
-  //                 _endAddress ?? 'End location',
-  //                 style: const TextStyle(
-  //                   fontSize: 12,
-  //                   fontWeight: FontWeight.w500,
-  //                 ),
-  //                 maxLines: 2,
-  //                 overflow: TextOverflow.ellipsis,
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ],
-  //   );
-  // }
-
-  // Widget _buildAddressLoading() {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Row(
-  //         children: [
-  //           Container(
-  //             width: 8,
-  //             height: 8,
-  //             decoration: BoxDecoration(
-  //               color: Colors.grey.shade400,
-  //               shape: BoxShape.circle,
-  //             ),
-  //           ),
-  //           const SizedBox(width: 8),
-  //           Expanded(
-  //             child: Container(
-  //               height: 12,
-  //               decoration: BoxDecoration(
-  //                 color: Colors.grey.shade300,
-  //                 borderRadius: BorderRadius.circular(4),
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       const SizedBox(height: 8),
-  //       Row(
-  //         children: [
-  //           Container(
-  //             width: 8,
-  //             height: 8,
-  //             decoration: BoxDecoration(
-  //               color: Colors.grey.shade400,
-  //               shape: BoxShape.circle,
-  //             ),
-  //           ),
-  //           const SizedBox(width: 8),
-  //           Expanded(
-  //             child: Container(
-  //               height: 12,
-  //               decoration: BoxDecoration(
-  //                 color: Colors.grey.shade300,
-  //                 borderRadius: BorderRadius.circular(4),
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
-
 }
+
+//   // Widget _rideStat(String label, String value) {
+//   //   return Column(
+//   //     children: [
+//   //       Text(
+//   //         value,
+//   //         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+//   //       ),
+//   //       const SizedBox(height: 4),
+//   //       Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+//   //     ],
+//   //   );
+//   // }
+
+//   // Widget _divider() {
+//   //   return Container(height: 28, width: 1, color: Colors.grey.shade300);
+//   // }
+
+//   // Widget _buildAddresses() {
+//   //   return Column(
+//   //     crossAxisAlignment: CrossAxisAlignment.start,
+//   //     children: [
+//   //       // Start Point
+//   //       Row(
+//   //         children: [
+//   //           Container(
+//   //             width: 8,
+//   //             height: 8,
+//   //             decoration: BoxDecoration(
+//   //               color: Colors.green,
+//   //               shape: BoxShape.circle,
+//   //             ),
+//   //           ),
+//   //           const SizedBox(width: 8),
+//   //           Expanded(
+//   //             child: Text(
+//   //               _startAddress ?? 'Start location',
+//   //               style: const TextStyle(
+//   //                 fontSize: 12,
+//   //                 fontWeight: FontWeight.w500,
+//   //               ),
+//   //               maxLines: 2,
+//   //               overflow: TextOverflow.ellipsis,
+//   //             ),
+//   //           ),
+//   //         ],
+//   //       ),
+//   //       const SizedBox(height: 8),
+
+//   //       // End Point (if available)
+//   //       if (widget.ride.endCoordinates != null) ...[
+//   //         Row(
+//   //           children: [
+//   //             Container(
+//   //               width: 8,
+//   //               height: 8,
+//   //               decoration: BoxDecoration(
+//   //                 color: Colors.red,
+//   //                 shape: BoxShape.circle,
+//   //               ),
+//   //             ),
+//   //             const SizedBox(width: 8),
+//   //             Expanded(
+//   //               child: Text(
+//   //                 _endAddress ?? 'End location',
+//   //                 style: const TextStyle(
+//   //                   fontSize: 12,
+//   //                   fontWeight: FontWeight.w500,
+//   //                 ),
+//   //                 maxLines: 2,
+//   //                 overflow: TextOverflow.ellipsis,
+//   //               ),
+//   //             ),
+//   //           ],
+//   //         ),
+//   //       ],
+//   //     ],
+//   //   );
+//   // }
+
+//   // Widget _buildAddressLoading() {
+//   //   return Column(
+//   //     crossAxisAlignment: CrossAxisAlignment.start,
+//   //     children: [
+//   //       Row(
+//   //         children: [
+//   //           Container(
+//   //             width: 8,
+//   //             height: 8,
+//   //             decoration: BoxDecoration(
+//   //               color: Colors.grey.shade400,
+//   //               shape: BoxShape.circle,
+//   //             ),
+//   //           ),
+//   //           const SizedBox(width: 8),
+//   //           Expanded(
+//   //             child: Container(
+//   //               height: 12,
+//   //               decoration: BoxDecoration(
+//   //                 color: Colors.grey.shade300,
+//   //                 borderRadius: BorderRadius.circular(4),
+//   //               ),
+//   //             ),
+//   //           ),
+//   //         ],
+//   //       ),
+//   //       const SizedBox(height: 8),
+//   //       Row(
+//   //         children: [
+//   //           Container(
+//   //             width: 8,
+//   //             height: 8,
+//   //             decoration: BoxDecoration(
+//   //               color: Colors.grey.shade400,
+//   //               shape: BoxShape.circle,
+//   //             ),
+//   //           ),
+//   //           const SizedBox(width: 8),
+//   //           Expanded(
+//   //             child: Container(
+//   //               height: 12,
+//   //               decoration: BoxDecoration(
+//   //                 color: Colors.grey.shade300,
+//   //                 borderRadius: BorderRadius.circular(4),
+//   //               ),
+//   //             ),
+//   //           ),
+//   //         ],
+//   //       ),
+//   //     ],
+//   //   );
+//   // }
+
+// }

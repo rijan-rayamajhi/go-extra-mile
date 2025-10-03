@@ -46,13 +46,24 @@ class _SelectVehicleTypeScreenState extends State<SelectVehicleTypeScreen> {
       selectedVehicleIndex = index;
       selectedVehicleType = _vehicleTypes[index];
     });
-    Navigator.push(context, MaterialPageRoute(builder: (context) => VehicleBrandScreen(selectedVehicleType: selectedVehicleType!)));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            VehicleBrandScreen(selectedVehicleType: selectedVehicleType!),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+      ),
       body: Column(
         children: [
           Expanded(

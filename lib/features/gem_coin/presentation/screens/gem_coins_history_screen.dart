@@ -204,9 +204,9 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
           height: MediaQuery.of(context).size.height * 0.8,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
@@ -219,7 +219,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -235,7 +235,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     IconButton(
@@ -259,7 +259,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -277,18 +277,22 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
-                                color: isSelected ? Theme.of(context).primaryColor : Colors.grey[100],
+                                color: isSelected 
+                                    ? Theme.of(context).colorScheme.primary 
+                                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isSelected
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.grey[100] ?? Colors.grey,
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                                 ),
                               ),
                               child: Text(
                                 option,
                                 style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.grey[700],
+                                  color: isSelected 
+                                      ? Theme.of(context).colorScheme.onPrimary 
+                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                                 ),
                               ),
@@ -305,7 +309,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -323,16 +327,22 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
-                                color: isSelected ? Theme.of(context).primaryColor : Colors.grey[100],
+                                color: isSelected 
+                                    ? Theme.of(context).colorScheme.primary 
+                                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: isSelected ? Theme.of(context).primaryColor : Colors.grey[300]!,
+                                  color: isSelected 
+                                      ? Theme.of(context).colorScheme.primary 
+                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                                 ),
                               ),
                               child: Text(
                                 range,
                                 style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.grey[700],
+                                  color: isSelected 
+                                      ? Theme.of(context).colorScheme.onPrimary 
+                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                                 ),
                               ),
@@ -349,10 +359,10 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.1),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, -2),
                     ),
@@ -370,7 +380,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: Theme.of(context).primaryColor),
+                          side: BorderSide(color: Theme.of(context).colorScheme.primary),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -378,7 +388,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         child: Text(
                           'Reset',
                           style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -396,7 +406,8 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -405,7 +416,6 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         child: const Text(
                           'Apply',
                           style: TextStyle(
-                            color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -424,17 +434,30 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
     @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
+        title: const Text(
+          'Gem Coins History',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).primaryColor,),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.filter_alt_outlined, color: Theme.of(context).primaryColor,),
+            icon: Icon(
+              Icons.filter_alt_outlined,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: _showFilterModal,
           ),
         ],
@@ -443,7 +466,9 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
         builder: (context, state) {
           if (state is GemCoinLoading) {
             return Center(
-              child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             );
           } else if (state is GemCoinError) {
             return Center(
@@ -453,7 +478,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -461,7 +486,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -469,13 +494,17 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                     state.message,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _loadTransactionHistory,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    ),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -503,47 +532,60 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   
                   // Header Section with Coin Display 
                   Container(
-                    width: double.infinity,
+                    margin: const EdgeInsets.all(16),
                     padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Coin Icon
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
+                            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Image.asset(
                             'assets/icons/gem_coin.png',
-                            width: 50,
-                            height: 50,
+                            width: 40,
+                            height: 40,
                           ),
                         ),
-                        const SizedBox(width: 20),
+                        const SizedBox(width: 16),
                         // Balance and Label
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              currentBalance.toString(),
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Total Balance',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Gem Coins',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
+                              const SizedBox(height: 4),
+                              Text(
+                                currentBalance.toString(),
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 4),
+                              Text(
+                                'Gem Coins',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -551,11 +593,12 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   
                   // Credit/Debit Summary Cards
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
                         Expanded(
                           child: _buildSummaryCard(
+                            context: context,
                             title: 'Credit',
                             amount: '+$creditTotal',
                             icon: Icons.trending_up,
@@ -565,6 +608,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildSummaryCard(
+                            context: context,
                             title: 'Debit',
                             amount: '-$debitTotal',
                             icon: Icons.trending_down,
@@ -579,7 +623,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   
                   // Transaction History
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -588,7 +632,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -600,6 +644,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                           ...filteredTransactions.map((transaction) {
                             final iconData = getTransactionIcon(transaction.rewardType);
                             return _buildTransactionItem(
+                              context: context,
                               icon: iconData['icon'],
                               title: transaction.reason,
                               subtitle: _getTransactionSubtitle(transaction),
@@ -632,7 +677,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Image.asset(
@@ -647,7 +692,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -655,7 +700,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
             'Start earning Gem Coins by completing rides!',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -672,7 +717,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
           Icon(
             Icons.filter_list_off,
             size: 64,
-            color: Colors.grey[400],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
@@ -680,7 +725,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 8),
@@ -688,7 +733,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
             'Try adjusting your filters',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -714,6 +759,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
   }
 
   Widget _buildSummaryCard({
+    required BuildContext context,
     required String title,
     required String amount,
     required IconData icon,
@@ -722,13 +768,16 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -760,7 +809,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
             title,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -770,6 +819,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
   }
 
   Widget _buildTransactionItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -782,11 +832,14 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -816,7 +869,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -824,7 +877,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   subtitle,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -832,7 +885,7 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
                   date,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[500],
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -853,14 +906,14 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
 
   Widget _buildFilterBadge() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.blue,
+        color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.3),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -872,14 +925,14 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
           Icon(
             Icons.filter_alt,
             size: 16,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
           const SizedBox(width: 8),
           Text(
             _getFilterDescription(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -894,13 +947,13 @@ class _GemCoinHistoryScreensState extends State<GemCoinHistoryScreens> {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.close,
                 size: 14,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           ),

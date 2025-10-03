@@ -1,47 +1,56 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hive/hive.dart';
 
-part 'ride_memory_entity.g.dart';
-
-@HiveType(typeId: 3)
 class RideMemoryEntity extends Equatable {
   // 🔹 Identity
-  @HiveField(0)
-  final String id;
+  final String? id;
 
   // 🔹 Content
-  @HiveField(1)
-  final String title;
-  @HiveField(2)
-  final String description;
-  @HiveField(3)
-  final String imageUrl;
+  final String? title;
+  final String? description;
+  final String? imageUrl;
 
   // 🔹 Location
-  @HiveField(4)
-  final GeoPoint capturedCoordinates;
+  final GeoPoint? capturedCoordinates;
 
   // 🔹 Timeline
-  @HiveField(5)
-  final DateTime capturedAt;
+  final DateTime? capturedAt;
 
   const RideMemoryEntity({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.imageUrl,
-    required this.capturedCoordinates,
-    required this.capturedAt,
+    this.id,
+    this.title,
+    this.description,
+    this.imageUrl,
+    this.capturedCoordinates,
+    this.capturedAt,
   });
+
+  /// 🔹 CopyWith
+  RideMemoryEntity copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? imageUrl,
+    GeoPoint? capturedCoordinates,
+    DateTime? capturedAt,
+  }) {
+    return RideMemoryEntity(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+      capturedCoordinates: capturedCoordinates ?? this.capturedCoordinates,
+      capturedAt: capturedAt ?? this.capturedAt,
+    );
+  }
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        imageUrl,
-        capturedCoordinates,
-        capturedAt,
-      ];
+    id,
+    title,
+    description,
+    imageUrl,
+    capturedCoordinates,
+    capturedAt,
+  ];
 }

@@ -6,7 +6,9 @@ import 'package:go_extra_mile_new/features/notification/domain/usecases/get_noti
 import 'package:go_extra_mile_new/features/notification/domain/usecases/get_notification_by_id.dart';
 import 'package:go_extra_mile_new/features/notification/domain/usecases/mark_as_read.dart';
 import 'package:go_extra_mile_new/features/notification/domain/usecases/mark_all_as_read.dart';
-import 'package:go_extra_mile_new/features/notification/domain/usecases/delete_notification.dart' as delete_usecase;
+import 'package:go_extra_mile_new/features/notification/domain/usecases/delete_notification.dart'
+    as delete_usecase;
+import 'package:go_extra_mile_new/features/notification/domain/usecases/get_unread_notification.dart';
 
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final GetNotifications getNotifications;
@@ -14,6 +16,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final MarkAsRead markAsRead;
   final MarkAllAsRead markAllAsRead;
   final delete_usecase.DeleteNotification deleteNotification;
+  final GetUnreadNotification getUnreadNotification;
 
   NotificationBloc({
     required this.getNotifications,
@@ -21,12 +24,14 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     required this.markAsRead,
     required this.markAllAsRead,
     required this.deleteNotification,
+    required this.getUnreadNotification,
   }) : super(NotificationInitial()) {
     on<LoadNotifications>(_onLoadNotifications);
     on<GetNotificationDetail>(_onGetNotificationDetail);
     on<MarkNotificationAsRead>(_onMarkNotificationAsRead);
     on<MarkAllNotificationsAsRead>(_onMarkAllAsRead);
     on<DeleteNotification>(_onDeleteNotification);
+    on<GetUnreadNotificationCount>(_onGetUnreadNotificationCount);
   }
 
   Future<void> _onLoadNotifications(
@@ -34,7 +39,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     emit(NotificationLoading());
-    final result = await getNotifications(event.userId);
+    final result = await getNotifications();
     result.fold(
       (failure) => emit(NotificationError(failure.message)),
       (notifications) => emit(NotificationLoaded(notifications)),
@@ -58,32 +63,31 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     final result = await markAsRead(event.id);
-    result.fold(
-      (failure) => emit(NotificationError(failure.message)),
-      (_) {
-        // Update the current state to mark the notification as read
-        if (state is NotificationLoaded) {
-          final currentState = state as NotificationLoaded;
-          final updatedNotifications = currentState.notifications.map((notification) {
-            if (notification.id == event.id) {
-              return notification.copyWith(isRead: true);
-            }
-            return notification;
-          }).toList();
-          emit(NotificationLoaded(updatedNotifications));
-        }
-      },
-    );
+    result.fold((failure) => emit(NotificationError(failure.message)), (_) {
+      // Update the current state to mark the notification as read
+      if (state is NotificationLoaded) {
+        final currentState = state as NotificationLoaded;
+        final updatedNotifications = currentState.notifications.map((
+          notification,
+        ) {
+          if (notification.id == event.id) {
+            return notification.copyWith(isRead: true);
+          }
+          return notification;
+        }).toList();
+        emit(NotificationLoaded(updatedNotifications));
+      }
+    });
   }
 
   Future<void> _onMarkAllAsRead(
     MarkAllNotificationsAsRead event,
     Emitter<NotificationState> emit,
   ) async {
-    final result = await markAllAsRead(event.userId);
+    final result = await markAllAsRead();
     result.fold(
       (failure) => emit(NotificationError(failure.message)),
-      (_) => add(LoadNotifications(event.userId)), // 🔄 reload list
+      (_) => add(const LoadNotifications()), // 🔄 reload list
     );
   }
 
@@ -92,18 +96,26 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     final result = await deleteNotification(event.id);
+    result.fold((failure) => emit(NotificationError(failure.message)), (_) {
+      // Update the current state to remove the deleted notification
+      if (state is NotificationLoaded) {
+        final currentState = state as NotificationLoaded;
+        final updatedNotifications = currentState.notifications
+            .where((notification) => notification.id != event.id)
+            .toList();
+        emit(NotificationLoaded(updatedNotifications));
+      }
+    });
+  }
+
+  Future<void> _onGetUnreadNotificationCount(
+    GetUnreadNotificationCount event,
+    Emitter<NotificationState> emit,
+  ) async {
+    final result = await getUnreadNotification();
     result.fold(
       (failure) => emit(NotificationError(failure.message)),
-      (_) {
-        // Update the current state to remove the deleted notification
-        if (state is NotificationLoaded) {
-          final currentState = state as NotificationLoaded;
-          final updatedNotifications = currentState.notifications
-              .where((notification) => notification.id != event.id)
-              .toList();
-          emit(NotificationLoaded(updatedNotifications));
-        }
-      },
+      (count) => emit(UnreadNotificationCountLoaded(count)),
     );
   }
 }

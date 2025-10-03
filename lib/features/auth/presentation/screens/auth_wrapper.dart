@@ -5,7 +5,7 @@ import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_bloc.dar
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_event.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/bloc/kauth_state.dart';
 import 'package:go_extra_mile_new/features/auth/presentation/screens/account_deleted_screen.dart';
-import 'package:go_extra_mile_new/features/main_screen.dart';
+import 'package:go_extra_mile_new/features/main/main_screen.dart';
 import 'package:go_extra_mile_new/core/service/navigation_service.dart';
 import 'auth_screen.dart';
 import '../../../referral/presentation/screens/referral_screen.dart';
@@ -32,9 +32,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
         if (state is KAuthFailure) {
           // AppSnackBar.error(context, 'Something went wrong');
         }
-        
+
         // Handle pending notification when user becomes authenticated
-        if (state is KAuthAuthenticated && NavigationService.hasPendingNotification()) {
+        if (state is KAuthAuthenticated &&
+            NavigationService.hasPendingNotification()) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             final pendingData = NavigationService.getPendingNotificationData();
             if (pendingData != null) {

@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:go_extra_mile_new/features/vehicle/domain/entities/vehicle_entiry.dart';
 
-
-
 // ------------------- Events -------------------
 abstract class VehicleEvent extends Equatable {
   const VehicleEvent();
@@ -20,6 +18,13 @@ class LoadUserVehicles extends VehicleEvent {
 
   @override
   List<Object?> get props => [userId];
+}
+
+class LoadVehicleBrands extends VehicleEvent {
+  const LoadVehicleBrands();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class AddNewVehicle extends VehicleEvent {

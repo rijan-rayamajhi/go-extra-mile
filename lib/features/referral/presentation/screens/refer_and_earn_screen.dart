@@ -350,8 +350,8 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
       itemCount: referredUsers.length,
       itemBuilder: (context, index) {
         final user = referredUsers[index];
-        final displayName = user["displayName"] ?? "User";
-        final createdAt = user["createdAt"] as DateTime?;
+        final displayName = user.displayName ?? "User";
+        final createdAt = user.createdAt;
         final dateString = createdAt != null
             ? "${createdAt.day} ${_getMonthName(createdAt.month)} ${createdAt.year}"
             : "Recently";
@@ -369,10 +369,10 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
               CircleAvatar(
                 radius: 26,
                 backgroundColor: Colors.black,
-                backgroundImage: user["photoUrl"] != null
-                    ? NetworkImage(user["photoUrl"])
+                backgroundImage: user.photoUrl != null
+                    ? NetworkImage(user.photoUrl!)
                     : null,
-                child: user["photoUrl"] == null
+                child: user.photoUrl == null
                     ? Text(
                         displayName.isNotEmpty
                             ? displayName[0].toUpperCase()

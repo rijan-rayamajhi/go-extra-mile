@@ -6,7 +6,7 @@ import 'package:go_extra_mile_new/common/widgets/app_snackbar.dart';
 import 'package:go_extra_mile_new/common/widgets/custom_text_field.dart';
 import 'package:go_extra_mile_new/common/widgets/primary_button.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
-import 'package:go_extra_mile_new/features/main_screen.dart';
+import 'package:go_extra_mile_new/features/main/main_screen.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_bloc.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_event.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/bloc/referral_state.dart';
@@ -73,12 +73,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
       },
       builder: (context, state) {
         if (state is ReferralLoading) {
-          return const Scaffold(
-            body: Center(child: LoadingScreen()),
-          );
+          return const Scaffold(body: Center(child: LoadingScreen()));
         }
 
-        
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.transparent,
