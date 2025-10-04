@@ -11,15 +11,16 @@ import 'package:go_extra_mile_new/features/monetization/presentation/monetizatio
 import 'package:go_extra_mile_new/features/monetization/presentation/bloc/monetization_data_bloc.dart';
 import 'package:go_extra_mile_new/features/monetization/presentation/bloc/monetization_data_event.dart';
 import 'package:go_extra_mile_new/features/monetization/presentation/bloc/monetization_data_state.dart';
+import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_event.dart';
+import 'package:go_extra_mile_new/features/profile/presentation/bloc/profile_state.dart';
 
 import 'package:go_extra_mile_new/features/vehicle/presentation/screens/my_vechile_screen.dart';
 import 'package:go_extra_mile_new/features/license/presentation/screens/my_driving_license_screen.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/screens/refer_and_earn_screen.dart';
 
 class HomeProfileImage extends StatefulWidget {
-  final String? profileImageUrl;
-
-  const HomeProfileImage({super.key, this.profileImageUrl});
+  const HomeProfileImage({super.key});
 
   @override
   State<HomeProfileImage> createState() => _HomeProfileImageState();
@@ -31,17 +32,32 @@ class _HomeProfileImageState extends State<HomeProfileImage> {
     super.initState();
     // Load complete monetization data when widget initializes
     context.read<MonetizationDataBloc>().add(const LoadMonetizationData());
+    // Load profile data to get profile image
+    context.read<ProfileBloc>().add(const GetProfileEvent());
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: CircularImage(
-        key: ValueKey(widget.profileImageUrl),
-        imageUrl: widget.profileImageUrl,
-        onTap: () => _showProfileBottomSheet(context),
-        height: 50,
-        width: 50,
+      child: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, profileState) {
+          String? profileImageUrl;
+          
+          if (profileState is ProfileLoaded) {
+            profileImageUrl = profileState.profile.photoUrl;
+          } else if (profileState is ProfileError && profileState.profile != null) {
+            // Use cached profile data even during errors
+            profileImageUrl = profileState.profile!.photoUrl;
+          }
+          
+          return CircularImage(
+            key: ValueKey(profileImageUrl),
+            imageUrl: profileImageUrl,
+            onTap: () => _showProfileBottomSheet(context),
+            height: 50,
+            width: 50,
+          );
+        },
       ),
     );
   }
@@ -87,12 +103,24 @@ class _HomeProfileImageState extends State<HomeProfileImage> {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
                             children: [
-                              ProfileTile(
-                                imageUrl: widget.profileImageUrl,
-                                title: 'My Profile',
-                                subtitle: 'View your complete profile',
-                                color: Theme.of(context).colorScheme.primary,
-                                onTap: () => _navigate(context, '/profile'),
+                              BlocBuilder<ProfileBloc, ProfileState>(
+                                builder: (context, profileState) {
+                                  String? profileImageUrl;
+                                  
+                                  if (profileState is ProfileLoaded) {
+                                    profileImageUrl = profileState.profile.photoUrl;
+                                  } else if (profileState is ProfileError && profileState.profile != null) {
+                                    profileImageUrl = profileState.profile!.photoUrl;
+                                  }
+                                  
+                                  return ProfileTile(
+                                    imageUrl: profileImageUrl,
+                                    title: 'My Profile',
+                                    subtitle: 'View your complete profile',
+                                    color: Theme.of(context).colorScheme.primary,
+                                    onTap: () => _navigate(context, '/profile'),
+                                  );
+                                },
                               ),
                               const SizedBox(height: 12),
                               BlocBuilder<

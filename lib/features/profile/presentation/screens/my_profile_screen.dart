@@ -745,11 +745,24 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   void _performLogout() async {
     try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
       // Use the auth bloc to handle logout
       context.read<KAuthBloc>().add(KSignOutEvent());
 
-      // Navigate to auth screen immediately after logout
+      // Wait a moment for the logout to process
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Navigate to auth wrapper after logout
       if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const AuthWrapper()),
           (route) => false,
@@ -757,6 +770,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog if open
         AppSnackBar.error(context, 'Failed to logout: $e');
       }
     }

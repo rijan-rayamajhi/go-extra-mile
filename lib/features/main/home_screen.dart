@@ -4,7 +4,7 @@ import 'package:go_extra_mile_new/features/ads/presentation/widgets/carousel_ads
 import 'package:go_extra_mile_new/features/leaderboard/home_leaderboard_widget.dart';
 import 'package:go_extra_mile_new/features/main/home_grid_view.dart';
 import 'package:go_extra_mile_new/features/others/home_app_stats_widget.dart';
-import 'package:go_extra_mile_new/features/profile/presentation/widgets/profile_avatar_widget.dart';
+import 'package:go_extra_mile_new/features/profile/home_profile_image.dart';
 import 'package:go_extra_mile_new/features/notification/presentation/widgets/notification_icon_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/features/referral/presentation/home_referral_footer_widget.dart';
@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const CarouselAdsWidget(),
 
         // Profile avatar widget
-        const Positioned(left: 16, child: ProfileAvatarWidget()),
+        const Positioned(left: 16, child: HomeProfileImage()),
 
         // Notification icon widget
         const Positioned(right: 16, child: NotificationIconWidget()),
