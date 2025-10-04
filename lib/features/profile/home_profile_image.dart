@@ -42,14 +42,15 @@ class _HomeProfileImageState extends State<HomeProfileImage> {
       child: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, profileState) {
           String? profileImageUrl;
-          
+
           if (profileState is ProfileLoaded) {
             profileImageUrl = profileState.profile.photoUrl;
-          } else if (profileState is ProfileError && profileState.profile != null) {
+          } else if (profileState is ProfileError &&
+              profileState.profile != null) {
             // Use cached profile data even during errors
             profileImageUrl = profileState.profile!.photoUrl;
           }
-          
+
           return CircularImage(
             key: ValueKey(profileImageUrl),
             imageUrl: profileImageUrl,
@@ -106,18 +107,23 @@ class _HomeProfileImageState extends State<HomeProfileImage> {
                               BlocBuilder<ProfileBloc, ProfileState>(
                                 builder: (context, profileState) {
                                   String? profileImageUrl;
-                                  
+
                                   if (profileState is ProfileLoaded) {
-                                    profileImageUrl = profileState.profile.photoUrl;
-                                  } else if (profileState is ProfileError && profileState.profile != null) {
-                                    profileImageUrl = profileState.profile!.photoUrl;
+                                    profileImageUrl =
+                                        profileState.profile.photoUrl;
+                                  } else if (profileState is ProfileError &&
+                                      profileState.profile != null) {
+                                    profileImageUrl =
+                                        profileState.profile!.photoUrl;
                                   }
-                                  
+
                                   return ProfileTile(
                                     imageUrl: profileImageUrl,
                                     title: 'My Profile',
                                     subtitle: 'View your complete profile',
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     onTap: () => _navigate(context, '/profile'),
                                   );
                                 },
@@ -131,16 +137,23 @@ class _HomeProfileImageState extends State<HomeProfileImage> {
                                   // Always show monetization option, but determine which one based on state
                                   bool isMonetized = false;
 
-                                  if (state is MonetizationDataLoaded &&
-                                      state.hasMonetizationStatus) {
-                                    isMonetized = state.isMonetized ?? false;
+                                  if (state is MonetizationDataLoaded) {
+                                    // Check database field first, then calculated status
+                                    final dbIsMonetized = state.monetizationData?.isMonetizedFromDB;
+                                    final calculatedIsMonetized = state.isMonetized;
+                                    
+                                    // If database explicitly says user is monetized, use that
+                                    if (dbIsMonetized == true) {
+                                      isMonetized = true;
+                                    } else {
+                                      // Otherwise use calculated status
+                                      isMonetized = calculatedIsMonetized ?? false;
+                                    }
                                   }
 
                                   return CompactOptionTile(
                                     icon: Icons.account_balance_wallet,
-                                    title: isMonetized
-                                        ? 'My Earning'
-                                        : 'Monetization',
+                                    title: isMonetized ? 'My Earning' : 'Monetization',
                                     color: Colors.green,
                                     onTap: () {
                                       if (isMonetized) {

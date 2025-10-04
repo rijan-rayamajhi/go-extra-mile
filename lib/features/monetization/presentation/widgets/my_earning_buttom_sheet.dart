@@ -72,254 +72,260 @@ class _MyEarningBottomSheetState extends State<MyEarningBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Handle bar
-                Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping outside
+        FocusScope.of(context).unfocus();
+      },
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle bar
+                  Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                ),
 
-                // Header
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Redeem Cash',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.account_balance_wallet,
-                              color: Colors.blue[700],
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '₹ ${widget.selectedAmount}',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Form
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Form(
-                    key: _formKey,
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // UPI ID
-                        CustomTextField(
-                          controller: _upiIdController,
-                          label: 'UPI ID',
-                          hintText: 'Enter your UPI ID',
-                          prefixIcon: Icons.account_balance,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your UPI ID';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Please enter a valid UPI ID';
-                            }
-                            return null;
-                          },
+                        Text(
+                          'Redeem Cash',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey[800],
+                          ),
                         ),
-                        const SizedBox(height: 20),
-
-                        // Name
-                        CustomTextField(
-                          controller: _nameController,
-                          label: 'Full Name',
-                          hintText: 'Enter your full name',
-                          prefixIcon: Icons.person_outline,
-                          textCapitalization: TextCapitalization.words,
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your name';
-                            }
-                            if (value.length < 3) {
-                              return 'Name must be at least 3 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Phone Number
-                        CustomTextField(
-                          controller: _phoneController,
-                          label: 'Phone Number',
-                          hintText: 'Enter your phone number',
-                          prefixIcon: Icons.phone_outlined,
-                          keyboardType: TextInputType.phone,
-                          textInputAction: TextInputAction.next,
-                          maxLength: 10,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your phone number';
-                            }
-                            if (value.length != 10) {
-                              return 'Phone number must be 10 digits';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-
-                        // WhatsApp Number
-                        CustomTextField(
-                          controller: _whatsappController,
-                          label: 'WhatsApp Number',
-                          hintText: 'Enter your WhatsApp number',
-                          prefixIcon: Icons.chat_bubble_outline,
-                          keyboardType: TextInputType.phone,
-                          textInputAction: TextInputAction.done,
-                          maxLength: 10,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your WhatsApp number';
-                            }
-                            if (value.length != 10) {
-                              return 'WhatsApp number must be 10 digits';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Info message
+                        const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue[200]!),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.info_outline,
+                                Icons.account_balance_wallet,
                                 color: Colors.blue[700],
                                 size: 20,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Please ensure all details are correct. Amount will be transferred to the provided UPI ID.',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blue[900],
-                                    height: 1.4,
-                                  ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '₹ ${widget.selectedAmount}',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue[700],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 24),
-
-                        // Redeem Button
-                        BlocConsumer<
-                          MonetizationDataBloc,
-                          MonetizationDataState
-                        >(
-                          listener: (context, state) {
-                            if (state is MonetizationDataLoading) {
-                              setState(() {
-                                _isProcessing = true;
-                              });
-                            } else if (state is MonetizationDataError) {
-                              setState(() {
-                                _isProcessing = false;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Error: ${state.message}'),
-                                  backgroundColor: Colors.red,
-                                  duration: const Duration(seconds: 5),
-                                ),
-                              );
-                            } else if (state is MonetizationDataLoaded) {
-                              setState(() {
-                                _isProcessing = false;
-                              });
-                              // Close the bottom sheet first, then navigate to main screen
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (context) => const MainScreen(),
-                                ),
-                                (route) => false,
-                              );
-                            }
-                          },
-                          builder: (context, state) {
-                            return PrimaryButton(
-                              text: _isProcessing
-                                  ? 'Processing...'
-                                  : 'Redeem ₹${widget.selectedAmount}',
-                              onPressed: _isProcessing
-                                  ? () {} // Disabled state
-                                  : () => _handleCashout(context),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
-                ),
-              ],
+
+                  // Form
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // UPI ID
+                          CustomTextField(
+                            controller: _upiIdController,
+                            label: 'UPI ID',
+                            hintText: 'Enter your UPI ID',
+                            prefixIcon: Icons.account_balance,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your UPI ID';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Please enter a valid UPI ID';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Name
+                          CustomTextField(
+                            controller: _nameController,
+                            label: 'Full Name',
+                            hintText: 'Enter your full name',
+                            prefixIcon: Icons.person_outline,
+                            textCapitalization: TextCapitalization.words,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your name';
+                              }
+                              if (value.length < 3) {
+                                return 'Name must be at least 3 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Phone Number
+                          CustomTextField(
+                            controller: _phoneController,
+                            label: 'Phone Number',
+                            hintText: 'Enter your phone number',
+                            prefixIcon: Icons.phone_outlined,
+                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.next,
+                            maxLength: 10,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your phone number';
+                              }
+                              if (value.length != 10) {
+                                return 'Phone number must be 10 digits';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // WhatsApp Number
+                          CustomTextField(
+                            controller: _whatsappController,
+                            label: 'WhatsApp Number',
+                            hintText: 'Enter your WhatsApp number',
+                            prefixIcon: Icons.chat_bubble_outline,
+                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.done,
+                            maxLength: 10,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your WhatsApp number';
+                              }
+                              if (value.length != 10) {
+                                return 'WhatsApp number must be 10 digits';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Info message
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.blue[200]!),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.blue[700],
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Please ensure all details are correct. Amount will be transferred to the provided UPI ID.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.blue[900],
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Redeem Button
+                          BlocConsumer<
+                            MonetizationDataBloc,
+                            MonetizationDataState
+                          >(
+                            listener: (context, state) {
+                              if (state is MonetizationDataLoading) {
+                                setState(() {
+                                  _isProcessing = true;
+                                });
+                              } else if (state is MonetizationDataError) {
+                                setState(() {
+                                  _isProcessing = false;
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: ${state.message}'),
+                                    backgroundColor: Colors.red,
+                                    duration: const Duration(seconds: 5),
+                                  ),
+                                );
+                              } else if (state is MonetizationDataLoaded) {
+                                setState(() {
+                                  _isProcessing = false;
+                                });
+                                // Close the bottom sheet first, then navigate to main screen
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (context) => const MainScreen(),
+                                  ),
+                                  (route) => false,
+                                );
+                              }
+                            },
+                            builder: (context, state) {
+                              return PrimaryButton(
+                                text: _isProcessing
+                                    ? 'Processing...'
+                                    : 'Redeem ₹${widget.selectedAmount}',
+                                onPressed: _isProcessing
+                                    ? () {} // Disabled state
+                                    : () => _handleCashout(context),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

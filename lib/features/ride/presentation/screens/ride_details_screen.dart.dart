@@ -5,6 +5,7 @@ import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_g
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_ride_odometer_card.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_ride_performance_widget.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_ride_memory_widget.dart';
+import 'package:go_extra_mile_new/features/ride/presentation/widgets/address_card_widget.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/widgets/vehicle_card.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
@@ -44,6 +45,14 @@ class RideDetailsScreen extends StatelessWidget {
                   seconds: (ride.totalTime ?? 0).toInt(),
                 ),
               ),
+              const SizedBox(height: 12),
+
+              // Route Details
+              if (ride.startCoordinates != null || ride.endCoordinates != null)
+                AddressCard(
+                  startCoordinates: ride.startCoordinates,
+                  endCoordinates: ride.endCoordinates,
+                ),
               const SizedBox(height: 12),
 
               // Ride Memories
@@ -170,7 +179,7 @@ class RideDetailsScreen extends StatelessWidget {
             const SizedBox(height: 12),
           ],
           
-          if (ride.rideDescription != null) ...[
+          if (ride.rideDescription != null && ride.rideDescription!.trim().isNotEmpty) ...[
             Text(
               "Description",
               style: theme.textTheme.bodySmall?.copyWith(

@@ -4,7 +4,7 @@ import 'package:go_extra_mile_new/common/widgets/custome_divider.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_data_bloc.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_data_event.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_data_state.dart';
-import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_details.dart';
+import 'package:go_extra_mile_new/features/ride/presentation/screens/ride_details_screen.dart.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/ride_card.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/recent_ride_card_shimmer.dart';
 

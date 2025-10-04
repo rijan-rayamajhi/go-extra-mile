@@ -12,6 +12,7 @@ class MonetizationDataEntity extends Equatable {
   final List<RideEntity> rides;
   final List<MyReferralUserEntity> referralUsers;
   final double totalGemCoins;
+  final bool? isMonetizedFromDB; // Database field for manual monetization override
 
   const MonetizationDataEntity({
     this.drivingLicense,
@@ -19,6 +20,7 @@ class MonetizationDataEntity extends Equatable {
     this.rides = const [],
     this.referralUsers = const [],
     this.totalGemCoins = 0.0,
+    this.isMonetizedFromDB,
   });
 
   // Helper methods to check verification status
@@ -69,5 +71,6 @@ class MonetizationDataEntity extends Equatable {
     rides,
     referralUsers,
     totalGemCoins,
+    isMonetizedFromDB,
   ];
 }

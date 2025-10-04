@@ -54,26 +54,27 @@ class MonetizationDataRepositoryImpl implements MonetizationRepository {
 
       // Get referral data
       final referralData = await getMyReferralData();
-      final referralUsers =
-          (referralData['myReferalUsers'] as List<dynamic>?)
-              ?.cast<MyReferralUserEntity>() ??
-          <MyReferralUserEntity>[];
+      final referralUsers = (referralData['myReferalUsers'] as List<dynamic>?)
+          ?.cast<MyReferralUserEntity>() ??
+      <MyReferralUserEntity>[];
 
-      // Get user's total GEM coins from Firestore
+      // Fetch user's total GEM coins and monetization status from Firestore
       double totalGemCoins = 0.0;
+      bool? isMonetizedFromDB;
       try {
         final userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(currentUser.uid)
             .get();
-        
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
           totalGemCoins = (userData['totalGemCoins'] as num?)?.toDouble() ?? 0.0;
+          isMonetizedFromDB = userData['isMonetized'] as bool?;
         }
       } catch (e) {
-        // If fetching GEM coins fails, continue with 0.0
+        // If fetching user data fails, continue with defaults
         totalGemCoins = 0.0;
+        isMonetizedFromDB = null;
       }
 
       return Right(
@@ -83,6 +84,7 @@ class MonetizationDataRepositoryImpl implements MonetizationRepository {
           rides: rides,
           referralUsers: referralUsers,
           totalGemCoins: totalGemCoins,
+          isMonetizedFromDB: isMonetizedFromDB,
         ),
       );
     } catch (e) {
@@ -192,13 +194,23 @@ class MonetizationDataRepositoryImpl implements MonetizationRepository {
 
       // 3. Deduct amount from admin bank balance
       final adminRef = FirebaseFirestore.instance
-          .collection('admin')
+          .collection('admin_data')
           .doc('monetization_settings');
 
-      // Use FieldValue.increment to atomically decrease the bank balance
-      batch.update(adminRef, {
-        'bankBalance': FieldValue.increment(-cashoutTransactionEntity.amount),
-      });
+      // Check if admin document exists first
+      final adminDoc = await adminRef.get();
+      if (adminDoc.exists) {
+        // Use FieldValue.increment to atomically decrease the bank balance
+        batch.update(adminRef, {
+          'bankBalance': FieldValue.increment(-cashoutTransactionEntity.amount),
+        });
+      } else {
+        // Create the document with initial bank balance if it doesn't exist
+        batch.set(adminRef, {
+          'bankBalance': -cashoutTransactionEntity.amount, // Start with negative amount
+          'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
 
       await batch.commit();
 

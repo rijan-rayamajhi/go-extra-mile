@@ -15,6 +15,7 @@ import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_r
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_ride_performance_widget.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_ride_memory_widget.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_ride_details_form_widget.dart';
+import 'package:go_extra_mile_new/features/ride/presentation/widgets/address_card_widget.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/widgets/vehicle_card.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -95,28 +96,7 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
           ),
         ),
         body: BlocConsumer<RideBloc, RideState>(
-          listener: (context, state) {
-            // // Handle upload success
-            // if (state.uploadStatus == UploadStatus.success) {
-            //   AppSnackBar.info(context, 'Ride saved successfully!');
-            //   // Reset ride and navigate after a short delay
-            //   Future.delayed(const Duration(milliseconds: 500), () {
-            //     context.read<RideBloc>().add(ResetRide());
-            //     Navigator.pushAndRemoveUntil(
-            //       context,
-            //       MaterialPageRoute(builder: (_) => const MainScreen()),
-            //       (route) => false,
-            //     );
-            //   });
-            // }
-            // // Handle upload failure
-            // else if (state.uploadStatus == UploadStatus.failure) {
-            //   AppSnackBar.error(
-            //     context,
-            //     'Failed to save ride: ${state.uploadError ?? "Unknown error"}',
-            //   );
-            // }
-          },
+          listener: (context, state) {},
           builder: (context, state) {
             final ride = state.currentRide;
 
@@ -140,6 +120,14 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                         seconds: (ride.totalTime ?? 0).toInt(),
                       ),
                     ),
+                    const SizedBox(height: 12),
+
+                    // Start and End Addresses
+                    if (ride.startCoordinates != null || ride.endCoordinates != null)
+                      AddressCard(
+                        startCoordinates: ride.startCoordinates,
+                        endCoordinates: ride.endCoordinates,
+                      ),
                     const SizedBox(height: 12),
 
                     // Ride Memories
@@ -199,10 +187,10 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                         if (state is RideDataLoaded && !_hasNavigated) {
                           // Set navigation guard to prevent multiple navigations
                           _hasNavigated = true;
-                          
+
                           // Show success message
                           AppSnackBar.info(context, 'Ride saved successfully!');
-                          
+
                           // Reset ride and navigate to main screen
                           context.read<RideBloc>().add(ResetRide());
                           Navigator.pushAndRemoveUntil(
@@ -250,4 +238,5 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
       ),
     );
   }
+
 }
