@@ -1,8 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_bloc.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/bloc/ride_state.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/screens/active_ride_screen.dart';
+import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 
 class RideTrackingIndicator extends StatelessWidget {
   const RideTrackingIndicator({super.key});
@@ -22,8 +24,15 @@ class RideTrackingIndicator extends StatelessWidget {
         final String formattedTime =
             "${elapsed.inHours.toString().padLeft(2, '0')}:${elapsed.inMinutes.remainder(60).toString().padLeft(2, '0')}:${elapsed.inSeconds.remainder(60).toString().padLeft(2, '0')}";
 
+        final theme = Theme.of(context);
+
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.fromLTRB(
+            baseScreenPadding,
+            baseScreenPadding,
+            baseScreenPadding,
+            0,
+          ),
           child: GestureDetector(
             onTap: () {
               Navigator.push(
@@ -35,45 +44,52 @@ class RideTrackingIndicator extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.95),
-                    Colors.grey.shade100.withOpacity(0.9),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(baseCardRadius),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  width: 1,
                 ),
-                border: Border.all(color: Colors.grey.shade200),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Live indicator
+                  // Live indicator with animation
                   Container(
-                    width: 10,
-                    height: 10,
+                    width: 12,
+                    height: 12,
                     decoration: BoxDecoration(
-                      color: Colors.greenAccent.shade400,
+                      color: Colors.green,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.3),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Ride in Progress',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
+                  const SizedBox(width: baseSpacing),
+                  // Status text
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Ride in Progress',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(),
+                  // Time display
                   Text(
                     formattedTime,
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontFeatures: [const FontFeature.tabularFigures()],
                     ),
                   ),
                 ],

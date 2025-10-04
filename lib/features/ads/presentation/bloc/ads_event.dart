@@ -26,3 +26,8 @@ class LoadCarouselAdsByLocation extends AdsEvent {
   @override
   List<Object?> get props => [latitude, longitude];
 }
+
+/// Event to load carousel ads with automatic location fetching
+class LoadCarouselAdsWithLocation extends AdsEvent {
+  const LoadCarouselAdsWithLocation();
+}

@@ -4,8 +4,6 @@ import 'package:go_extra_mile_new/features/ads/presentation/bloc/ads_bloc.dart';
 import 'package:go_extra_mile_new/features/ads/presentation/bloc/ads_event.dart';
 import 'package:go_extra_mile_new/features/ads/presentation/bloc/ads_state.dart';
 import 'package:go_extra_mile_new/features/ads/domain/entities/carousel_ad.dart';
-import 'package:go_extra_mile_new/core/service/location_service.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CarouselAdsWidget extends StatefulWidget {
@@ -26,43 +24,16 @@ class _CarouselAdsWidgetState extends State<CarouselAdsWidget> {
     super.dispose();
   }
 
-  Future<void> _loadAdsWithLocation() async {
-    if (_hasLoadedAds) return; // Prevent multiple calls
-    _hasLoadedAds = true;
-
-    try {
-      final locationService = LocationService();
-
-      if (!await locationService.isLocationServiceEnabled()) return;
-
-      LocationPermission permission = await locationService.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await locationService.requestPermission();
-      }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever)
-        return;
-
-      final position = await locationService.getCurrentPosition();
-      if (position != null) {
-        context.read<AdsBloc>().add(
-          LoadCarouselAdsByLocation(
-            latitude: position.latitude,
-            longitude: position.longitude,
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('Error loading location: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AdsBloc, AdsState>(
       builder: (context, state) {
         if (state is AdsInitial) {
-          _loadAdsWithLocation();
+          if (!_hasLoadedAds) {
+            _hasLoadedAds = true;
+            // Use the new bloc event that handles location internally
+            context.read<AdsBloc>().add(const LoadCarouselAdsWithLocation());
+          }
           return _buildShimmerPlaceholder();
         }
         if (state is AdsLoading) {
@@ -177,6 +148,63 @@ class _CarouselAdsWidgetState extends State<CarouselAdsWidget> {
 
   Widget _buildPlaceholder() => AspectRatio(
     aspectRatio: 16 / 12,
-    child: Center(child: Text('Go Extra Mile')),
+    child: Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.white, Colors.grey.shade50],
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(height: 32),
+          // App name
+          Text(
+            'Go Extra Mile',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Tagline
+          Text(
+            'Commute • Ride • Travel',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.black.withOpacity(0.9),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Reward section
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.black.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.stars_rounded, color: Colors.black, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Earn Rewards',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 }

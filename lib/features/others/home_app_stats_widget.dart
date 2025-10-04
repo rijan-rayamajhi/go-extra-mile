@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'presentation/bloc/app_stats_bloc.dart';
 import 'presentation/bloc/app_stats_event.dart';
 import 'presentation/bloc/app_stats_state.dart';
@@ -158,18 +159,12 @@ class _HomeAppStatsWidgetState extends State<HomeAppStatsWidget> {
   }
 
   String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
-    return number.toString();
+    final formatter = NumberFormat('#,###');
+    return formatter.format(number);
   }
 
   String _formatDistance(double distance) {
-    if (distance >= 1000) {
-      return '${(distance / 1000).toStringAsFixed(1)}K';
-    }
-    return distance.toStringAsFixed(1);
+    final formatter = NumberFormat('#,###');
+    return formatter.format(distance.round());
   }
 }

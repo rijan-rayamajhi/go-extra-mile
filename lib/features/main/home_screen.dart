@@ -39,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           //profile , notification , carosel ads
           _buildHeader(),
-          const SizedBox(height: 16),
           RideTrackingIndicator(),
           const SizedBox(height: 16),
           HomeGridView(),

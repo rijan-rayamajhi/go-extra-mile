@@ -17,6 +17,11 @@ class NotificationIconWidget extends StatelessWidget {
         } else if (state is NotificationLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is NotificationLoaded) {
+          // Count unread notifications
+          final unreadCount = state.notifications
+              .where((notification) => !notification.isRead)
+              .length;
+
           return SafeArea(
             child: GestureDetector(
               onTap: () {
@@ -27,17 +32,47 @@ class NotificationIconWidget extends StatelessWidget {
                   ),
                 );
               },
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.notifications,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              child: Stack(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.notifications,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  // Notification badge
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          unreadCount > 99 ? '99+' : unreadCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           );
