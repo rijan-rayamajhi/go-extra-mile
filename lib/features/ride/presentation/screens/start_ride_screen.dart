@@ -19,6 +19,7 @@ class StartRideScreen extends StatefulWidget {
 
 class _StartRideScreenState extends State<StartRideScreen> {
   GoogleMapController? _mapController;
+  double _currentZoom = 15.0; // Remember user's preferred zoom level
 
   @override
   void initState() {
@@ -26,13 +27,16 @@ class _StartRideScreenState extends State<StartRideScreen> {
     context.read<RideBloc>().add(LoadInitialLocation());
   }
 
-  void _goToCurrentLocation(LatLng target) {
-    if (_mapController != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: target, zoom: 15),
-        ),
-      );
+  void _moveCameraTo(LatLng position, {double? zoom, bool animate = true}) {
+    if (_mapController == null) return;
+    final targetZoom = zoom ?? _currentZoom;
+    final update = CameraUpdate.newCameraPosition(
+      CameraPosition(target: position, zoom: targetZoom),
+    );
+    if (animate) {
+      _mapController!.animateCamera(update);
+    } else {
+      _mapController!.moveCamera(update);
     }
   }
 
@@ -54,10 +58,7 @@ class _StartRideScreenState extends State<StartRideScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<RideBloc, RideState>(
-        listener: (context, state) {
-          final current = _getCurrentCoordinates(state);
-          if (current != null) _goToCurrentLocation(current);
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           final startCoords = state.currentRide?.startCoordinates;
           if (startCoords == null) {
@@ -95,8 +96,15 @@ class _StartRideScreenState extends State<StartRideScreen> {
                 child: SafeArea(
                   child: _circleButton(
                     icon: Icons.my_location,
-                    onPressed: () =>
-                        context.read<RideBloc>().add(MoveToCurrentLocation()),
+                    onPressed: () {
+                      final current = _getCurrentCoordinates(state);
+                      if (current != null) {
+                        _moveCameraTo(
+                          current,
+                          zoom: 17,
+                        ); // Use a good zoom level for location button
+                      }
+                    },
                   ),
                 ),
               ),

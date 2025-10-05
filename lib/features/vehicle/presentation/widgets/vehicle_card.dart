@@ -23,8 +23,54 @@ class VehicleCardWidget extends StatelessWidget {
         } else if (state is VehicleError) {
           return Center(child: Text(state.message));
         } else if (state is VehicleLoaded) {
-          // Find the vehicle with matching id
-          final vehicle = state.vehicles.firstWhere((v) => v.id == vehicleId);
+          // Find the vehicle with matching id - use safe lookup
+          final vehicleIndex = state.vehicles.indexWhere((v) => v.id == vehicleId);
+          
+          // If vehicle not found, show error message
+          if (vehicleIndex == -1) {
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.red.shade50,
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(baseScreenPadding),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade600, size: 32),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Vehicle Not Found',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Vehicle ID: $vehicleId',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.red.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          
+          final vehicle = state.vehicles[vehicleIndex];
 
           return Container(
             margin: const EdgeInsets.only(bottom: 16),

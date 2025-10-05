@@ -12,4 +12,7 @@ abstract class RideRepository {
 
   /// Uploads a new ride
   Future<void> uploadRide(RideEntity ride);
+
+  /// Clears a specific local ride after successful upload
+  Future<void> clearLocalRide(String rideId);
 }

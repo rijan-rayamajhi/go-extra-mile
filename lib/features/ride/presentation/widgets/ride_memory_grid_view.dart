@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/ride_entity.dart';
 import '../bloc/ride_data_bloc.dart';
 import '../bloc/ride_data_state.dart';
+import '../screens/ride_memory_list_view.dart';
 
 class RideMemoryGridView extends StatelessWidget {
   final Function(RideEntity ride)? onRideTap;
@@ -28,32 +29,44 @@ class RideMemoryGridView extends StatelessWidget {
             ...(state.localRides ?? []),
           ];
 
-          // Filter rides that have at least one memory
-          final ridesWithMemories = allRides
-              .where(
-                (ride) =>
-                    ride.rideMemories != null && ride.rideMemories!.isNotEmpty,
-              )
-              .toList();
+          // Create a flat list of individual memories with their ride context
+          final allMemories = <Map<String, dynamic>>[];
+          for (final ride in allRides) {
+            if (ride.rideMemories != null && ride.rideMemories!.isNotEmpty) {
+              for (int i = 0; i < ride.rideMemories!.length; i++) {
+                allMemories.add({
+                  'ride': ride,
+                  'memory': ride.rideMemories![i],
+                  'memoryIndex': i,
+                });
+              }
+            }
+          }
 
-          if (ridesWithMemories.isEmpty) {
+          if (allMemories.isEmpty) {
             return _buildEmptyState(context);
           }
 
           return GridView.builder(
-            padding: const EdgeInsets.all(1),
+            padding: const EdgeInsets.all(8),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 1,
-              mainAxisSpacing: 1,
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
               childAspectRatio: 0.75,
             ),
-            itemCount: ridesWithMemories.length,
+            itemCount: allMemories.length,
             itemBuilder: (context, index) {
-              final ride = ridesWithMemories[index];
+              final memoryData = allMemories[index];
+              final ride = memoryData['ride'] as RideEntity;
+              final memoryIndex = memoryData['memoryIndex'] as int;
+              
               return RideMemoryGridItem(
                 ride: ride,
-                onTap: () => onRideTap?.call(ride),
+                memoryIndex: memoryIndex,
+                onTap: () => _navigateToMemoryListView(context, ride, memoryIndex),
               );
             },
           );
@@ -67,17 +80,30 @@ class RideMemoryGridView extends StatelessWidget {
 
   Widget _buildLoadingGrid() {
     return GridView.builder(
-      padding: const EdgeInsets.all(1),
+      padding: const EdgeInsets.all(8),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 1,
-        mainAxisSpacing: 1,
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
         childAspectRatio: 0.75,
       ),
-      itemCount: 9,
+      itemCount: 6, // Show 3 rows (6 items) for loading
       itemBuilder: (context, index) {
         return _ShimmerBox();
       },
+    );
+  }
+
+  void _navigateToMemoryListView(BuildContext context, RideEntity ride, int memoryIndex) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RideMemoryListView(
+          selectedRide: ride,
+          initialMemoryIndex: memoryIndex,
+        ),
+      ),
     );
   }
 
@@ -168,10 +194,15 @@ class RideMemoryGridView extends StatelessWidget {
 
 class RideMemoryGridItem extends StatefulWidget {
   final RideEntity ride;
+  final int memoryIndex;
   final VoidCallback? onTap;
 
-  const RideMemoryGridItem({Key? key, required this.ride, this.onTap})
-    : super(key: key);
+  const RideMemoryGridItem({
+    Key? key, 
+    required this.ride, 
+    this.memoryIndex = 0,
+    this.onTap,
+  }) : super(key: key);
 
   @override
   State<RideMemoryGridItem> createState() => _RideMemoryGridItemState();
@@ -182,22 +213,31 @@ class _RideMemoryGridItemState extends State<RideMemoryGridItem> {
   Widget build(BuildContext context) {
     final memories = widget.ride.rideMemories ?? [];
     final memoryCount = memories.length;
-    final firstMemory = memories.isNotEmpty ? memories.first : null;
+    final currentMemory = widget.memoryIndex < memories.length 
+        ? memories[widget.memoryIndex] 
+        : (memories.isNotEmpty ? memories.first : null);
     final additionalCount = memoryCount > 1 ? memoryCount - 1 : 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return InkWell(
       onTap: widget.onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        color: isDark ? Colors.grey[900] : Colors.grey[200],
+        decoration: BoxDecoration(
+          color: isDark ? Colors.grey[900] : Colors.grey[200],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,
           children: [
             // Background image
-            if (firstMemory?.imageUrl != null)
-              Image.network(
-                firstMemory!.imageUrl!,
-                fit: BoxFit.cover,
+            if (currentMemory?.imageUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  currentMemory!.imageUrl!,
+                  fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: isDark ? Colors.grey[850] : Colors.grey[200],
@@ -212,10 +252,14 @@ class _RideMemoryGridItemState extends State<RideMemoryGridItem> {
                   if (loadingProgress == null) return child;
                   return _ShimmerBox();
                 },
+                ),
               )
             else
               Container(
-                color: isDark ? Colors.grey[850] : Colors.grey[200],
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[850] : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Icon(
                   Icons.photo_outlined,
                   color: isDark ? Colors.grey[700] : Colors.grey[400],
@@ -298,6 +342,7 @@ class _ShimmerBoxState extends State<_ShimmerBox>
       builder: (context, child) {
         return Container(
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

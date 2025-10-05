@@ -4,6 +4,7 @@ import 'package:go_extra_mile_new/features/ride/domain/usecases/get_all_hive_rid
 import 'package:go_extra_mile_new/features/ride/domain/usecases/get_recent_ride.dart';
 import 'package:go_extra_mile_new/features/ride/domain/usecases/get_ride_by_id.dart';
 import 'package:go_extra_mile_new/features/ride/domain/usecases/upload_ride.dart';
+import 'package:go_extra_mile_new/features/ride/domain/usecases/clear_local_ride.dart';
 import 'ride_data_event.dart';
 import 'ride_data_state.dart';
 
@@ -13,6 +14,7 @@ class RideDataBloc extends Bloc<RideDataEvent, RideDataState> {
   final GetRecentRide getRecentRide;
   final GetRideById getRideById;
   final UploadRide uploadRide;
+  final ClearLocalRide clearLocalRide;
 
   RideDataBloc({
     required this.getAllFirebaseRides,
@@ -20,6 +22,7 @@ class RideDataBloc extends Bloc<RideDataEvent, RideDataState> {
     required this.getRecentRide,
     required this.getRideById,
     required this.uploadRide,
+    required this.clearLocalRide,
   }) : super(const RideDataInitial()) {
     on<LoadAllRides>(_onLoadAllRides);
     on<UploadRideEvent>(_onUploadRide);
@@ -54,7 +57,13 @@ class RideDataBloc extends Bloc<RideDataEvent, RideDataState> {
   ) async {
     emit(const RideDataLoading());
     try {
+      // Upload the ride to Firebase
       await uploadRide(event.ride);
+      
+      // Clear the local ride after successful upload
+      if (event.ride.id != null) {
+        await _clearLocalRide(event.ride.id!);
+      }
       
       // Reload all rides after successful upload
       final remoteRides = await getAllFirebaseRides();
@@ -71,5 +80,9 @@ class RideDataBloc extends Bloc<RideDataEvent, RideDataState> {
     } catch (e) {
       emit(RideDataError(e.toString()));
     }
+  }
+
+  Future<void> _clearLocalRide(String rideId) async {
+    await clearLocalRide(rideId);
   }
 }

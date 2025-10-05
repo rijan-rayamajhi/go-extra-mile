@@ -29,12 +29,14 @@ class ActiveRideScreen extends StatefulWidget {
 class _ActiveRideScreenState extends State<ActiveRideScreen> {
   GoogleMapController? _mapController;
   bool _followUser = true;
+  double _currentZoom = 15.0; // Remember user's preferred zoom level
   Set<Marker> _markers = {};
   Set<String> _addedMemoryIds = {}; // To prevent duplicate markers
-  void _moveCameraTo(LatLng position, {double zoom = 17, bool animate = true}) {
+  void _moveCameraTo(LatLng position, {double? zoom, bool animate = true}) {
     if (_mapController == null) return;
+    final targetZoom = zoom ?? _currentZoom;
     final update = CameraUpdate.newCameraPosition(
-      CameraPosition(target: position, zoom: zoom),
+      CameraPosition(target: position, zoom: targetZoom),
     );
     if (animate) {
       _mapController!.animateCamera(update);
@@ -119,6 +121,7 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
       child: Scaffold(
         body: BlocConsumer<RideBloc, RideState>(
           listener: (context, state) async {
+            // Smart auto-follow: only follow if follow mode is enabled
             final current = _getCurrentCoordinates(state);
             if (_followUser && current != null) {
               _moveCameraTo(current);
@@ -140,12 +143,25 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
                 GoogleMap(
                   initialCameraPosition: CameraPosition(
                     target: LatLng(startCoords.latitude, startCoords.longitude),
-                    zoom: 15,
+                    zoom: _currentZoom,
                   ),
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
                   markers: _markers,
                   onMapCreated: (controller) => _mapController = controller,
+                  // Gesture detection callbacks
+                  onCameraMoveStarted: () {
+                    // User started moving the camera manually - disable auto-follow
+                    if (_followUser) {
+                      setState(() {
+                        _followUser = false;
+                      });
+                    }
+                  },
+                  onCameraMove: (CameraPosition position) {
+                    // Update current zoom level as user changes it
+                    _currentZoom = position.zoom;
+                  },
                   polylines: {
                     if ((state.currentRide?.routePoints?.isNotEmpty ?? false))
                       Polyline(
@@ -154,7 +170,7 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
                           state.currentRide!.routePoints!
                               .map((p) => LatLng(p.latitude, p.longitude))
                               .toList(),
-                          minDistance: 5,
+                          minDistance: 10,
                         ),
                         color: Colors.blue,
                         width: 5,
@@ -175,8 +191,17 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
                     );
                   },
                   onCurrentLocation: () {
-                    context.read<RideBloc>().add(MoveToCurrentLocation());
-                    _followUser = true;
+                    // Re-enable auto-follow and move to current location
+                    setState(() {
+                      _followUser = true;
+                    });
+                    final current = _getCurrentCoordinates(state);
+                    if (current != null) {
+                      _moveCameraTo(
+                        current,
+                        zoom: 17,
+                      ); // Use a good zoom level for location button
+                    }
                   },
                 ),
 

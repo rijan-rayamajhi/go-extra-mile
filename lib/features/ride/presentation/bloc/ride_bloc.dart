@@ -109,6 +109,7 @@ class RideBloc extends Bloc<RideEvent, RideState> {
     MoveToCurrentLocation event,
     Emitter<RideState> emit,
   ) async {
+    print('_onMoveToCurrentLocation');
     if (!await _requestPermissions()) return;
 
     try {
@@ -117,6 +118,8 @@ class RideBloc extends Bloc<RideEvent, RideState> {
           accuracy: LocationAccuracy.high,
         ),
       );
+
+      print('_onMoveToCurrentLocation : ${pos.latitude} ${pos.longitude} ');
 
       emit(
         _currentState.copyWith(

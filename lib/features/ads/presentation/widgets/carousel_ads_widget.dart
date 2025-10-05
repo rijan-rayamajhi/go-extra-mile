@@ -41,9 +41,9 @@ class _CarouselAdsWidgetState extends State<CarouselAdsWidget> {
         } else if (state is AdsLoaded) {
           return _buildCarousel(state.ads);
         } else if (state is AdsEmpty) {
-          return _buildPlaceholder();
+          return _builEmptyPlaceholder();
         } else if (state is AdsError) {
-          return Center(child: Text('Error: ${state.message}'));
+          return _buildErrorPlaceholder(state.message);
         }
         return const SizedBox.shrink();
       },
@@ -101,8 +101,15 @@ class _CarouselAdsWidgetState extends State<CarouselAdsWidget> {
           child: Image.network(
             ad.imageUrl,
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) =>
-                _buildErrorPlaceholder(),
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Colors.grey[200],
+                child: const Center(
+                  child: Icon(Icons.error, color: Colors.red),
+                ),
+              );
+            },
+
             loadingBuilder: (context, child, loadingProgress) =>
                 loadingProgress == null
                 ? child
@@ -116,12 +123,38 @@ class _CarouselAdsWidgetState extends State<CarouselAdsWidget> {
     );
   }
 
-  Widget _buildErrorPlaceholder() => Container(
-    color: Colors.grey[300],
-    child: const Center(
-      child: Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
-    ),
-  );
+  Widget _buildErrorPlaceholder(String message) {
+    return AspectRatio(
+      aspectRatio: 16 / 12,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.grey.shade50],
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: 40),
+            Icon(Icons.error, color: Colors.red),
+            const SizedBox(height: 8),
+            const Text('Something went wrong'),
+            TextButton(
+              onPressed: () {
+                context.read<AdsBloc>().add(
+                  const LoadCarouselAdsWithLocation(),
+                );
+              },
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildPageIndicators(int count) => Positioned(
     bottom: 16,
@@ -146,7 +179,7 @@ class _CarouselAdsWidgetState extends State<CarouselAdsWidget> {
     ),
   );
 
-  Widget _buildPlaceholder() => AspectRatio(
+  Widget _builEmptyPlaceholder() => AspectRatio(
     aspectRatio: 16 / 12,
     child: Container(
       decoration: BoxDecoration(

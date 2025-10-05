@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_extra_mile_new/common/widgets/custome_divider.dart';
 import 'package:go_extra_mile_new/core/constants/app_constants.dart';
 import 'package:go_extra_mile_new/common/widgets/circular_image.dart';
 import 'package:go_extra_mile_new/common/widgets/image_viewer.dart';
@@ -394,7 +395,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   });
                 },
               ),
-
+              const SizedBox(height: 32),
+              CustomeDivider(text: 'Ride Memories'),
               //ride information
               const SizedBox(height: 16),
               Container(
@@ -461,18 +463,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   ],
                 ),
               ),
-
-              const SizedBox(height: 16),
-
-              // //profile memory
-              SizedBox(
-                height: 400, // Fixed height for grid view
-                child: RideMemoryGridView(
-                  onRideTap: (ride) {
-                    // Handle ride tap
-                  },
-                ),
-              ),
+              // Profile memory
+              RideMemoryGridView(),
             ],
           ),
         ),
@@ -749,9 +741,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       // Use the auth bloc to handle logout

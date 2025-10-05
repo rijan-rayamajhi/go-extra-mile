@@ -12,6 +12,9 @@ abstract class RideHiveDatasource {
 
   /// Uploads a new ride
   Future<void> uploadRide(RideEntity ride);
+
+  /// Clears a specific ride from local storage
+  Future<void> clearRide(String rideId);
 }
 
 class RideHiveDatasourceImpl implements RideHiveDatasource {
@@ -67,5 +70,10 @@ class RideHiveDatasourceImpl implements RideHiveDatasource {
       // Optionally log the error
       return null;
     }
+  }
+
+  @override
+  Future<void> clearRide(String rideId) async {
+    await _box.delete(rideId);
   }
 }

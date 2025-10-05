@@ -94,13 +94,14 @@ import '../../features/ads/domain/usecases/get_carousel_ads_by_location.dart';
 import '../../features/ads/presentation/bloc/ads_bloc.dart';
 import '../../features/ride/data/datasource/ride_hive_datasource.dart';
 import '../../features/ride/data/datasource/ride_firebase_datasource.dart';
-import '../../features/ride/data/repositories/ride_repository_impl.dart';
 import '../../features/ride/domain/repositories/ride_repository.dart';
+import '../../features/ride/data/repositories/ride_repository_impl.dart';
 import '../../features/ride/domain/usecases/get_all_firebase_rides.dart';
 import '../../features/ride/domain/usecases/get_all_hive_rides.dart';
 import '../../features/ride/domain/usecases/get_recent_ride.dart';
 import '../../features/ride/domain/usecases/get_ride_by_id.dart';
 import '../../features/ride/domain/usecases/upload_ride.dart';
+import '../../features/ride/domain/usecases/clear_local_ride.dart';
 import '../../features/ride/presentation/bloc/ride_bloc.dart';
 import '../../features/ride/presentation/bloc/ride_data_bloc.dart';
 import '../../features/monetization/data/repositories/monetization_data_repository_impl.dart';
@@ -296,6 +297,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetRecentRide(sl()));
   sl.registerLazySingleton(() => GetRideById(sl()));
   sl.registerLazySingleton(() => UploadRide(sl()));
+  sl.registerLazySingleton(() => ClearLocalRide(sl()));
 
   // Ride BLoC
   sl.registerFactory(() => RideBloc());
@@ -308,6 +310,7 @@ Future<void> init() async {
       getRecentRide: sl(),
       getRideById: sl(),
       uploadRide: sl(),
+      clearLocalRide: sl(),
     ),
   );
 

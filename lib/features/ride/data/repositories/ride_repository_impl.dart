@@ -54,4 +54,9 @@ class RideRepositoryImpl implements RideRepository {
   Future<RideEntity?> getRideById(String id) async {
     return await remoteDataSource.getRideById(id);
   }
+
+  @override
+  Future<void> clearLocalRide(String rideId) async {
+    await localDataSource.clearRide(rideId);
+  }
 }
