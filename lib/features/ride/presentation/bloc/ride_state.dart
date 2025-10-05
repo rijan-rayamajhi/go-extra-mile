@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/ride_entity.dart';
 
 class RideState extends Equatable {
@@ -8,6 +9,7 @@ class RideState extends Equatable {
   final List<RideEntity> remoteRides;
   final RideEntity? currentRide;
   final String? uploadError;
+  final GeoPoint? currentLocation; // Current GPS position for camera following
 
   const RideState({
     this.isTracking = false,
@@ -16,6 +18,7 @@ class RideState extends Equatable {
     this.remoteRides = const [],
     this.ride,
     this.uploadError,
+    this.currentLocation,
   });
 
   /// 🔹 CopyWith
@@ -26,6 +29,7 @@ class RideState extends Equatable {
     List<RideEntity>? remoteRides,
     RideEntity? ride,
     String? uploadError,
+    GeoPoint? currentLocation,
   }) {
     return RideState(
       isTracking: isTracking ?? this.isTracking,
@@ -34,6 +38,7 @@ class RideState extends Equatable {
       remoteRides: remoteRides ?? this.remoteRides,
       ride: ride ?? this.ride,
       uploadError: uploadError ?? this.uploadError,
+      currentLocation: currentLocation ?? this.currentLocation,
     );
   }
 
@@ -48,5 +53,6 @@ class RideState extends Equatable {
     remoteRides,
     ride,
     uploadError,
+    currentLocation,
   ];
 }

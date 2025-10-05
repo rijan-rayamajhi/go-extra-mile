@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,14 +30,37 @@ class ActiveRideScreen extends StatefulWidget {
 class _ActiveRideScreenState extends State<ActiveRideScreen> {
   GoogleMapController? _mapController;
   bool _followUser = true;
-  double _currentZoom = 15.0; // Remember user's preferred zoom level
+  double _currentZoom = 17; // Remember user's preferred zoom level
   Set<Marker> _markers = {};
   Set<String> _addedMemoryIds = {}; // To prevent duplicate markers
-  void _moveCameraTo(LatLng position, {double? zoom, bool animate = true}) {
+  double _currentBearing = 0.0; // Current direction of travel
+  LatLng? _previousLocation; // To calculate bearing
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure we have current location for camera following
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<RideBloc>().add(MoveToCurrentLocation());
+    });
+  }
+
+  void _moveCameraTo(
+    LatLng position, {
+    double? zoom,
+    bool animate = true,
+    double? bearing,
+  }) {
     if (_mapController == null) return;
     final targetZoom = zoom ?? _currentZoom;
+    final targetBearing = bearing ?? _currentBearing;
+
     final update = CameraUpdate.newCameraPosition(
-      CameraPosition(target: position, zoom: targetZoom),
+      CameraPosition(
+        target: position,
+        zoom: targetZoom,
+        bearing: targetBearing, // Rotate map based on direction of travel
+      ),
     );
     if (animate) {
       _mapController!.animateCamera(update);
@@ -46,16 +70,67 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
   }
 
   LatLng? _getCurrentCoordinates(RideState state) {
+    // Use current location first (for real-time camera following)
+    final current = state.currentLocation;
+    if (current != null) {
+      final currentLatLng = LatLng(current.latitude, current.longitude);
+
+      // Calculate bearing if we have a previous location
+      if (_previousLocation != null) {
+        _currentBearing = _calculateBearing(_previousLocation!, currentLatLng);
+      }
+      _previousLocation = currentLatLng;
+
+      return currentLatLng;
+    }
+
+    // Fallback to route points if current location not available
     final points = state.currentRide?.routePoints;
     if (points != null && points.isNotEmpty) {
       final last = points.last;
-      return LatLng(last.latitude, last.longitude);
+      final lastLatLng = LatLng(last.latitude, last.longitude);
+
+      // Calculate bearing from second-to-last point if available
+      if (points.length > 1) {
+        final secondLast = points[points.length - 2];
+        final secondLastLatLng = LatLng(
+          secondLast.latitude,
+          secondLast.longitude,
+        );
+        _currentBearing = _calculateBearing(secondLastLatLng, lastLatLng);
+      }
+      _previousLocation = lastLatLng;
+
+      return lastLatLng;
     }
+
+    // Final fallback to start coordinates
     final start = state.currentRide?.startCoordinates;
     if (start != null) {
-      return LatLng(start.latitude, start.longitude);
+      final startLatLng = LatLng(start.latitude, start.longitude);
+      _previousLocation = startLatLng;
+      return startLatLng;
     }
     return null;
+  }
+
+  // Calculate bearing between two points
+  double _calculateBearing(LatLng start, LatLng end) {
+    final startLat = start.latitude * (3.14159265359 / 180);
+    final startLng = start.longitude * (3.14159265359 / 180);
+    final endLat = end.latitude * (3.14159265359 / 180);
+    final endLng = end.longitude * (3.14159265359 / 180);
+
+    final dLng = endLng - startLng;
+
+    final y = sin(dLng) * cos(endLat);
+    final x =
+        cos(startLat) * sin(endLat) - sin(startLat) * cos(endLat) * cos(dLng);
+
+    final bearing = atan2(y, x);
+
+    // Convert from radians to degrees and normalize to 0-360
+    return (bearing * (180 / 3.14159265359) + 360) % 360;
   }
 
   /// Adds an image marker with rounded corners and black border
@@ -151,16 +226,23 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
                   onMapCreated: (controller) => _mapController = controller,
                   // Gesture detection callbacks
                   onCameraMoveStarted: () {
-                    // User started moving the camera manually - disable auto-follow
+                    // Only disable auto-follow if user manually drags the map
+                    // Don't disable for programmatic camera movements
                     if (_followUser) {
-                      setState(() {
-                        _followUser = false;
+                      // Add a small delay to distinguish between user gesture and programmatic movement
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        if (mounted && _followUser) {
+                          setState(() {
+                            _followUser = false;
+                          });
+                        }
                       });
                     }
                   },
                   onCameraMove: (CameraPosition position) {
-                    // Update current zoom level as user changes it
+                    // Update current zoom level and bearing as user changes them
                     _currentZoom = position.zoom;
+                    // Don't update bearing if user manually rotates - let auto-follow handle it
                   },
                   polylines: {
                     if ((state.currentRide?.routePoints?.isNotEmpty ?? false))
@@ -170,7 +252,7 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
                           state.currentRide!.routePoints!
                               .map((p) => LatLng(p.latitude, p.longitude))
                               .toList(),
-                          minDistance: 10,
+                          minDistance: 5, // Reduced for better smoothing
                         ),
                         color: Colors.blue,
                         width: 5,
@@ -190,17 +272,26 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
                       (Route<dynamic> route) => false, // remove all
                     );
                   },
-                  onCurrentLocation: () {
-                    // Re-enable auto-follow and move to current location
+                  onCurrentLocation: () async {
+                    // Re-enable auto-follow
                     setState(() {
                       _followUser = true;
                     });
-                    final current = _getCurrentCoordinates(state);
-                    if (current != null) {
-                      _moveCameraTo(
-                        current,
-                        zoom: 17,
-                      ); // Use a good zoom level for location button
+
+                    // Fetch fresh GPS coordinates
+                    final freshLocation = await _getUserCurrentLocation();
+                    if (freshLocation != null) {
+                      // Trigger RideBloc to update current location
+                      context.read<RideBloc>().add(MoveToCurrentLocation());
+
+                      // Move camera to fresh location immediately
+                      _moveCameraTo(freshLocation, zoom: 17);
+                    } else {
+                      // Fallback to state coordinates if GPS fetch fails
+                      final current = _getCurrentCoordinates(state);
+                      if (current != null) {
+                        _moveCameraTo(current, zoom: 17);
+                      }
                     }
                   },
                 ),
@@ -208,7 +299,6 @@ class _ActiveRideScreenState extends State<ActiveRideScreen> {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                    width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: const BoxDecoration(
                       color: Colors.white,

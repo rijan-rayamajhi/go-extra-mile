@@ -21,6 +21,11 @@ class OdometerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if any odometer reading is missing
+    final bool isMissingBefore = _isImageMissing(beforeImage);
+    final bool isMissingAfter = _isImageMissing(afterImage);
+    final bool hasMissingReadings = isMissingBefore || isMissingAfter;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -35,29 +40,69 @@ class OdometerCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Odometer Readings', // fixed title
+                'Odometer Readings',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               if (verificationStatus != null) _buildVerificationBadge(),
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildOdometerItem('Before Ride', beforeImage, beforeCaptureTime),
-              _buildOdometerItem('After Ride', afterImage, afterCaptureTime),
-            ],
-          ),
+          
+          // Show warning message if odometer readings are missing
+          if (hasMissingReadings) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade300, width: 1),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, 
+                       color: Colors.orange.shade600, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'You are missing your leaderboard ranking. Please add ${isMissingBefore && isMissingAfter ? 'both odometer readings' : isMissingBefore ? 'before ride odometer' : 'after ride odometer'} in next ride.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.orange.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            // Only show odometer images if both are present
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildOdometerItem('Before Ride', beforeImage, beforeCaptureTime),
+                _buildOdometerItem('After Ride', afterImage, afterCaptureTime),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
+  
+  // Helper method to check if an image is missing
+  bool _isImageMissing(dynamic image) {
+    if (image == null) return true;
+    if (image is String && image.isEmpty) return true;
+    if (image is File && !image.existsSync()) return true;
+    return false;
+  }
 
   Widget _buildOdometerItem(String title, dynamic image, DateTime captureTime) {
+    final bool isMissing = _isImageMissing(image);
     Widget imageWidget;
 
-    if (image is File) {
+    if (image is File && image.existsSync()) {
       imageWidget = Image.file(
         image,
         width: 100,
@@ -79,10 +124,7 @@ class OdometerCard extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
-          errorWidget: (context, url, error) => Container(
-            color: Colors.grey.shade200,
-            child: const Icon(Icons.error_outline),
-          ),
+          errorWidget: (context, url, error) => _buildMissingImageWidget(),
         );
       } else {
         // It's a local file path
@@ -92,30 +134,21 @@ class OdometerCard extends StatelessWidget {
           width: 100,
           height: 100,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              width: 100,
-              height: 100,
-              color: Colors.grey.shade200,
-              child: const Icon(Icons.error_outline),
-            );
-          },
+          errorBuilder: (context, error, stackTrace) => _buildMissingImageWidget(),
         );
       }
     } else {
-      imageWidget = Container(
-        width: 100,
-        height: 100,
-        color: Colors.grey.shade200,
-        child: const Icon(Icons.image_not_supported),
-      );
+      imageWidget = _buildMissingImageWidget();
     }
 
-    // Wrap image with border
+    // Wrap image with border (red if missing, normal if present)
     imageWidget = Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade500, width: 1),
+        border: Border.all(
+          color: isMissing ? Colors.red.shade400 : Colors.grey.shade500, 
+          width: isMissing ? 2 : 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: ClipRRect(
@@ -130,14 +163,49 @@ class OdometerCard extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 14, 
+            fontWeight: FontWeight.w500,
+            color: isMissing ? Colors.red.shade600 : Colors.black,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
-          _formatDate(captureTime),
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
+          isMissing ? 'Missing' : _formatDate(captureTime),
+          style: TextStyle(
+            fontSize: 12, 
+            color: isMissing ? Colors.red.shade500 : Colors.grey,
+            fontWeight: isMissing ? FontWeight.w500 : FontWeight.normal,
+          ),
         ),
       ],
+    );
+  }
+  
+  Widget _buildMissingImageWidget() {
+    return Container(
+      width: 100,
+      height: 100,
+      color: Colors.red.shade50,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.camera_alt_outlined,
+            color: Colors.red.shade400,
+            size: 24,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Missing',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.red.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -17,7 +17,6 @@ import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_r
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/save_ride_ride_details_form_widget.dart';
 import 'package:go_extra_mile_new/features/ride/presentation/widgets/address_card_widget.dart';
 import 'package:go_extra_mile_new/features/vehicle/presentation/widgets/vehicle_card.dart';
-import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -123,7 +122,8 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                     const SizedBox(height: 12),
 
                     // Start and End Addresses
-                    if (ride.startCoordinates != null || ride.endCoordinates != null)
+                    if (ride.startCoordinates != null ||
+                        ride.endCoordinates != null)
                       AddressCard(
                         startCoordinates: ride.startCoordinates,
                         endCoordinates: ride.endCoordinates,
@@ -143,25 +143,19 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
                       const SizedBox(height: 12),
                     ],
 
-                    // Odometer
-                    if (ride.odometer != null &&
-                        ride.odometer!.beforeRideOdometerImage != null &&
-                        ride.odometer!.beforeRideOdometerImageCaptureAt !=
-                            null &&
-                        ride.odometer!.afterRideOdometerImage != null &&
-                        ride.odometer!.afterRideOdometerImageCaptureAt !=
-                            null) ...[
-                      OdometerCard(
-                        beforeImage: ride.odometer!.beforeRideOdometerImage!,
-                        beforeCaptureTime:
-                            ride.odometer!.beforeRideOdometerImageCaptureAt!,
-                        afterImage: ride.odometer!.afterRideOdometerImage!,
-                        afterCaptureTime:
-                            ride.odometer!.afterRideOdometerImageCaptureAt!,
-                        verificationStatus: ride.odometer!.verificationStatus,
-                      ),
-                      const SizedBox(height: 12),
-                    ],
+                    // Odometer - Always show to display missing readings warning
+                    OdometerCard(
+                      beforeImage: ride.odometer?.beforeRideOdometerImage,
+                      beforeCaptureTime:
+                          ride.odometer?.beforeRideOdometerImageCaptureAt ??
+                          DateTime.now(),
+                      afterImage: ride.odometer?.afterRideOdometerImage,
+                      afterCaptureTime:
+                          ride.odometer?.afterRideOdometerImageCaptureAt ??
+                          DateTime.now(),
+                      verificationStatus: ride.odometer?.verificationStatus,
+                    ),
+                    const SizedBox(height: 12),
 
                     // Ride Details Form
                     RideDetailsForm(
@@ -238,5 +232,4 @@ class _SaveRideScreenState extends State<SaveRideScreen> {
       ),
     );
   }
-
 }

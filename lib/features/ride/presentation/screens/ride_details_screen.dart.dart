@@ -41,9 +41,7 @@ class RideDetailsScreen extends StatelessWidget {
               // Ride Performance
               RidePerformanceWidget(
                 totalDistance: ride.totalDistance ?? 0.0,
-                totalDuration: Duration(
-                  seconds: (ride.totalTime ?? 0).toInt(),
-                ),
+                totalDuration: Duration(seconds: (ride.totalTime ?? 0).toInt()),
               ),
               const SizedBox(height: 12),
 
@@ -68,23 +66,18 @@ class RideDetailsScreen extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
 
-              // Odometer
-              if (ride.odometer != null &&
-                  ride.odometer!.beforeRideOdometerImage != null &&
-                  ride.odometer!.beforeRideOdometerImageCaptureAt != null &&
-                  ride.odometer!.afterRideOdometerImage != null &&
-                  ride.odometer!.afterRideOdometerImageCaptureAt != null) ...[
-                OdometerCard(
-                  beforeImage: ride.odometer!.beforeRideOdometerImage!,
-                  beforeCaptureTime:
-                      ride.odometer!.beforeRideOdometerImageCaptureAt!,
-                  afterImage: ride.odometer!.afterRideOdometerImage!,
-                  afterCaptureTime:
-                      ride.odometer!.afterRideOdometerImageCaptureAt!,
-                  verificationStatus: ride.odometer!.verificationStatus,
-                ),
-                const SizedBox(height: 12),
-              ],
+              // Odometer - Always show to display missing readings warning
+              OdometerCard(
+                beforeImage: ride.odometer?.beforeRideOdometerImage,
+                beforeCaptureTime:
+                    ride.odometer?.beforeRideOdometerImageCaptureAt ??
+                        DateTime.now(),
+                afterImage: ride.odometer?.afterRideOdometerImage,
+                afterCaptureTime:
+                    ride.odometer?.afterRideOdometerImageCaptureAt ??
+                        DateTime.now(),
+                verificationStatus: ride.odometer?.verificationStatus,
+              ),
 
               // Ride Details (Title & Description)
               if (ride.rideTitle != null || ride.rideDescription != null) ...[
@@ -110,39 +103,39 @@ class RideDetailsScreen extends StatelessWidget {
     final duration = Duration(seconds: (ride.totalTime ?? 0).toInt());
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
-    
+
     String durationText;
     if (hours > 0) {
       durationText = '${hours}h ${minutes}m';
     } else {
       durationText = '${minutes}m';
     }
-    
+
     final gemCoins = ride.totalGEMCoins?.toStringAsFixed(0) ?? '0';
     final title = ride.rideTitle ?? 'My Ride';
-    
+
     String shareText = '🚴 $title\n\n';
     shareText += '📍 Distance: ${distance.toStringAsFixed(2)} km\n';
     shareText += '⏱️ Duration: $durationText\n';
     shareText += '💎 GEM Coins: $gemCoins\n';
-    
+
     if (ride.rideDescription != null && ride.rideDescription!.isNotEmpty) {
       shareText += '\n📝 ${ride.rideDescription}\n';
     }
-    
+
     if (ride.endedAt != null) {
       final formattedDate = DateFormat('MMM dd, yyyy').format(ride.endedAt!);
       shareText += '\n📅 $formattedDate\n';
     }
-    
+
     shareText += '\nShared from Go Extra Mile 🚴‍♂️';
-    
+
     Share.share(shareText, subject: title);
   }
 
   Widget _buildRideDetailsCard(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -160,7 +153,7 @@ class RideDetailsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           if (ride.rideTitle != null) ...[
             Text(
               "Title",
@@ -172,14 +165,13 @@ class RideDetailsScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               ride.rideTitle!,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: Colors.black87,
-              ),
+              style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black87),
             ),
             const SizedBox(height: 12),
           ],
-          
-          if (ride.rideDescription != null && ride.rideDescription!.trim().isNotEmpty) ...[
+
+          if (ride.rideDescription != null &&
+              ride.rideDescription!.trim().isNotEmpty) ...[
             Text(
               "Description",
               style: theme.textTheme.bodySmall?.copyWith(
@@ -196,7 +188,7 @@ class RideDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
           ],
-          
+
           Row(
             children: [
               Icon(

@@ -16,7 +16,7 @@ class RideBloc extends Bloc<RideEvent, RideState> {
   StreamSubscription<Position>? _positionSubscription;
   Timer? _timer;
 
-  final double minMovementMeters = 5;
+  final double minMovementMeters = 8; // Increased to reduce noise
 
   RideBloc() : super(RideState.initial()) {
     _initNotifications();
@@ -93,7 +93,10 @@ class RideBloc extends Bloc<RideEvent, RideState> {
       final updatedRide = (_currentState.currentRide ?? RideEntity()).copyWith(
         startCoordinates: GeoPoint(pos.latitude, pos.longitude),
       );
-      emit(_currentState.copyWith(currentRide: updatedRide));
+      emit(_currentState.copyWith(
+        currentRide: updatedRide,
+        currentLocation: GeoPoint(pos.latitude, pos.longitude),
+      ));
     } catch (e) {
       emit(
         _currentState.copyWith(
@@ -109,7 +112,6 @@ class RideBloc extends Bloc<RideEvent, RideState> {
     MoveToCurrentLocation event,
     Emitter<RideState> emit,
   ) async {
-    print('_onMoveToCurrentLocation');
     if (!await _requestPermissions()) return;
 
     try {
@@ -119,13 +121,12 @@ class RideBloc extends Bloc<RideEvent, RideState> {
         ),
       );
 
-      print('_onMoveToCurrentLocation : ${pos.latitude} ${pos.longitude} ');
-
       emit(
         _currentState.copyWith(
           currentRide: (_currentState.currentRide ?? RideEntity()).copyWith(
             startCoordinates: GeoPoint(pos.latitude, pos.longitude),
           ),
+          currentLocation: GeoPoint(pos.latitude, pos.longitude),
         ),
       );
     } catch (_) {}
@@ -277,13 +278,25 @@ class RideBloc extends Bloc<RideEvent, RideState> {
     final ride = _currentState.currentRide!;
     final currentPoints = List<GeoPoint>.from(ride.routePoints ?? []);
     double totalDistance = ride.totalDistance ?? 0;
+    GeoPoint? newCurrentLocation = _currentState.currentLocation;
 
     if (event.position != null) {
+      final position = event.position!;
+      
+      // Filter out low accuracy GPS readings (accuracy > 20 meters)
+      if (position.accuracy > 20) {
+        return; // Skip this update if GPS accuracy is poor
+      }
+      
       final point = GeoPoint(
-        event.position!.latitude,
-        event.position!.longitude,
+        position.latitude,
+        position.longitude,
       );
 
+      // Always update current location for camera following
+      newCurrentLocation = point;
+
+      // Only add to route points if significant movement for route tracking
       if (currentPoints.isNotEmpty) {
         final last = currentPoints.last;
         final distance = haversine(
@@ -303,6 +316,7 @@ class RideBloc extends Bloc<RideEvent, RideState> {
     }
 
     final totalTime = (ride.totalTime ?? 0) + 1;
+
     // Calculate GEM coins: 1 meter = 0.001 GEM coins
     final totalGEMCoins = totalDistance * 0.001;
 
@@ -314,6 +328,7 @@ class RideBloc extends Bloc<RideEvent, RideState> {
           totalTime: totalTime,
           totalGEMCoins: totalGEMCoins,
         ),
+        currentLocation: newCurrentLocation,
       ),
     );
 
